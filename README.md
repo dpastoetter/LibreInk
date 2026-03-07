@@ -81,3 +81,4 @@ The site is tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 - `src/core/utils/` – Shared helpers (e.g. stripHtml).
 - `src/apps/` – App plugins (e.g. settings, finance, games, news, reddit, notes, dictionary).
 - `src/types/` – Shared types and plugin API.
+# OpenInk-WebOS
