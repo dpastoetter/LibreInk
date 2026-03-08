@@ -26,6 +26,7 @@ export function Shell({ services }: ShellProps) {
   const [currentAppId, setCurrentAppId] = useState<string | null>(null);
   const [instance, setInstance] = useState<AppInstance | null>(null);
   const [appStack, setAppStack] = useState<string[]>([]);
+  const [loadingAppId, setLoadingAppId] = useState<string | null>(null);
 
   const closeApp = useCallback(() => {
     if (instance?.onDestroy) instance.onDestroy();
@@ -81,11 +82,25 @@ export function Shell({ services }: ShellProps) {
       setInstance(inst);
       setCurrentAppId(app.id);
       setAppStack([app.id]);
+      setLoadingAppId(null);
       if (window.history?.pushState) {
         window.history.pushState({ [HISTORY_STATE_KEY]: true, appId: app.id }, '', window.location.href);
       }
     },
     [services, navigate, closeApp, instance]
+  );
+
+  const launchAppById = useCallback(
+    async (appId: string) => {
+      setLoadingAppId(appId);
+      try {
+        const app = await AppRegistry.loadApp(appId);
+        if (app) launchApp(app);
+      } catch {
+        setLoadingAppId(null);
+      }
+    },
+    [launchApp]
   );
 
   const goHome = useCallback(() => {
@@ -96,17 +111,21 @@ export function Shell({ services }: ShellProps) {
     }
   }, [currentAppId, goToHome]);
 
-  const showHome = currentAppId === null;
+  const showHome = currentAppId === null && !loadingAppId;
   const currentApp = currentAppId ? AppRegistry.getApp(currentAppId) : null;
   const headerTitle = instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '';
-  const apps = useMemo(() => AppRegistry.getAllApps(), []);
+  const appDescriptors = useMemo(() => AppRegistry.getAllAppDescriptors(), []);
 
   return (
     <div class="shell">
       <StatusBar theme={services.theme} settings={services.settings} />
       <main class="shell-main" role="main">
         {showHome ? (
-          <HomeScreen apps={apps} onLaunch={launchApp} />
+          <HomeScreen apps={appDescriptors} onLaunch={(d) => launchAppById(d.id)} />
+        ) : loadingAppId ? (
+          <div class="shell-loading" role="status" aria-live="polite">
+            <p>Loading…</p>
+          </div>
         ) : instance ? (
           <div class="app-container">
             <header class="app-header">

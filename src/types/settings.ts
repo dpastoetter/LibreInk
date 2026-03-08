@@ -10,6 +10,8 @@ export interface GlobalSettings {
   fontSize: FontSize;
   theme: ThemePreset;
   appearance: Appearance;
+  /** Global zoom multiplier (e.g. 0.75–1.5). Applied to root for resolution fit. */
+  zoom: number;
 }
 
 export const DEFAULT_SETTINGS: GlobalSettings = {
@@ -18,4 +20,5 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   fontSize: 'medium',
   theme: 'normal',
   appearance: 'light',
+  zoom: 1,
 };

@@ -2,10 +2,10 @@ import { h } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
+import { CORS_PROXY } from '@core/constants';
 
 const COINGECKO_URL =
   'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd,eur&include_24hr_change=true';
-const CORS_PROXY = 'https://corsproxy.io/?';
 const YAHOO_CHART = (symbol: string) =>
   `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
 const EURUSD_SYMBOL = 'EURUSD=X';

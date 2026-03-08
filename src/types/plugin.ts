@@ -10,6 +10,14 @@ export const PLUGIN_API_VERSION = 1;
 /** App category for home screen grouping and filtering. */
 export type AppCategory = 'system' | 'game' | 'reader' | 'network' | string;
 
+/** Minimal app info for home screen tiles; used for lazy-loaded apps. */
+export interface AppDescriptor {
+  id: string;
+  name: string;
+  icon?: string;
+  category?: AppCategory;
+}
+
 /** Optional metadata (permissions, network requirement, etc.). */
 export interface AppMetadata {
   permissions?: string[];

@@ -4,9 +4,9 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
+import { CORS_PROXY, CACHE_TTL_SHORT_MS } from '@core/constants';
 
 const CACHE_KEY = 'news:cache';
-const CORS_PROXY = 'https://corsproxy.io/?';
 
 const DEFAULT_FEEDS = [
   'https://feeds.bbci.co.uk/news/rss.xml',
@@ -55,7 +55,7 @@ interface CachedFeed {
   fetchedAt: number;
 }
 
-const CACHE_TTL = 1000 * 60 * 30; // 30 min
+const CACHE_TTL = CACHE_TTL_SHORT_MS;
 
 function parseRss(xml: string, source: string): NewsItem[] {
   const items: NewsItem[] = [];

@@ -4,9 +4,9 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
+import { CORS_PROXY } from '@core/constants';
 
 const REDDIT_JSON = (path: string) => `https://www.reddit.com${path}.json?raw_json=1&limit=25`;
-const CORS_PROXY = 'https://corsproxy.io/?';
 
 interface RedditPost {
   data: {

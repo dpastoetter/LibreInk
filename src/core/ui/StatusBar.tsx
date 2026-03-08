@@ -3,6 +3,10 @@ import { useState, useEffect } from 'preact/hooks';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
 
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
+
 interface StatusBarProps {
   theme: ThemeService;
   settings: SettingsService;
@@ -23,14 +27,27 @@ function useClock() {
 export function StatusBar({ theme, settings }: StatusBarProps) {
   const time = useClock();
   const [appearance, setAppearance] = useState<'light' | 'dark'>(() => theme.getSettings().appearance);
+  const [zoom, setZoom] = useState(() => theme.getSettings().zoom);
 
   useEffect(() => {
-    return theme.subscribe((s) => setAppearance(s.appearance));
+    return theme.subscribe((s) => {
+      setAppearance(s.appearance);
+      setZoom(s.zoom);
+    });
   }, [theme]);
 
   const toggleAppearance = () => {
     const next = appearance === 'light' ? 'dark' : 'light';
     settings.set({ appearance: next });
+  };
+
+  const zoomOut = () => {
+    const next = Math.max(ZOOM_MIN, Math.round((zoom - ZOOM_STEP) * 10) / 10);
+    settings.set({ zoom: next });
+  };
+  const zoomIn = () => {
+    const next = Math.min(ZOOM_MAX, Math.round((zoom + ZOOM_STEP) * 10) / 10);
+    settings.set({ zoom: next });
   };
 
   const bulbOff = (
@@ -51,6 +68,24 @@ export function StatusBar({ theme, settings }: StatusBarProps) {
         {time}
       </span>
       <span class="status-bar-right">
+        <button
+          type="button"
+          class="btn btn-status btn-status-zoom"
+          onClick={zoomOut}
+          disabled={zoom <= ZOOM_MIN}
+          aria-label="Zoom out"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          class="btn btn-status btn-status-zoom"
+          onClick={zoomIn}
+          disabled={zoom >= ZOOM_MAX}
+          aria-label="Zoom in"
+        >
+          +
+        </button>
         <button
           type="button"
           class="btn btn-status btn-status-theme"

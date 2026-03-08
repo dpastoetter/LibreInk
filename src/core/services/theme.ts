@@ -30,6 +30,8 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
       root.dataset.fontSize = next.fontSize;
       root.dataset.theme = next.theme;
       root.dataset.appearance = next.appearance;
+      const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
+      root.style.setProperty('--zoom', String(zoom));
       listeners.forEach((l) => l(settings));
     },
   };

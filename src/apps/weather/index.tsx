@@ -2,9 +2,9 @@ import { h } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
+import { CACHE_TTL_SHORT_MS } from '@core/constants';
 
 const CACHE_KEY = 'weather:cache';
-const CACHE_TTL_MS = 1000 * 60 * 30; // 30 min
 const DEFAULT_LAT = 52.52;
 const DEFAULT_LON = 13.41;
 const OPEN_METEO = (lat: number, lon: number) =>
@@ -139,7 +139,7 @@ function WeatherApp(context: AppContext): AppInstance {
       setError(null);
       try {
         const cached = await storage.get<CachedWeather>(CACHE_KEY);
-        if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+        if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_SHORT_MS) {
           setData(cached);
           titleRef.current = cached.cityName ? `Weather · ${cached.cityName}` : 'Weather';
           setLoading(false);

@@ -12,6 +12,7 @@
   --radius: 10px;
   --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --zoom: 1;
 }
 
 /* Light: white background and header */
@@ -75,15 +76,15 @@
 }
 
 [data-font-size="small"] {
-  font-size: 15px;
+  font-size: calc(15px * var(--zoom, 1));
 }
 
 [data-font-size="medium"] {
-  font-size: 17px;
+  font-size: calc(17px * var(--zoom, 1));
 }
 
 [data-font-size="large"] {
-  font-size: 21px;
+  font-size: calc(21px * var(--zoom, 1));
 }
 
 /* Pixel optics: e-ink friendly rendering and spacing */
@@ -140,6 +141,12 @@ html, body {
 .shell-main {
   flex: 1;
   overflow: auto;
+}
+
+.shell-loading {
+  padding: var(--space);
+  text-align: center;
+  color: var(--muted);
   contain: layout style;
 }
 
@@ -187,6 +194,7 @@ html, body {
   color: var(--header-fg);
 }
 
+.status-bar .btn-status-zoom,
 .status-bar .btn-status-theme {
   padding: 6px;
   min-width: 34px;
@@ -833,6 +841,36 @@ html, body {
 .dictionary-meaning { margin: var(--space) 0; }
 .dictionary-defs { margin: 0.25em 0 0 1em; padding: 0; list-style: disc; }
 .dictionary-example { color: var(--muted); font-style: italic; }
+
+/* Stopwatch */
+.stopwatch-app { }
+.stopwatch-app .timer-display { font-size: 3rem; font-weight: 600; font-variant-numeric: tabular-nums; margin: var(--space) 0; text-align: center; }
+
+/* World clock */
+.worldclock-app { }
+.worldclock-list { list-style: none; margin: 0; padding: 0; }
+.worldclock-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space) 0; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.worldclock-row:last-child { border-bottom: none; }
+.worldclock-label { font-weight: 500; }
+.worldclock-time { color: var(--muted); font-size: 1.1rem; }
+
+/* Comics (xkcd + Comics RSS) */
+.comics-app { }
+.comics-source-tabs { display: flex; gap: var(--space); margin-bottom: var(--space); flex-wrap: wrap; }
+.comics-source-tabs .btn-ghost { background: transparent; border: 1px solid var(--border); }
+.comics-feed-list { list-style: none; margin: 0 0 var(--space); padding: 0; }
+.comics-feed-list li { margin-bottom: 0.5em; }
+.comics-feed-btn { width: 100%; text-align: left; min-height: var(--tap-min); }
+.comics-back-feed { margin-bottom: var(--space); }
+.comics-strip { margin-top: var(--space); }
+.comics-title { font-size: 1.15rem; margin: 0 0 0.25em; }
+.comics-meta { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
+.comics-image-wrap { margin: var(--space) 0; text-align: center; }
+.comics-image { max-width: 100%; height: auto; vertical-align: middle; }
+.comics-alt { font-size: 0.9rem; color: var(--muted); font-style: italic; margin: var(--space) 0; }
+.comics-alt-btn { margin-top: var(--space); }
+.comics-no-img { color: var(--muted); font-style: italic; margin: var(--space) 0; }
+.comics-source-link { display: inline-block; margin-top: var(--space); color: var(--accent); }
 
 .settings-app .panel .btn { margin-right: var(--space); margin-bottom: var(--space); }
 

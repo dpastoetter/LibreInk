@@ -1,26 +1,26 @@
 import { h } from 'preact';
 import { memo } from 'preact/compat';
 import { useMemo, useCallback } from 'preact/hooks';
-import type { WebOSApp } from '../../types/plugin';
+import type { AppDescriptor } from '../../types/plugin';
 
 interface HomeScreenProps {
-  apps: WebOSApp[];
-  onLaunch: (app: WebOSApp) => void;
+  apps: AppDescriptor[];
+  onLaunch: (app: AppDescriptor) => void;
 }
 
-function sortByName(apps: WebOSApp[]): WebOSApp[] {
+function sortByName(apps: AppDescriptor[]): AppDescriptor[] {
   return [...apps].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** Apps list: alphabetical but Settings always last. */
-function sortAppsWithSettingsLast(apps: WebOSApp[]): WebOSApp[] {
+function sortAppsWithSettingsLast(apps: AppDescriptor[]): AppDescriptor[] {
   const sorted = sortByName(apps);
   const settings = sorted.filter((a) => a.id === 'settings');
   const rest = sorted.filter((a) => a.id !== 'settings');
   return [...rest, ...settings];
 }
 
-const AppTile = memo(function AppTile({ app }: { app: WebOSApp }) {
+const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
   return (
     <li>
       <button
@@ -47,7 +47,7 @@ export function HomeScreen({ apps, onLaunch }: HomeScreenProps) {
   );
 
   const appById = useMemo(() => {
-    const m = new Map<string, WebOSApp>();
+    const m = new Map<string, AppDescriptor>();
     apps.forEach((a) => m.set(a.id, a));
     return m;
   }, [apps]);
