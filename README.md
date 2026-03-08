@@ -8,7 +8,7 @@ A minimal, plugin-based “webOS-style” environment for low-spec e-ink devices
 |------------|-----------|
 | ![OpenInk home screen — light mode](docs/screenshots/light-mode.png) | ![OpenInk home screen — dark mode](docs/screenshots/dark-mode.png) |
 
-Toggle appearance from the status bar (light bulb icon). The same Apps and Games launcher is available in both themes.
+Toggle appearance from the status bar (light bulb icon). Use **+** / **−** in the status bar to zoom for resolution fit. The same Apps and Games launcher is available in both themes.
 
 ## Tech stack
 
@@ -41,8 +41,8 @@ npm test
 
 ## Adding a new app / plugin
 
-1. Create a folder under `src/apps/<app-id>/` and implement the `WebOSApp` interface (see `src/apps/notes/` or `src/apps/dictionary/`).
-2. Register the app in `src/apps/registry.ts` with `AppRegistry.registerApp(yourApp)`.
+1. Create a folder under `src/apps/<app-id>/` and implement the `WebOSApp` interface (see `src/apps/dictionary/` or `src/apps/comics/`).
+2. Register the app in `src/apps/registry.ts` by adding a descriptor and lazy loader to the `LAZY_APPS` array (e.g. `load: () => import('./your-app').then(m => m.yourApp)`).
 
 Full steps and how to use shared services and respect global settings are in **[docs/plugins.md](docs/plugins.md)**.
 
@@ -64,13 +64,15 @@ Full steps and how to use shared services and respect global settings are in **[
 
   ![Finance — Markets](docs/screenshots/finance-markets.png)
 
-- **Weather**, **Timer**, **Dictionary** – Widgets and utilities.
+- **Comics** – xkcd (by number, Older/Newer) and Comics RSS (curated strips from comicsrss.com). Cached; no animation.
+
+- **Weather**, **Timer**, **Stopwatch**, **World clock**, **Dictionary** – Widgets and utilities (offline or cached where possible).
 
 ## Performance & e-ink (low-spec first)
 
 The site is tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 
-- **No animation loops** – No `requestAnimationFrame`; updates are discrete (StatusBar 60s, Timer 1s, Racing 500ms).
+- **No animation loops** – No `requestAnimationFrame`; updates are discrete (StatusBar 60s, Timer/Stopwatch/World clock 1s, Racing 500ms).
 - **Reduced motion** – When `prefers-reduced-motion: reduce`, all transitions and decorative shadows are disabled to cut repaints.
 - **Containment** – Shell, app content, and home sections use `contain: layout style` to limit reflow/repaint scope.
 - **Light JS** – Memoized app lists and paginated slices; event delegation on the home grid; minimal work per render.
@@ -103,5 +105,5 @@ For a site that anyone can access, the app is built with security in mind: no se
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – Core UI (StatusBar, PageNav, Button, List).
 - `src/core/utils/` – Shared helpers (e.g. stripHtml).
-- `src/apps/` – App plugins (e.g. settings, finance, games, news, reddit, notes, dictionary).
+- `src/apps/` – App plugins (e.g. settings, finance, games, news, reddit, comics, timer, stopwatch, worldclock, dictionary).
 - `src/types/` – Shared types and plugin API.
