@@ -47,7 +47,12 @@ async function init() {
   const root = document.getElementById('root');
   if (!root) return;
   try {
-    await settings.load();
+    // Timeout so Kindle/slow localStorage does not block render (ReKindle: localStorage can be slow/volatile).
+    const loadTimeout = 5000;
+    await Promise.race([
+      settings.load(),
+      new Promise<void>((resolve) => setTimeout(resolve, loadTimeout)),
+    ]);
     renderShell(root);
   } catch (e) {
     root.innerHTML =

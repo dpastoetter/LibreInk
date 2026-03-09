@@ -42,17 +42,42 @@ const legacyHtml = `<!DOCTYPE html>
   <link rel="stylesheet" crossorigin href="${cssHref}">
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root"><p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">Loading OpenInk…</p></div>
   <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
-  <script crossorigin src="${polyfillSrc}"></script>
-  <script>System.import("${entrySrc}");</script>
   <script>
-    setTimeout(function() {
+    (function() {
       var root = document.getElementById('root');
-      if (root && root.children.length === 0) {
-        root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">Loading… If this persists, try another browser.</p>';
+      var entrySrc = ${JSON.stringify(entrySrc)};
+      var polyfillSrc = ${JSON.stringify(polyfillSrc)};
+      function showErr(msg) {
+        if (root) root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">' + msg + '</p>';
       }
-    }, 15000);
+      window.onerror = function() {
+        showErr('OpenInk could not start. Try a different browser or device.');
+        return true;
+      };
+      var s = document.createElement('script');
+      s.crossOrigin = 'anonymous';
+      s.src = polyfillSrc;
+      s.onload = function() {
+        if (typeof System === 'undefined') {
+          showErr('OpenInk could not load (missing polyfill).');
+          return;
+        }
+        System.import(entrySrc).catch(function() {
+          showErr('OpenInk could not load. Try another browser or device.');
+        });
+      };
+      s.onerror = function() {
+        showErr('OpenInk could not load scripts. Check your connection.');
+      };
+      document.body.appendChild(s);
+      setTimeout(function() {
+        if (root && root.children.length === 1 && root.textContent.indexOf('Loading') !== -1) {
+          root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">Still loading… If this persists, try another browser or device.</p>';
+        }
+      }, 12000);
+    })();
   </script>
 </body>
 </html>
