@@ -941,3 +941,15 @@ html, body {
   .racing-row > * + * { margin-left: 0; }
   .calculator-app > * + * { margin-top: 0; }
 }
+
+/* ReKindle/Kindle compatibility (legacy.html has class="legacy-browser" on html): no animations/transitions (e-ink ghosting), system fonts only. See ReKindle COMPATIBILITY.md */
+html.legacy-browser *,
+html.legacy-browser *::before,
+html.legacy-browser *::after {
+  transition: none !important;
+  animation: none !important;
+}
+html.legacy-browser,
+html.legacy-browser body {
+  font-family: Arial, Verdana, "Courier New", serif, sans-serif;
+}

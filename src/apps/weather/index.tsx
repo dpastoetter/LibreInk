@@ -42,7 +42,18 @@ function weatherLabel(code: number): string {
   return 'Storm';
 }
 
+/** ReKindle: no Unicode emoji on Kindle; use ASCII for legacy build. */
 function weatherIcon(code: number): string {
+  const legacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
+  if (legacy) {
+    if (code === 0) return 'Sun';
+    if (code <= 3) return 'Cld';
+    if (code <= 49) return 'Fog';
+    if (code <= 69) return 'Rain';
+    if (code <= 79) return 'Snow';
+    if (code <= 94) return 'T-storm';
+    return 'Storm';
+  }
   if (code === 0) return '☀️';
   if (code <= 3) return '⛅';
   if (code <= 49) return '🌫️';
@@ -283,6 +294,7 @@ export const weatherApp = {
   id: 'weather',
   name: 'Weather',
   icon: '🌤️',
+  iconFallback: '~',
   category: 'network' as const,
   apiVersion: PLUGIN_API_VERSION,
   metadata: { requiresNetwork: true },

@@ -56,6 +56,7 @@ export const AppRegistry = {
       id: a.id,
       name: a.name,
       icon: a.icon,
+      iconFallback: a.iconFallback,
       category: a.category,
     }));
     const fromLazy = Array.from(lazy.values()).map((e) => e.descriptor);

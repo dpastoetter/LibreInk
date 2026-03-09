@@ -14,7 +14,10 @@ export type AppCategory = 'system' | 'game' | 'reader' | 'network' | string;
 export interface AppDescriptor {
   id: string;
   name: string;
+  /** Emoji or character icon; avoid on Kindle (use iconFallback). */
   icon?: string;
+  /** ASCII/symbol fallback for Kindle/legacy (no Unicode emoji support). */
+  iconFallback?: string;
   category?: AppCategory;
 }
 
@@ -34,8 +37,10 @@ export interface WebOSApp {
   id: string;
   /** Label shown on the home screen. */
   name: string;
-  /** Optional icon (character or icon key). */
+  /** Optional icon (character or icon key). Avoid emoji on Kindle. */
   icon?: string;
+  /** ASCII fallback for Kindle/legacy (ReKindle: no Unicode emoji). */
+  iconFallback?: string;
   /** Category for ordering/grouping (system, reader, network, game, etc.). */
   category?: AppCategory;
   /** Must equal PLUGIN_API_VERSION. */

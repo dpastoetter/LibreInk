@@ -118,6 +118,7 @@ docs/                         # Documentation
 
 - **ARCHITECTURE.md** – How the shell, plugins, and services fit together.
 - **DEMO.md** – E-ink demo page: URL, controls, and refresh behaviour.
+- **KINDLE-COMPATIBILITY.md** – Kindle/e-ink constraints (ReKindle-style): no flex gap, no emoji, no animations on legacy, system fonts, etc.
 - **plugins.md** – Step-by-step app plugin implementation and use of context/services.
 - **SECURITY.md** – Security measures and deployment checklist for public sites.
 - **README.md** – Quick start, commands, and links to the docs above.

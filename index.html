@@ -2,6 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function() {
+        var ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+        var kindle = /\b(Kindle|Silk|Oasis|Experimental|KFGIWI|KFTUWI|KFTT|KFAPWA|KFJW)\b/i.test(ua);
+        var obfuscatedEink = /AppleWebKit\/53\d/.test(ua) && /Safari\/53\d/.test(ua) && !/Chrome/i.test(ua);
+        var modern = /Chrome\/[89]\d|Chrome\/1\d\d|Firefox\/[789]\d|Firefox\/1\d\d|Edg\/[89]\d|Edg\/1\d\d|Version\/1[3-9]|Version\/2\d/i.test(ua);
+        if (kindle || obfuscatedEink || !modern) {
+          window.location.replace('legacy.html');
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#ffffff" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://corsproxy.io https://api.coingecko.com https://nominatim.openstreetmap.org https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.dictionaryapi.dev; font-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'" />
@@ -14,15 +25,6 @@
   <body>
     <div id="root"></div>
     <noscript><p style="padding:1rem;font-family:system-ui,sans-serif;">OpenInk needs JavaScript.</p></noscript>
-    <script>
-      (function() {
-        var ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
-        if (/\b(Kindle|Silk|Oasis|Experimental)\b/i.test(ua)) {
-          window.location.replace('legacy.html');
-          return;
-        }
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
     <script>
       setTimeout(function() {

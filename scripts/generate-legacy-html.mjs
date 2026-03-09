@@ -28,7 +28,7 @@ const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
 const cssHref = cssMatch ? cssMatch[1] : '/assets/index.css';
 
 const legacyHtml = `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="legacy-browser">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
@@ -43,14 +43,14 @@ const legacyHtml = `<!DOCTYPE html>
 </head>
 <body>
   <div id="root"></div>
-  <noscript><p style="padding:1rem;font-family:system-ui,sans-serif;">OpenInk needs JavaScript.</p></noscript>
+  <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
   <script crossorigin src="${polyfillSrc}"></script>
   <script>System.import("${entrySrc}");</script>
   <script>
     setTimeout(function() {
       var root = document.getElementById('root');
       if (root && root.children.length === 0) {
-        root.innerHTML = '<p style="padding:1.5rem;font-family:system-ui,sans-serif;">Loading… If this persists, try another browser.</p>';
+        root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">Loading… If this persists, try another browser.</p>';
       }
     }, 15000);
   </script>
