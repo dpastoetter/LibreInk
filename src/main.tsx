@@ -62,4 +62,9 @@ async function init() {
   }
 }
 
-init().catch(() => {});
+// If the URL is a legacy path but we're running (server served index.html for that path), don't render so the inline "deploy full dist" message stays.
+if (/legacy(-static)?\.html$/i.test(typeof window !== 'undefined' ? window.location.pathname : '')) {
+  // no-op
+} else {
+  init().catch(() => {});
+}

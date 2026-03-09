@@ -10,10 +10,14 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 - **12s timeout fallback:** If the app has not mounted within 12 seconds, the loader replaces the content with a static message and a "Try again" link.
 - **Startup timeout:** In the app, `settings.load()` is raced with a 5s timeout so slow or hanging localStorage (e.g. on Kindle) does not block the first render.
 
-## If the Kindle shows a blank screen
+## If the Kindle shows a blank screen or legacy-static forwards to legacy
 
-1. **Confirm the right file is served:** Open `legacy-static.html` on the Kindle (same host, same path, e.g. `https://yoursite.com/legacy-static.html`). That page has no JavaScript. If you see "OpenInk" and "This page does not use JavaScript", the server is fine and the issue is with running the app scripts on legacy.html.
-2. **Deploy the full `dist/`:** Ensure `dist/legacy.html` and `dist/legacy-static.html` are deployed. If your host rewrites all routes to `index.html` (SPA mode), add an exception so `legacy.html` and `legacy-static.html` are served as static files.
+1. **You opened legacy-static.html but were sent to legacy.html:** That means your host is serving `index.html` for every URL (SPA fallback). The app now skips redirecting when the URL is already `legacy.html` or `legacy-static.html`, so you should see a short message instead of being forwarded. To actually serve the legacy pages:
+   - **Deploy the full `dist/`** so `legacy.html` and `legacy-static.html` exist in the deployed output.
+   - **Netlify:** The repo includes `public/_redirects` (copied to `dist/`) so `/legacy.html` and `/legacy-static.html` are served as files. If you add a catch-all (e.g. `/* /index.html 200`), put it *after* those two lines.
+   - **Other hosts (Vercel, etc.):** Configure rewrites so `legacy.html` and `legacy-static.html` are not rewritten to `index.html`.
+   - **GitHub Pages:** Deploy the whole `dist/` folder; by default each file is served, so no extra config unless you use a custom 404 that serves index.
+2. **Confirm the right file is served:** After fixing the host, open `legacy-static.html`. You should see "OpenInk" and "This page does not use JavaScript". If you see that, the server is correct; then try `legacy.html` for the app.
 3. **Base path:** If you deploy under a subpath (e.g. `https://user.github.io/OpenInk-WebOS/`), set `base: '/OpenInk-WebOS/'` in `vite.config.ts` before building so script and style URLs in legacy.html resolve correctly.
 
 ## What we do
