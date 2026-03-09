@@ -62,9 +62,12 @@ async function init() {
   }
 }
 
-// If the URL is a legacy path but we're running (server served index.html for that path), don't render so the inline "deploy full dist" message stays.
-if (/legacy(-static)?\.html$/i.test(typeof window !== 'undefined' ? window.location.pathname : '')) {
-  // no-op
+// Only skip init when the URL is legacy *and* we're the modern bundle (server served index.html for legacy URL). When we're the legacy bundle (LEGACY), we're always on legacy.html and must run init().
+const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+const isLegacyPath = /legacy(-static)?\.html$/i.test(pathname);
+const isLegacyBundle = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
+if (isLegacyPath && !isLegacyBundle) {
+  // Modern bundle running with legacy URL = wrong file served; leave the inline message.
 } else {
   init().catch(() => {});
 }

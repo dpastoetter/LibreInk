@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
+import { formatTimeWithSecondsLegacy } from '@core/utils/date';
 
 /** Offset in minutes from UTC. e.g. -300 = EST (UTC-5). Local is computed at render. */
 const FIXED_ZONES: { label: string; offsetMinutes: number }[] = [
@@ -15,6 +16,7 @@ function formatTime(offsetMinutes: number): string {
   const d = new Date();
   const utc = d.getTime() + d.getTimezoneOffset() * 60000;
   const local = new Date(utc + offsetMinutes * 60000);
+  if (typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY) return formatTimeWithSecondsLegacy(local);
   return local.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 }
 

@@ -23,10 +23,14 @@ interface FinanceRow {
 
 function formatPrice(n: number, currency: Currency): string {
   const symbol = currency === 'EUR' ? '€' : '$';
-  const locale = currency === 'EUR' ? 'de-DE' : 'en-US';
   if (n >= 1e6) return `${symbol}${(n / 1e6).toFixed(2)}M`;
-  if (n >= 1e3) return `${symbol}${n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  return `${symbol}${n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
+  try {
+    const locale = currency === 'EUR' ? 'de-DE' : 'en-US';
+    if (n >= 1e3) return `${symbol}${n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${symbol}${n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
+  } catch {
+    return `${symbol}${n.toFixed(2)}`;
+  }
 }
 
 function formatChange24h(pct: number, absoluteInCurrency?: number, currency?: Currency): string {

@@ -36,7 +36,7 @@ const TRY_AGAIN =
   '<a href="#" onclick="location.reload();return false;" style="color:#333;text-decoration:underline;">Try again</a>';
 
 // All visible content uses inline styles so nothing depends on external CSS for first paint.
-const initialContent = `<div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;"><h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1><p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading app...</p><p style="margin:0 0 1rem;color:#555;">If nothing loads, use a phone or computer for the full app.</p><ul style="margin:0 0 1rem;padding-left:1.25rem;"><li>Calculator</li><li>Weather</li><li>News</li><li>Timer</li><li>Settings</li><li>Games</li></ul><p style="margin:0;">${TRY_AGAIN}</p></div>`;
+const initialContent = `<div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;"><h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1><p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading app...</p><p style="margin:0 0 0.5rem;font-size:0.85rem;color:#888;">Bookmark this page (legacy.html) on your Kindle for next time.</p><p style="margin:0 0 1rem;color:#555;">If nothing loads, use a phone or computer for the full app.</p><ul style="margin:0 0 1rem;padding-left:1.25rem;"><li>Calculator</li><li>Weather</li><li>News</li><li>Timer</li><li>Settings</li><li>Games</li></ul><p style="margin:0;">${TRY_AGAIN}</p></div>`;
 
 // Critical: ensure body and #root are visible even if external CSS never loads (Kindle/old WebKit).
 const criticalStyle = `body{margin:0;background:#fff;color:#000;min-height:100vh;font-family:Arial,Verdana,sans-serif}#root{display:block !important;visibility:visible !important;opacity:1 !important}#legacy-canary{margin:0;padding:0.5rem 1rem;font-size:14px;background:#fff;color:#000;border-bottom:1px solid #ccc}`;
@@ -62,13 +62,20 @@ const legacyHtml = `<!DOCTYPE html>
     var fallbackMsg = ${JSON.stringify(FALLBACK_MSG)};
     var tryAgain = ${JSON.stringify(TRY_AGAIN)};
     function showFallback(msg){
-      if (root) root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">' + msg + ' ' + tryAgain + '</p>';
+      if (!root) return;
+      root.style.display = 'block';
+      root.style.visibility = 'visible';
+      root.style.opacity = '1';
+      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' ' + tryAgain + '</p>';
     }
     window.__openinkFallback = showFallback;
     window.onerror = function(){ try { showFallback('OpenInk could not start.'); } catch(e) {} return true; };
     var t = setTimeout(function(){
       if (window.__openinkMounted) return;
-      try { showFallback(fallbackMsg); } catch(e) {}
+      try {
+        var r = document.getElementById('root');
+        if (r) showFallback(fallbackMsg);
+      } catch(e) {}
     }, 12000);
     window.__openinkFallbackTimer = t;
   } catch(e) {}
@@ -82,7 +89,11 @@ const legacyHtml = `<!DOCTYPE html>
     var entrySrc = ${JSON.stringify(entrySrc)};
     var tryAgain = ${JSON.stringify(TRY_AGAIN)};
     function showErr(msg){
-      if (root) root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">' + msg + ' ' + tryAgain + '</p>';
+      if (!root) return;
+      root.style.display = 'block';
+      root.style.visibility = 'visible';
+      root.style.opacity = '1';
+      root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">' + msg + ' ' + tryAgain + '</p>';
     }
     if (typeof System === 'undefined') {
       showErr('OpenInk could not load (missing polyfill).');
@@ -96,7 +107,12 @@ const legacyHtml = `<!DOCTYPE html>
   } catch (e) {
     try {
       var r = document.getElementById('root');
-      if (r) r.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">OpenInk could not start. <a href="#" onclick="location.reload();return false;">Try again</a></p>';
+      if (r) {
+        r.style.display = 'block';
+        r.style.visibility = 'visible';
+        r.style.opacity = '1';
+        r.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;">OpenInk could not start. <a href="#" onclick="location.reload();return false;">Try again</a></p>';
+      }
     } catch(x) {}
   }
 })();
@@ -120,8 +136,8 @@ const staticHtml = `<!DOCTYPE html>
 <body>
 <h1>OpenInk</h1>
 <p>This page does not use JavaScript. If you see this on your Kindle, the server is working.</p>
-<p>For the full app, open <a href="legacy.html">legacy.html</a> (requires JavaScript). If that page stays blank, your browser may not support the app.</p>
-<p>Use a phone or computer for the full experience.</p>
+<p>For the full app, open <a href="legacy.html">legacy.html</a> (requires JavaScript). <strong>Bookmark legacy.html</strong> on your Kindle for fastest load next time.</p>
+<p>If legacy.html stays blank, your browser may not support the app. Use a phone or computer for the full experience.</p>
 </body>
 </html>
 `;

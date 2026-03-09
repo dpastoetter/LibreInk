@@ -3,6 +3,7 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
+import { formatDateLegacy } from '@core/utils/date';
 import { CORS_PROXY } from '@core/constants';
 
 const REDDIT_JSON = (path: string) => `https://www.reddit.com${path}.json?raw_json=1&limit=25`;
@@ -147,7 +148,7 @@ function RedditApp(context: AppContext): AppInstance {
       const pageComments = comments.slice((commentPage - 1) * 5, commentPage * 5);
       return (
         <div class="reddit-post-view">
-          <p class="reddit-meta">u/{selectedPost.author} · {selectedPost.score} pts · {new Date(selectedPost.created_utc * 1000).toLocaleDateString()}</p>
+          <p class="reddit-meta">u/{selectedPost.author} · {selectedPost.score} pts · {import.meta.env.LEGACY ? formatDateLegacy(new Date(selectedPost.created_utc * 1000)) : new Date(selectedPost.created_utc * 1000).toLocaleDateString()}</p>
           <div class="reddit-selftext">
             {stripHtml(selectedPost.selftext_html || selectedPost.selftext || '') || (selectedPost.is_self ? '' : `Link: ${selectedPost.url}`)}
           </div>

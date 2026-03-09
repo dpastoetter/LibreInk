@@ -31,6 +31,13 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 - **No `position: sticky` / `fixed`** – We avoid them to prevent checkerboarding on e-ink.
 - **Touch targets** – Minimum `--tap-min: 52px` for tap areas.
 
+## Quick tips for Kindle users
+
+- **Bookmark `legacy.html` directly** (e.g. `https://yoursite.com/legacy.html`) so the Kindle opens the legacy page without going through the main index and redirect. Fewer requests and less chance of the host serving the wrong file.
+- **JIT-less engine:** The Kindle browser runs JavaScript 5–10× slower than a normal phone. We avoid heavy work on startup (settings load is raced with 5s; date/time use manual formatting on legacy).
+- **Date/time:** On the legacy build we use manual string formatting (`@core/utils/date`) instead of `Intl` / `toLocaleString` options, which are unreliable on Kindle (ReKindle).
+- **Images:** `image-rendering: pixelated` is set on legacy for crisp edges on e-ink.
+
 ## References
 
 - [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md) – Full constraints (JIT-less engine, `Intl`/date quirks, localStorage volatile, etc.).

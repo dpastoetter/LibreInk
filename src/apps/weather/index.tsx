@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { CACHE_TTL_SHORT_MS } from '@core/constants';
+import { formatWeekdayShortLegacy } from '@core/utils/date';
 
 const CACHE_KEY = 'weather:cache';
 const DEFAULT_LAT = 52.52;
@@ -267,7 +268,7 @@ function WeatherApp(context: AppContext): AppInstance {
             <ul class="weather-forecast list">
               {data.daily.map((day) => (
                 <li key={day.date}>
-                  <span class="weather-day">{new Date(day.date).toLocaleDateString([], { weekday: 'short' })}</span>
+                  <span class="weather-day">{import.meta.env.LEGACY ? formatWeekdayShortLegacy(new Date(day.date)) : new Date(day.date).toLocaleDateString([], { weekday: 'short' })}</span>
                   <span class="weather-day-icon">{weatherIcon(day.code)}</span>
                   <span class="weather-day-range">{Math.round(day.min)}° – {Math.round(day.max)}°</span>
                 </li>

@@ -952,4 +952,5 @@ html.legacy-browser *::after {
 html.legacy-browser,
 html.legacy-browser body {
   font-family: Arial, Verdana, "Courier New", serif, sans-serif;
+  image-rendering: pixelated; /* ReKindle: crisp edges on e-ink */
 }

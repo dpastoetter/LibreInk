@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
+import { formatTimeLegacy } from '../utils/date';
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
@@ -11,12 +12,16 @@ interface StatusBarProps {
   settings: SettingsService;
 }
 
+const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
+
 /** Clock updates every 60s to keep e-ink / low-spec refresh and CPU minimal. */
 function useClock() {
-  const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  const [time, setTime] = useState(() =>
+    isLegacy ? formatTimeLegacy(new Date()) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  );
   useEffect(() => {
     const id = setInterval(() => {
-      setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      setTime(isLegacy ? formatTimeLegacy(new Date()) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     }, 60_000);
     return () => clearInterval(id);
   }, []);
