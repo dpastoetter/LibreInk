@@ -109,6 +109,7 @@ docs/                         # Documentation
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
 - The e-ink demo is copied to `dist/demo/eink-demo.html`; open that URL on your deployed site to use it.
+- **Kindle / old browsers:** The build includes a legacy (nomodule) bundle. Deploy the full `dist/` so the browser can load either the modern or legacy scripts. If the Kindle still shows a white screen, it may be blocking or failing on the legacy scripts; the 8s fallback message in `index.html` will appear if the app never renders.
 
 ## Documentation
 
@@ -123,6 +124,7 @@ docs/                         # Documentation
 
 - **ESLint** – `eslint.config.js` with TypeScript and jsx-a11y; run with `npm run lint`.
 - **PWA** – [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) generates a service worker (Workbox) for offline caching; registration in `main.tsx` (production only). Manifest: [public/manifest.json](public/manifest.json).
+- **Legacy build** – [@vitejs/plugin-legacy](https://github.com/vitejs/vite/tree/main/packages/plugin-legacy) emits a second bundle for browsers that don’t support ES modules (e.g. Kindle). Modern browsers load `type="module"` scripts; others load `nomodule` scripts (SystemJS + polyfills). Use `npm run build`; both bundles are in `dist/`.
 
 ## Possible improvements
 

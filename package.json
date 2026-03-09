@@ -16,6 +16,8 @@
   "devDependencies": {
     "@eslint/js": "^9.15.0",
     "@preact/preset-vite": "^2.8.0",
+    "@vitejs/plugin-legacy": "^5.4.0",
+    "terser": "^5.36.0",
     "@types/node": "^20.0.0",
     "eslint": "^9.15.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",

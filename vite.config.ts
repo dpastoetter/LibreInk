@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import preact from '@preact/preset-vite';
+import legacy from '@vitejs/plugin-legacy';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -9,6 +10,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [
     preact(),
+    // Legacy build (nomodule) for Kindle and other browsers that don't support ES modules or modern JS.
+    legacy({
+      targets: ['defaults', 'not supports es6-module'],
+      modernPolyfills: true,
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       workbox: { globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'] },
