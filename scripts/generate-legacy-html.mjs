@@ -27,15 +27,16 @@ const entrySrc = entryMatch[1];
 const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
 const cssHref = cssMatch ? cssMatch[1] : '/assets/index.css';
 
-// Static fallback shown if the app never mounts (e.g. Kindle loading loop). No JS required.
-const staticFallback = `
+// Shown immediately so Kindle never sees a blank or loading-only screen. App replaces this if it mounts.
+const initialContent = `
   <div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;">
-    <h1 style="font-size:1.35rem;margin:0 0 1rem;">OpenInk</h1>
-    <p style="margin:0 0 1rem;color:#555;">The app could not start on this device. You can use these on a phone or computer:</p>
+    <h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1>
+    <p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading app…</p>
+    <p style="margin:0 0 1rem;color:#555;">If nothing loads, use a phone or computer for the full app:</p>
     <ul style="margin:0 0 1rem;padding-left:1.25rem;">
-      <li>Calculator</li><li>Weather</li><li>News</li><li>Timer</li><li>Settings</li><li>Games (Chess, Sudoku, …)</li>
+      <li>Calculator</li><li>Weather</li><li>News</li><li>Timer</li><li>Settings</li><li>Games</li>
     </ul>
-    <p style="margin:0;font-size:0.9rem;color:#666;">Open this page on a phone or computer for the full app.</p>
+    <p style="margin:0;"><a href="#" onclick="location.reload();return false;" style="color:#333;text-decoration:underline;">Try again</a></p>
   </div>`.replace(/\n\s+/g, ' ').trim();
 
 const legacyHtml = `<!DOCTYPE html>
@@ -53,37 +54,36 @@ const legacyHtml = `<!DOCTYPE html>
   <link rel="stylesheet" crossorigin href="${cssHref}">
 </head>
 <body>
-  <div id="root"><p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">Loading OpenInk…</p></div>
+  <div id="root">${initialContent}</div>
   <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
-  <script crossorigin="anonymous" src="${polyfillSrc}"><\/script>
   <script>
     (function() {
       var root = document.getElementById('root');
       var entrySrc = ${JSON.stringify(entrySrc)};
+      var polyfillSrc = ${JSON.stringify(polyfillSrc)};
       function showErr(msg) {
         if (root) root.innerHTML = '<p style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;">' + msg + '</p>';
       }
-      function showStaticFallback() {
-        if (root) root.innerHTML = ${JSON.stringify(staticFallback)};
-      }
       window.onerror = function() {
-        showErr('OpenInk could not start. Try another browser or device.');
+        showErr('OpenInk could not start. <a href="#" onclick="location.reload();return false;">Try again</a>');
         return true;
       };
-      if (typeof System === 'undefined') {
-        showErr('OpenInk could not load (missing polyfill).');
-        return;
-      }
-      System.import(entrySrc).then(function() {
-        // App may mount async; fallback timer will hide if __openinkMounted is set
-      }).catch(function() {
-        showErr('OpenInk could not load. Try another browser or device.');
-      });
-      setTimeout(function() {
-        if (root && !window.__openinkMounted) {
-          showStaticFallback();
+      var s = document.createElement('script');
+      s.crossOrigin = 'anonymous';
+      s.src = polyfillSrc;
+      s.onload = function() {
+        if (typeof System === 'undefined') {
+          showErr('OpenInk could not load (missing polyfill). <a href="#" onclick="location.reload();return false;">Try again</a>');
+          return;
         }
-      }, 12000);
+        System.import(entrySrc).then(function() {}).catch(function() {
+          showErr('OpenInk could not load. Use a phone or computer. <a href="#" onclick="location.reload();return false;">Try again</a>');
+        });
+      };
+      s.onerror = function() {
+        showErr('Could not load scripts. Check connection. <a href="#" onclick="location.reload();return false;">Try again</a>');
+      };
+      document.body.appendChild(s);
     })();
   </script>
 </body>
