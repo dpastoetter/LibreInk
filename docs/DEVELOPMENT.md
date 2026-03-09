@@ -63,6 +63,9 @@ public/
 │   └── eink-demo.html        # E-ink mock reader demo (B&W, resize, simulated refresh)
 └── …
 
+scripts/
+└── generate-legacy-html.mjs   # Post-build: generates dist/legacy.html for no-ESM browsers
+
 docs/                         # Documentation
 ├── ARCHITECTURE.md           # High-level design (this repo)
 ├── DEMO.md                   # E-ink demo page (how to open, controls)
@@ -109,7 +112,7 @@ docs/                         # Documentation
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
 - The e-ink demo is copied to `dist/demo/eink-demo.html`; open that URL on your deployed site to use it.
-- **Kindle / old browsers:** The build includes a legacy (nomodule) bundle. Deploy the full `dist/` so the browser can load either the modern or legacy scripts. If the Kindle still shows a white screen, it may be blocking or failing on the legacy scripts; the 8s fallback message in `index.html` will appear if the app never renders.
+- **Kindle / old browsers:** Kindle/Silk user agents see an “Unsupported browser” message immediately (no app load). The build also generates `dist/legacy.html` via `scripts/generate-legacy-html.mjs` (no `type="module"` scripts—only classic scripts). Deploy the full `dist/` including `legacy.html` so other old browsers can try it; on legacy, the same unsupported message appears for Kindle, and a 10s fallback appears if the app never renders.
 
 ## Documentation
 

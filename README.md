@@ -8,7 +8,7 @@ A minimal, plugin-based “webOS-style” environment for low-spec e-ink devices
 |------------|-----------|
 | ![OpenInk home screen — light mode](docs/screenshots/light-mode.png) | ![OpenInk home screen — dark mode](docs/screenshots/dark-mode.png) |
 
-Toggle appearance from the status bar (light bulb icon). Use **+** / **−** in the status bar to zoom for resolution fit. The same Apps and Games launcher is available in both themes.
+Toggle appearance from the status bar (light bulb icon); the bulb scales with zoom. Use **+** / **−** in the status bar to zoom for resolution fit. The same Apps and Games launcher is available in both themes.
 
 ### Demo
 
@@ -35,6 +35,8 @@ npm run dev
 ```
 
 Then open the URL shown (e.g. `http://localhost:5173`) in a browser. The dev server listens on all interfaces, so you can also use your machine’s LAN address (e.g. `http://192.168.1.5:5173`) from another device on the same network.
+
+**Kindle / limited browsers:** Kindle and Silk see an “Unsupported browser” message immediately (no white screen). Other old browsers can try `/legacy.html` (no ES modules).
 
 **E-ink demo (testing):** Open `/demo/eink-demo.html` (e.g. [http://localhost:5173/demo/eink-demo.html](http://localhost:5173/demo/eink-demo.html)) to run the app in a B&W mock reader: drag the corner to resize, simulated e-ink refresh every 3–4 navigations (or on a timer). See **[docs/DEMO.md](docs/DEMO.md)** for details.
 
@@ -65,9 +67,7 @@ Full steps and how to use shared services and respect global settings are in **[
 - **Calculator** – Basic arithmetic; offline.
 - **Games** – Chess (local 2p or vs computer), Sudoku, Minesweeper, Racing (discrete-tick, e-ink friendly).
 - **News** – RSS reader with multiple sources, CORS proxy, source labels, date-sorted mix.
-- **Reddit** – Read-only subreddit and post list with paginated comments.
-
-  Choose a subreddit from the list or open one by name, then browse posts and comments (dark mode shown below).
+- **Reddit** – Read-only subreddit and post list with paginated comments. Choose a subreddit from the list or open one by name; server errors (e.g. 500) show a friendly message—try another subreddit.
 
   | Subreddit picker | Post list |
   |------------------|-----------|

@@ -94,7 +94,12 @@ function RedditApp(context: AppContext): AppInstance {
         setPosts(data.data.children.map((c) => c.data));
         setListPage(1);
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load');
+        const msg = e instanceof Error ? e.message : 'Failed to load';
+        if (msg.includes('500')) {
+          setError("This subreddit couldn't be loaded (server error). Try again or pick another.");
+        } else {
+          setError(msg);
+        }
       } finally {
         setLoading(false);
       }
