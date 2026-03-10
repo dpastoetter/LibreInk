@@ -27,17 +27,17 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
       try {
         const root = document.documentElement;
         if (root) {
-          root.dataset.pixelOptics = next.pixelOptics;
-          root.dataset.colorMode = next.colorMode;
-          root.dataset.fontSize = next.fontSize;
-          root.dataset.theme = next.theme;
-          root.dataset.appearance = next.appearance;
+          root.setAttribute('data-pixel-optics', next.pixelOptics);
+          root.setAttribute('data-color-mode', next.colorMode);
+          root.setAttribute('data-font-size', next.fontSize);
+          root.setAttribute('data-theme', next.theme);
+          root.setAttribute('data-appearance', next.appearance);
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           root.style.setProperty('--zoom', String(zoom));
         }
         listeners.forEach((l) => l(settings));
       } catch (_) {
-        // Old browsers (e.g. Kindle) may not support dataset or setProperty
+        // Old browsers (e.g. Kindle) may not support setAttribute or setProperty
       }
     },
   };

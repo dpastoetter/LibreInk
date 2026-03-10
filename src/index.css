@@ -67,6 +67,29 @@
   --header-border: #555;
 }
 
+/* Legacy + high contrast: maximum contrast for e-ink (pure black/white) */
+html.legacy-browser[data-appearance="light"][data-theme="highContrast"] {
+  --fg: #000000;
+  --muted: #000000;
+  --border: #000000;
+  --accent: #000000;
+  --surface: #ffffff;
+  --header-bg: #ffffff;
+  --header-fg: #000000;
+  --header-border: #000000;
+}
+html.legacy-browser[data-appearance="dark"][data-theme="highContrast"] {
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #ffffff;
+  --border: #ffffff;
+  --accent: #ffffff;
+  --surface: #000000;
+  --header-bg: #000000;
+  --header-fg: #ffffff;
+  --header-border: #ffffff;
+}
+
 [data-color-mode="color"] {
   --accent: #4f46e5;
 }
@@ -1125,11 +1148,26 @@ html.legacy-browser .status-bar,
 html.legacy-browser .app-header {
   border-bottom-width: 1.5px;
 }
+html.legacy-browser .app-header .btn-nav + .btn-nav {
+  margin-left: 0.5rem;
+}
+
+/* Legacy: chess board fit (no min()/clamp); cap size so it fits on small screens */
+html.legacy-browser .chess-board {
+  width: 85%;
+  max-width: 260px;
+  max-height: 260px;
+  min-width: 0;
+}
+html.legacy-browser .chess-cell {
+  font-size: 0.75rem;
+}
 
 /* Legacy: no CSS Grid (Chrome 44). Use flex so app tiles don’t span full width. */
 html.legacy-browser .app-grid {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   grid-template-columns: unset;
   gap: 0;
 }

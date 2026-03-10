@@ -42,8 +42,10 @@ const POSTS_PER_PAGE = 10;
 
 function scrollAppContentToTop() {
   try {
-    const el = document.querySelector('.app-content') as HTMLElement | null;
-    if (el) el.scrollTo(0, 0);
+    const appContent = document.querySelector('.app-content') as HTMLElement | null;
+    if (appContent) appContent.scrollTo(0, 0);
+    const root = document.getElementById('root');
+    if (root) root.scrollTo(0, 0);
   } catch (_) {}
 }
 
@@ -153,13 +155,19 @@ function RedditApp(context: AppContext): AppInstance {
     if (selectedPost) {
       const commentPages = Math.max(1, Math.ceil(comments.length / 5));
       const pageComments = comments.slice((commentPage - 1) * 5, commentPage * 5);
+      const showMainThread = commentPage === 1;
       return (
         <div class="reddit-post-view">
-          <p class="reddit-meta">u/{selectedPost.author} · {selectedPost.score} pts · {import.meta.env.LEGACY ? formatDateLegacy(new Date(selectedPost.created_utc * 1000)) : new Date(selectedPost.created_utc * 1000).toLocaleDateString()}</p>
-          <div class="reddit-selftext">
-            {stripHtml(selectedPost.selftext_html || selectedPost.selftext || '') || (selectedPost.is_self ? '' : `Link: ${selectedPost.url}`)}
-          </div>
-          <h2>Comments</h2>
+          {showMainThread && (
+            <>
+              <p class="reddit-meta">u/{selectedPost.author} · {selectedPost.score} pts · {import.meta.env.LEGACY ? formatDateLegacy(new Date(selectedPost.created_utc * 1000)) : new Date(selectedPost.created_utc * 1000).toLocaleDateString()}</p>
+              <div class="reddit-selftext">
+                {stripHtml(selectedPost.selftext_html || selectedPost.selftext || '') || (selectedPost.is_self ? '' : `Link: ${selectedPost.url}`)}
+              </div>
+              <h2>Comments</h2>
+            </>
+          )}
+          {!showMainThread && <h2 class="reddit-more-comments">More comments</h2>}
           {comments.length === 0 ? (
             <p class="reddit-meta">No comments yet.</p>
           ) : (
@@ -173,7 +181,7 @@ function RedditApp(context: AppContext): AppInstance {
                 ))}
               </ul>
                   {commentPages > 1 && (
-                <PageNav current={commentPage} total={commentPages} onPrev={() => setCommentPage((p) => Math.max(1, p - 1))} onNext={() => setCommentPage((p) => Math.min(commentPages, p + 1))} />
+                <PageNav current={commentPage} total={commentPages} onPrev={() => { setCommentPage((p) => Math.max(1, p - 1)); scrollAppContentToTop(); }} onNext={() => { setCommentPage((p) => Math.min(commentPages, p + 1)); scrollAppContentToTop(); }} />
               )}
             </>
           )}
