@@ -18,7 +18,7 @@ On Kindle and other no-ESM browsers, open **legacy.html** for the full app (same
 |----------------|---------------|
 | ![Legacy home — light](docs/screenshots/legacy-home-light.png) | ![Legacy home — dark](docs/screenshots/legacy-home-dark.png) |
 
-To regenerate all screenshots: run `npm run build` then `npm run screenshot` (or `npm run screenshot:modern` and `npm run screenshot:legacy` separately). Requires [Playwright](https://playwright.dev/) (`npx playwright install chromium` once).
+To regenerate home screen screenshots: run `npm run build` then `npm run screenshot` (or `npm run screenshot:modern` and `npm run screenshot:legacy` separately). Requires [Playwright](https://playwright.dev/) (`npx playwright install chromium` once).
 
 ### Demo
 
@@ -80,13 +80,7 @@ Full steps and how to use shared services and respect global settings are in **[
 - **News** – RSS reader with multiple sources, CORS proxy, source labels, date-sorted mix.
 - **Reddit** – Read-only subreddit and post list with paginated comments. Choose a subreddit from the list or open one by name; server errors (e.g. 500) show a friendly message—try another subreddit.
 
-  | Subreddit picker | Post list |
-  |------------------|-----------|
-  | ![Reddit — subreddit picker](docs/screenshots/reddit-subreddits.png) | ![Reddit — post list](docs/screenshots/reddit-posts.png) |
-
 - **Finance** – Markets: S&P 500, Gold, Bitcoin, Ethereum with 24h change; USD/EUR toggle and Refresh.
-
-  ![Finance — Markets](docs/screenshots/finance-markets.png)
 
 - **Comics** – xkcd (by number, Older/Newer) and Comics RSS (curated strips from comicsrss.com). Cached; no animation.
 
@@ -130,7 +124,7 @@ For a site that anyone can access, the app is built with security in mind: no se
 
 - `src/core/kernel/` – Shell, home screen, app lifecycle.
 - `src/core/plugins/` – Plugin registry.
-- `src/core/icons/` – Legacy SVG icons for the app launcher (Kindle/no-emoji).
+- `src/core/icons/` – App launcher icons: Heroicons for modern build (`app-icons.tsx`); legacy build uses `app-icons-legacy.ts` and `legacy-svg.ts` (no Heroicons, smaller bundle).
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – Core UI (StatusBar, PageNav, Button, List).
 - `src/core/utils/` – Shared helpers (e.g. stripHtml).

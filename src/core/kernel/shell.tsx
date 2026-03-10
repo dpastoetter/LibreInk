@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'preact/hooks';
-import type { WebOSApp, AppInstance, AppContext } from '../../types/plugin';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'preact/hooks';
+import type { WebOSApp, AppInstance, AppContext, AppDescriptor } from '../../types/plugin';
 import { AppRegistry } from '../plugins/registry';
 import { HomeScreen } from './HomeScreen';
 import { StatusBar } from '../ui/StatusBar';
@@ -26,21 +26,23 @@ export function Shell({ services }: ShellProps) {
   const [instance, setInstance] = useState<AppInstance | null>(null);
   const [_appStack, setAppStack] = useState<string[]>([]);
   const [loadingAppId, setLoadingAppId] = useState<string | null>(null);
+  const instanceRef = useRef<AppInstance | null>(null);
+  instanceRef.current = instance;
 
   const closeApp = useCallback(() => {
-    if (instance?.onDestroy) instance.onDestroy();
+    if (instanceRef.current?.onDestroy) instanceRef.current.onDestroy();
     setInstance(null);
     setCurrentAppId(null);
     setAppStack([]);
-  }, [instance]);
+  }, []);
 
   const goToHome = useCallback(() => {
-    if (instance?.onSuspend) instance.onSuspend();
-    if (instance?.onDestroy) instance.onDestroy();
+    if (instanceRef.current?.onSuspend) instanceRef.current.onSuspend();
+    if (instanceRef.current?.onDestroy) instanceRef.current.onDestroy();
     setInstance(null);
     setCurrentAppId(null);
     setAppStack([]);
-  }, [instance]);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.history) return;
@@ -66,7 +68,7 @@ export function Shell({ services }: ShellProps) {
 
   const launchApp = useCallback(
     (app: WebOSApp) => {
-      if (instance?.onDestroy) instance.onDestroy();
+      if (instanceRef.current?.onDestroy) instanceRef.current.onDestroy();
       const context: AppContext = {
         navigate,
         closeApp,
@@ -86,7 +88,7 @@ export function Shell({ services }: ShellProps) {
         window.history.pushState({ [HISTORY_STATE_KEY]: true, appId: app.id }, '', window.location.href);
       }
     },
-    [services, navigate, closeApp, instance]
+    [services, navigate, closeApp]
   );
 
   const launchAppById = useCallback(
@@ -114,6 +116,7 @@ export function Shell({ services }: ShellProps) {
   const currentApp = currentAppId ? AppRegistry.getApp(currentAppId) : null;
   const headerTitle = instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '';
   const appDescriptors = useMemo(() => AppRegistry.getAllAppDescriptors(), []);
+  const handleLaunch = useCallback((d: AppDescriptor) => launchAppById(d.id), [launchAppById]);
 
   // Notify parent frame (e.g. e-ink demo) when view changes so it can simulate refresh
   useEffect(() => {
@@ -131,7 +134,7 @@ export function Shell({ services }: ShellProps) {
       <StatusBar theme={services.theme} settings={services.settings} />
       <main class="shell-main" role="main">
         {showHome ? (
-          <HomeScreen apps={appDescriptors} onLaunch={(d) => launchAppById(d.id)} />
+          <HomeScreen apps={appDescriptors} onLaunch={handleLaunch} />
         ) : loadingAppId ? (
           <div class="shell-loading" role="status" aria-live="polite">
             <p>Loading…</p>

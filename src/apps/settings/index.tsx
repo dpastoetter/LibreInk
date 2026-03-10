@@ -94,6 +94,10 @@ function SettingsApp(context: AppContext): AppInstance {
             </button>
           ))}
         </section>
+        <section class="panel">
+          <h2 class="panel-title">Demo</h2>
+          <a href="/demo/eink-demo.html" class="btn">E-ink demo</a>
+        </section>
       </div>
     );
   }

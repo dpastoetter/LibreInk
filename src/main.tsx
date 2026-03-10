@@ -9,7 +9,7 @@ import { registerAllApps } from './apps/registry';
 import { DEFAULT_SETTINGS } from './types/settings';
 import './index.css';
 
-/** Legacy loader contract: set by legacy.html so the app can report errors or mounted state. */
+/** Bootstrap: same code path for modern (Vite ESM) and legacy (single IIFE for Kindle). Fast first paint on legacy: render with defaults, load stored settings in background. Legacy loader contract: legacy.html sets __openinkMounted / __openinkFallback for errors. */
 interface LegacyWindow {
   __openinkMounted?: boolean;
   __openinkFallback?: (msg: string) => void;
@@ -60,7 +60,11 @@ try {
   if (isLegacyPath && !isLegacyBundle) {
     // Modern bundle running with legacy URL = wrong file served; leave the inline message.
   } else {
-    init().catch(showLegacyFallback);
+    try {
+      init();
+    } catch (e) {
+      showLegacyFallback(e);
+    }
   }
 } catch (e) {
   showLegacyFallback(e);
@@ -81,16 +85,16 @@ function renderShell(root: HTMLElement) {
   if (typeof window !== 'undefined') (window as unknown as { __openinkMounted?: boolean }).__openinkMounted = true;
 }
 
-async function init() {
+function init() {
   const root = document.getElementById('root');
   if (!root) return;
   try {
-    const loadTimeout = 5000;
-    await Promise.race([
-      settings.load().catch(() => ({ ...DEFAULT_SETTINGS })),
-      new Promise<void>((resolve) => setTimeout(resolve, loadTimeout)),
-    ]);
+    theme.applySettings(DEFAULT_SETTINGS);
     renderShell(root);
+    settings
+      .load()
+      .then((loaded) => theme.applySettings(loaded))
+      .catch(() => theme.applySettings(DEFAULT_SETTINGS));
   } catch (e) {
     showLegacyFallback(e);
   }

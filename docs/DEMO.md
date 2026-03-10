@@ -1,36 +1,45 @@
-# E-ink demo
+# E-ink / Kindle demo
 
-The e-ink demo is a standalone page that runs the OpenInk app inside a mock e-ink reader for testing and presentation.
+The e-ink demo is a standalone page that runs the OpenInk **legacy** app (same as Kindle) inside a mock e-ink reader for testing and presentation.
 
 ## How to open
 
 - **Dev:** After `npm run dev`, open `http://localhost:5173/demo/eink-demo.html`
-- **Production:** Deploy the built app and open `https://your-domain.com/demo/eink-demo.html` (the file is in `public/demo/`, so it is copied to `dist/demo/` on build)
+- **Production:** Open `https://your-domain.com/demo/eink-demo.html` (the file is in `public/demo/`, copied to `dist/demo/` on build)
+- **From the app (including Kindle):** Open **Settings** → **E-ink demo**. That link loads the demo page in the same tab (you can use “← Back to OpenInk” to return to the app).
 
 ## What it does
 
-- **Same app:** The page embeds the OpenInk app in an iframe (same origin). You get the full app: home screen, all widgets, zoom, theme.
-- **B&W:** A grayscale + contrast filter is applied to the iframe so it looks like a monochrome e-ink screen.
-- **Device frame:** A dark bezel wraps the “screen” to suggest a reader device.
-- **Resize:** Drag the bottom-right corner of the screen to change the reader size (no separate width/height inputs).
-- **Simulated refresh:** E-ink panels don’t update on every tap; they refresh in batches. The demo mimics this with a black full-screen flash:
-  - **On navigation:** The app sends a message on each navigation (open app, go home, etc.). The demo counts these and runs the refresh **after a random 3–4 navigations**, not on every click.
-  - **Auto-refresh:** Optional “Auto-refresh every 3s” runs the same black flash on a timer.
+- **Kindle build:** The iframe loads **legacy.html** (same bundle and layout as on Kindle): grayscale, high contrast, no animations. The legacy launcher uses inline SVG or fallback text for app icons (no Heroicons in the legacy bundle).
+- **Fixed Kindle size:** The “screen” uses hard-coded dimensions matching a **Kindle Paperwhite 11th gen (6.8″)** at 1/3 scale: **412×549 px** (device resolution 1236×1648). No resize handle.
+- **Grayscale:** A grayscale + contrast filter is applied to the iframe so it looks like a monochrome e-ink screen (legacy.html is already grayscale; the filter reinforces it in the frame).
+- **Simulated refresh:** E-ink panels refresh in batches with a black flash. The demo runs a **fixed refresh** every **3 navigations** (open app, go home, back, etc.), with a **hard-coded 400 ms** black phase (adjustable via the slider).
+- **Slight bleed:** After the main black flash fades out, a short **ghosting/bleed** phase runs: a faint black overlay (~6% opacity) fades to zero over ~180 ms to mimic residual image on e-ink.
 
 ## Controls (below the device)
 
 | Control | Description |
 |--------|-------------|
-| **Refresh duration (ms)** | How long the black phase lasts (200–900 ms). Affects how long the screen stays black before fading back to content. |
-| **Auto-refresh every 3s** | When checked, triggers the refresh animation every 3 seconds. |
+| **Refresh duration (ms)** | Length of the black phase (300–600 ms). Default 400. |
+| **Auto-refresh every 3s** | When checked, runs the refresh (and bleed) every 3 seconds. |
+
+## Using the demo on a Kindle
+
+The demo page is built to work when opened **on a Kindle device** (same browser as legacy.html):
+
+- **Layout:** No `gap` or `inset`; spacing uses margins and `top/right/bottom/left`. Fonts are Arial/Verdana for wide support.
+- **Narrow viewport:** On small screens the “device” frame uses `max-width: 100%` and the screen height uses `70vh` so the embedded app is readable.
+- **Reachable from the app:** In the legacy app, open **Settings** and tap **E-ink demo** to load this page; use “← Back to OpenInk” to return.
+
+Netlify (and similar) should serve the file as-is: `public/_redirects` includes `/demo/eink-demo.html` so it is not rewritten to the SPA.
 
 ## Technical notes
 
-- The app is loaded at `/` in the iframe. The shell sends `postMessage({ type: 'openink-refresh' })` to the parent when the view changes (see `src/core/kernel/shell.tsx`). The demo listens and throttles to 3–4 clicks before running the refresh.
-- The overlay is a div with `opacity: 0` by default; `runRefresh()` fades it to black then back to transparent. No class toggling, to avoid flicker.
-- Resize is done with a single timeout loop: mousedown on the handle, mousemove to update size, mouseup to stop. Size is clamped (200–900 px width, 266–1200 px height).
-- The demo is plain HTML/CSS/JS in `public/demo/eink-demo.html`. It does not use the app’s build; it only needs the app to be served from the same origin so the iframe can load it.
+- The iframe **src** is **/legacy.html** so the demo shows the same app and layout as on Kindle.
+- The shell sends `postMessage({ type: 'openink-refresh' })` to the parent on each navigation; the demo counts and runs refresh every 3.
+- **Bleed:** A second overlay (`.eink-bleed`) is faded in to low opacity then out after the main refresh to simulate ghosting.
+- The demo is plain HTML/CSS/JS in `public/demo/eink-demo.html`; no app build step. It only needs the app served from the same origin.
 
 ## Files
 
-- `public/demo/eink-demo.html` – Single file: markup, styles, and script. Shipped as-is; no bundling.
+- `public/demo/eink-demo.html` – Single file: markup, styles, and script. Shipped as-is.

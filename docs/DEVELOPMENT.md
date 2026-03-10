@@ -20,7 +20,7 @@ This document covers how to run, build, test, and work with the codebase day to 
 | `npm run test:watch` | Run Vitest in watch mode |
 | `npm run screenshot:legacy` | After `npm run build`, starts preview and captures legacy.html home screen (light and dark) to `docs/screenshots/legacy-home-*.png`. Requires Playwright. |
 | `npm run screenshot:modern` | After `npm run build`, starts preview and captures modern app home screen (light and dark) to `docs/screenshots/light-mode.png` and `dark-mode.png`. Requires Playwright. |
-| `npm run screenshot` | Runs both screenshot scripts to regenerate all app screenshots. Ensure no other process is using ports 4173 or 4174. |
+| `npm run screenshot` | Runs both screenshot scripts to regenerate legacy and modern home screen screenshots. Ensure no other process is using ports 4173 or 4174. |
 
 ## Project structure
 
@@ -39,6 +39,8 @@ src/
 │   ├── plugins/
 │   │   └── registry.ts       # App registry (register / getApp / getAllApps)
 │   ├── icons/
+│   │   ├── app-icons.tsx     # Heroicons for modern launcher; aliased to app-icons-legacy for legacy build
+│   │   ├── app-icons-legacy.ts  # No Heroicons; legacy uses legacy-svg / fallback only
 │   │   └── legacy-svg.ts     # Inline SVG icons for legacy/Kindle launcher
 │   ├── services/             # Service implementations
 │   │   ├── storage.ts
@@ -74,7 +76,10 @@ docs/                         # Documentation
 ├── ARCHITECTURE.md           # High-level design (this repo)
 ├── DEMO.md                   # E-ink demo page (how to open, controls)
 ├── DEVELOPMENT.md            # This file
-└── plugins.md               # How to add and implement apps
+├── KINDLE-COMPATIBILITY.md   # Kindle/e-ink constraints and legacy behaviour
+├── plugins.md                # How to add and implement apps
+├── SECURITY.md               # Security and deployment checklist
+└── screenshots/              # Captured home screens (light-mode, dark-mode, legacy-home-*)
 ```
 
 ## Adding a new app
@@ -133,6 +138,16 @@ docs/                         # Documentation
 - **ESLint** – `eslint.config.js` with TypeScript and jsx-a11y; run with `npm run lint`.
 - **PWA** – [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) generates a service worker (Workbox) for offline caching; registration in `main.tsx` (production only). Manifest: [public/manifest.json](public/manifest.json).
 - **Legacy build** – A separate build (`vite.legacy-single.config.ts`) produces `openink-legacy-single.js` (IIFE, Babel Chrome 44). Kindles are redirected to `legacy.html`, which loads that bundle and shows the full app. Modern browsers load `index.html` with `type="module"`. Use `npm run build`; `dist/legacy.html` and `dist/assets/openink-legacy-single.js` are generated.
+
+## Performance (legacy / Kindle)
+
+The legacy bundle and runtime are tuned for low-spec e-ink devices:
+
+- **Fast first paint** – The app renders immediately with default theme/settings; stored settings are loaded in the background and applied when ready (no blocking on `localStorage` before first frame).
+- **Smaller legacy bundle** – Heroicons are not included in the legacy build. The legacy launcher uses `app-icons-legacy.ts` (aliased in `vite.legacy-single.config.ts`), so tiles use inline SVG or fallback text only; this keeps the IIFE bundle smaller and parse/execution faster.
+- **Stable Shell callbacks** – `launchApp`, `closeApp`, and `goToHome` are stabilized with a ref to the current app instance, so child components (e.g. HomeScreen) receive stable props and avoid unnecessary re-renders when switching apps.
+- **Clock and theme** – On legacy, the status bar clock uses a simple formatter and updates every 60 seconds to limit reflows; theme is applied via `setAttribute` on the document so high-contrast works without extra layout.
+- **CSS** – Legacy uses `html.legacy-browser` scoping: no transitions/animations, system fonts, grayscale, and flex-based app grid (no CSS Grid). See `index.css` and [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md).
 
 ## Possible improvements
 

@@ -18,6 +18,7 @@ export default defineConfig({
       '@apps': path.resolve(__dirname, 'src/apps'),
       '@types': path.resolve(__dirname, 'src/types'),
       'virtual:pwa-register': path.resolve(__dirname, 'src/stub-pwa.ts'),
+      '@core/icons/app-icons': path.resolve(__dirname, 'src/core/icons/app-icons-legacy.ts'),
       react: 'preact/compat',
       'react-dom': 'preact/compat',
     },

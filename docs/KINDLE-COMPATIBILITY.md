@@ -24,7 +24,7 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 - **Higher contrast on legacy (normal theme)** – For e-ink readability, the normal theme on legacy uses stronger contrast: near-black text and dark borders in light mode, bright text and clearer borders in dark mode. The high-contrast theme in Settings is unchanged.
 - **No animations/transitions on legacy** – `legacy.html` sets `class="legacy-browser"` on `<html>`. Our CSS disables `transition` and `animation` for `html.legacy-browser *` to avoid e-ink ghosting.
 - **System fonts only** – No web fonts. On legacy we use `Arial, Verdana, "Courier New", serif, sans-serif` (ReKindle-style).
-- **No Unicode emoji on legacy** – App launcher icons use inline SVG (`iconLegacySvg`, from `src/core/icons/legacy-svg.ts`) when available; otherwise `iconFallback` (ASCII/symbol) or emoji. Weather icons use text labels (Sun, Cld, Rain, etc.) in the legacy build.
+- **No Unicode emoji on legacy** – App launcher icons use inline SVG (`iconLegacySvg`, from `src/core/icons/legacy-svg.ts`) when available; otherwise `iconFallback` (ASCII/symbol) or emoji. The legacy build does not include Heroicons (it uses `app-icons-legacy.ts` so the bundle stays small). Weather icons use text labels (Sun, Cld, Rain, etc.) in the legacy build.
 - **No `alert` / `confirm` / `prompt`** – We do not use them; use custom modals if needed.
 - **No `position: sticky` / `fixed`** – We avoid them to prevent checkerboarding on e-ink.
 - **Touch targets** – Minimum `--tap-min: 52px` for tap areas.
@@ -33,7 +33,7 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 ## Quick tips for Kindle users
 
 - **Bookmark `legacy.html` directly** (e.g. `https://yoursite.com/legacy.html`) so the Kindle opens the legacy page without going through the main index. Fewer requests and less chance of the host serving the wrong file.
-- **JIT-less engine:** The Kindle browser runs JavaScript 5–10× slower than a normal phone. We avoid heavy work on startup (settings load is raced with 5s; date/time use manual formatting on legacy).
+- **JIT-less engine:** The Kindle browser runs JavaScript 5–10× slower than a normal phone. We avoid blocking on storage before first paint: the app renders immediately with default settings, then loads stored settings in the background. Date/time use manual formatting on legacy.
 - **Date/time:** On the legacy build we use manual string formatting (`@core/utils/date`) instead of `Intl` / `toLocaleString` options, which are unreliable on Kindle (ReKindle).
 - **Images:** `image-rendering: pixelated` is set on legacy for crisp edges on e-ink.
 

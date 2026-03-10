@@ -1,2 +1,3 @@
-# Serve legacy page as file (must appear before any SPA catch-all like /* /index.html 200)
+# Serve legacy and demo as files (must appear before any SPA catch-all like /* /index.html 200)
 /legacy.html          /legacy.html          200
+/demo/eink-demo.html  /demo/eink-demo.html  200

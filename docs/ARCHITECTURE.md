@@ -15,10 +15,10 @@ The app is a **single-page application (SPA)** built with Preact and Vite. It pr
 **`src/main.tsx`**
 
 1. Creates the four services: storage, network, theme, settings.
-2. Theme is created with `DEFAULT_SETTINGS`; settings service loads persisted values from storage and applies them to the theme.
-3. Calls `registerAllApps()` so all built-in apps are registered in `AppRegistry`.
-4. Calls `settings.load()` to restore saved settings.
-5. Renders `<Shell services={...} />` into `#root`.
+2. Theme is created with `DEFAULT_SETTINGS`.
+3. Calls `registerAllApps()` so all built-in apps are registered in `AppRegistry` (lazy descriptors only; app code loads on first launch).
+4. Applies default settings to the document and renders `<Shell services={...} />` into `#root` immediately (fast first paint).
+5. Loads persisted settings from storage in the background and applies them via `theme.applySettings()` when ready.
 
 No app is running at this point; the shell shows the home screen.
 
@@ -53,8 +53,8 @@ The shell is the root UI when not on the home screen. It holds:
 
 **Registry**: `src/core/plugins/registry.ts`
 
-- In-memory `Map<string, WebOSApp>`.
-- `registerApp(app)` adds an app; `getApp(id)` / `getAllApps()` / `getAppsByCategory(category)` for the shell and home screen.
+- In-memory `Map<string, WebOSApp>` for loaded apps and a lazy map (descriptor + loader) for apps not yet loaded.
+- `registerApp(app)` adds an app; `registerLazy(descriptor, load)` registers a lazy app; `getApp(id)` / `getAllApps()` / `getAllAppDescriptors()` for the shell and home screen. `loadApp(id)` loads a lazy app on first launch.
 
 **Registration**: `src/apps/registry.ts`
 
@@ -68,7 +68,7 @@ Apps do not import each other; they are only coupled via the shared types and co
 
 **Network** (`src/core/services/network.ts`): Thin wrapper around `fetch` with CORS and credentials settings; exposes `fetch`, `fetchText`, `fetchJson`. Used by apps for Reddit, News, Finance, etc.
 
-**Theme** (`src/core/services/theme.ts`): Holds current global settings in memory and applies them to `document.documentElement.dataset` (pixelOptics, colorMode, fontSize, theme, appearance). Exposes `getSettings()` and `subscribe(listener)`. Updated only by the settings service when the user changes settings.
+**Theme** (`src/core/services/theme.ts`): Holds current global settings in memory and applies them to the document via `setAttribute` (e.g. `data-theme`, `data-appearance`, `data-pixel-optics`) and `style.setProperty` for zoom, so legacy/Kindle browsers without full `dataset` support still get high-contrast and appearance. Exposes `getSettings()` and `subscribe(listener)`. Updated only by the settings service when the user changes settings.
 
 **Settings** (`src/core/services/settings.ts`): Persisted global settings. `get()` returns current in-memory settings; `set(partial)` merges, persists via storage, and calls `theme.applySettings()`. `load()` reads from storage and applies to theme (used at startup).
 
@@ -98,4 +98,4 @@ Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Ap
 ## Build and runtime
 
 - **Vite** bundles the app; aliases (`@core`, `@apps`, `@types`) point into `src/`. The result is static HTML/JS/CSS; no server-side rendering.
-- **Runtime**: One shell, one active app instance at a time. Apps are registered lazily (see `LAZY_APPS` in `src/apps/registry.ts`) and loaded on first launch via dynamic import.
+- **Runtime**: One shell, one active app instance at a time. Apps are registered lazily (see `LAZY_APPS` in `src/apps/registry.ts`) and loaded on first launch via dynamic import. The legacy build (Kindle) inlines all app code into a single IIFE; the same lazy API is used but the bundle is one file.
