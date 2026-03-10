@@ -8,6 +8,7 @@ const LAZY_APPS: { descriptor: AppDescriptor; load: () => Promise<WebOSApp> }[] 
   { descriptor: { id: 'comics', name: 'Comics', icon: '🗞️', iconFallback: 'C', category: 'reader' }, load: () => import('./comics').then((m) => m.comicsApp) },
   { descriptor: { id: 'dictionary', name: 'Dictionary', icon: '📖', iconFallback: 'D', category: 'reader' }, load: () => import('./dictionary').then((m) => m.dictionaryApp) },
   { descriptor: { id: 'finance', name: 'Finance', icon: '📈', iconFallback: '$', category: 'network' }, load: () => import('./finance').then((m) => m.financeApp) },
+  { descriptor: { id: 'mario', name: 'Mario', icon: '🍄', iconFallback: 'M', category: 'game' }, load: () => import('./games/mario-app').then((m) => m.marioApp) },
   { descriptor: { id: 'minesweeper', name: 'Minesweeper', icon: '💣', iconFallback: '*', category: 'game' }, load: () => import('./games/minesweeper-app').then((m) => m.minesweeperApp) },
   { descriptor: { id: 'news', name: 'News', icon: '📰', iconFallback: 'N', category: 'network' }, load: () => import('./news').then((m) => m.newsApp) },
   { descriptor: { id: 'racing', name: 'Racing', icon: '🏎️', iconFallback: 'R', category: 'game' }, load: () => import('./games/racing-app').then((m) => m.racingApp) },

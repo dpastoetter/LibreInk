@@ -738,6 +738,101 @@ html, body {
   flex-shrink: 0;
 }
 
+/* Mario — discrete tick, no animation; e-ink / Kindle friendly */
+.mario-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.mario-intro,
+.mario-meta {
+  margin: 0 0 var(--space);
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.mario-score {
+  flex-shrink: 0;
+  margin: 0 0 var(--space);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mario-world {
+  position: relative;
+  background: #5c94fc;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+}
+
+.mario-ground,
+.mario-platform,
+.mario-player,
+.mario-enemy,
+.mario-coin {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.mario-ground {
+  background: #8b4513;
+  border: 1px solid #654321;
+}
+
+.mario-platform {
+  background: #8b4513;
+  border: 1px solid #654321;
+}
+
+.mario-player {
+  background: #e52521;
+  border: 2px solid #000;
+  border-radius: 2px;
+}
+
+.mario-enemy {
+  background: #8b4513;
+  border: 2px solid #000;
+  border-radius: 2px;
+}
+
+.mario-coin {
+  background: #f7dc0a;
+  border: 1px solid #b7950b;
+  border-radius: 50%;
+}
+
+.mario-controls {
+  display: flex;
+  gap: var(--space);
+  margin-top: var(--space);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mario-btn {
+  min-height: var(--tap-min);
+  min-width: 80px;
+}
+
+.mario-jump {
+  min-width: 100px;
+}
+
+.mario-game > .btn {
+  margin-top: var(--space);
+  flex-shrink: 0;
+}
+
 /* Reddit */
 .reddit-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
 .reddit-search .input { flex: 1; min-width: 0; }
