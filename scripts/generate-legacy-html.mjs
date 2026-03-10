@@ -143,12 +143,13 @@ const legacyFullHtml = `<!DOCTYPE html>
     var root = document.getElementById('root');
     var fallbackMsg = ${JSON.stringify(FALLBACK_MSG)};
     window.__openinkFallback = function(msg) { setFallback(root, msg || fallbackMsg); };
-    window.onerror = function() { try { window.__openinkMounted = true; setFallback(root, (window.__openinkError && String(window.__openinkError)) || 'OpenInk could not start.'); } catch(x) {} return true; };
+    window.onerror = function(msg, url, line, col, err) { try { window.__openinkMounted = true; var errMsg = (window.__openinkError && String(window.__openinkError)) || (err && err.message) || msg || 'OpenInk could not start.'; setFallback(root, errMsg); } catch(x) {} return true; };
+    if (typeof window.addEventListener === 'function') window.addEventListener('unhandledrejection', function(e) { try { if (window.__openinkMounted) return; window.__openinkMounted = true; var errMsg = (e && e.reason != null) ? String(e.reason) : 'App failed to start.'; if (window.__openinkFallback) window.__openinkFallback(errMsg); } catch(x) {} });
     var t = setTimeout(function(){
       if (window.__openinkMounted) return;
       var r = document.getElementById('root');
       if (r) setFallback(r, fallbackMsg);
-    }, 14000);
+    }, 25000);
     window.__openinkFallbackTimer = t;
   } catch(e) {}
 })();
@@ -167,11 +168,11 @@ ${useSingleScript
     s.src = 'assets/openink-legacy-single.js';
     s.async = false;
     s.onerror = function() { showFallback('Could not load app. (Use npm run build then npm run preview to test the full app.)'); };
-    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 5000); };
+    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 8000); };
     document.body.appendChild(s);
     setTimeout(function() {
       if (!window.__openinkMounted) showFallback('App did not start. (Use npm run build then npm run preview to test the full app.)');
-    }, 12000);
+    }, 22000);
   } catch(e) { showFallback('Could not load app.'); }
 })();
 </script>`

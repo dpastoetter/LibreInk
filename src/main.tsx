@@ -96,7 +96,8 @@ async function init() {
     const win = typeof window !== 'undefined' ? (window as unknown as { __openinkMounted?: boolean; __openinkFallback?: (msg: string) => void; __openinkError?: string }) : null;
     if (win) win.__openinkError = e != null ? String(e) : LOAD_ERROR_MESSAGE;
     if (typeof window !== 'undefined') (window as unknown as { __openinkMounted?: boolean }).__openinkMounted = true;
-    if (win?.__openinkFallback) win.__openinkFallback(win?.__openinkError ?? LOAD_ERROR_MESSAGE);
-    else setRootFallback(root, win?.__openinkError ?? LOAD_ERROR_MESSAGE);
+    const errMsg = (win && win.__openinkError) ? win.__openinkError : LOAD_ERROR_MESSAGE;
+    if (win && win.__openinkFallback) win.__openinkFallback(errMsg);
+    else setRootFallback(root, errMsg);
   }
 }

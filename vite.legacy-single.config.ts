@@ -40,13 +40,14 @@ export default defineConfig({
         babel({
           babelHelpers: 'bundled',
           extensions: ['.js', '.jsx', '.ts', '.tsx'],
-          exclude: /node_modules/,
+          exclude: /node_modules\/(?!preact\/)/,
           presets: [
             [
               '@babel/preset-env',
               {
-                targets: { chrome: 44 },
+                targets: { chrome: 38 },
                 modules: false,
+                bugfixes: true,
               },
             ],
           ],
