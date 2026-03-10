@@ -28,7 +28,13 @@ const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
         data-app-id={app.id}
         aria-label={`Open ${app.name}`}
       >
-        <span class="app-tile-icon" aria-hidden="true">{typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconFallback ? app.iconFallback : (app.icon ?? '◻')}</span>
+        <span class="app-tile-icon" aria-hidden="true">
+          {typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconLegacySvg
+            ? <span class="app-tile-icon-svg" dangerouslySetInnerHTML={{ __html: app.iconLegacySvg }} />
+            : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconFallback
+              ? app.iconFallback
+              : (app.icon ?? '◻')}
+        </span>
         <span class="app-tile-name">{app.name}</span>
       </button>
     </li>

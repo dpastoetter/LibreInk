@@ -309,6 +309,20 @@ html, body {
   margin-bottom: 0.25rem;
 }
 
+.app-tile-icon-svg {
+  display: inline-block;
+  width: 2.5rem;
+  height: 2.5rem;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.app-tile-icon-svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .app-tile-name {
   font-size: 0.75rem;
   text-align: center;

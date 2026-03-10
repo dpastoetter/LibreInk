@@ -18,6 +18,8 @@ export interface AppDescriptor {
   icon?: string;
   /** ASCII/symbol fallback for Kindle/legacy (no Unicode emoji support). */
   iconFallback?: string;
+  /** Inline SVG (black/white) for legacy/Kindle; simple shapes only. */
+  iconLegacySvg?: string;
   category?: AppCategory;
 }
 
@@ -41,6 +43,8 @@ export interface WebOSApp {
   icon?: string;
   /** ASCII fallback for Kindle/legacy (ReKindle: no Unicode emoji). */
   iconFallback?: string;
+  /** Inline SVG (black/white) for legacy/Kindle. */
+  iconLegacySvg?: string;
   /** Category for ordering/grouping (system, reader, network, game, etc.). */
   category?: AppCategory;
   /** Must equal PLUGIN_API_VERSION. */

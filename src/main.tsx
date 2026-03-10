@@ -35,7 +35,7 @@ try {
   registerAllApps();
 
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const isLegacyPath = /legacy(-static)?\.html$/i.test(pathname);
+  const isLegacyPath = /legacy\.html$/i.test(pathname);
   const isLegacyBundle = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
   if (isLegacyPath && !isLegacyBundle) {
     // Modern bundle running with legacy URL = wrong file served; leave the inline message.
