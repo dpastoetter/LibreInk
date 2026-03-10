@@ -143,7 +143,7 @@ const legacyFullHtml = `<!DOCTYPE html>
     var root = document.getElementById('root');
     var fallbackMsg = ${JSON.stringify(FALLBACK_MSG)};
     window.__openinkFallback = function(msg) { setFallback(root, msg || fallbackMsg); };
-    window.onerror = function() { try { setFallback(root, 'OpenInk could not start.'); } catch(x) {} return true; };
+    window.onerror = function() { try { window.__openinkMounted = true; setFallback(root, (window.__openinkError && String(window.__openinkError)) || 'OpenInk could not start.'); } catch(x) {} return true; };
     var t = setTimeout(function(){
       if (window.__openinkMounted) return;
       var r = document.getElementById('root');

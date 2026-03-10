@@ -27,9 +27,16 @@ export function createSettingsService(
     },
 
     async load(): Promise<GlobalSettings> {
-      const stored = await storage.get<GlobalSettings>(SETTINGS_KEY);
-      if (stored) current = { ...DEFAULT_SETTINGS, ...stored };
-      theme.applySettings(current);
+      try {
+        const stored = await storage.get<GlobalSettings>(SETTINGS_KEY);
+        if (stored) current = { ...DEFAULT_SETTINGS, ...stored };
+        theme.applySettings(current);
+      } catch (_) {
+        current = { ...DEFAULT_SETTINGS };
+        try {
+          theme.applySettings(current);
+        } catch (_) {}
+      }
       return current;
     },
   };

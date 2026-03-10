@@ -23,12 +23,49 @@ if (canUseSW) {
     .catch(() => {});
 }
 
-const storage = createStorageService();
-const network = createNetworkService();
-const theme = createThemeService(DEFAULT_SETTINGS);
-const settings = createSettingsService(storage, theme);
+let storage: ReturnType<typeof createStorageService>;
+let network: ReturnType<typeof createNetworkService>;
+let theme: ReturnType<typeof createThemeService>;
+let settings: ReturnType<typeof createSettingsService>;
+try {
+  storage = createStorageService();
+  network = createNetworkService();
+  theme = createThemeService(DEFAULT_SETTINGS);
+  settings = createSettingsService(storage, theme);
+  registerAllApps();
 
-registerAllApps();
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isLegacyPath = /legacy(-static)?\.html$/i.test(pathname);
+  const isLegacyBundle = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
+  if (isLegacyPath && !isLegacyBundle) {
+    // Modern bundle running with legacy URL = wrong file served; leave the inline message.
+  } else {
+    init()
+      .catch((err: unknown) => {
+        const win = typeof window !== 'undefined' ? (window as unknown as { __openinkMounted?: boolean; __openinkFallback?: (m: string) => void; __openinkError?: string }) : null;
+        if (win) {
+          win.__openinkMounted = true;
+          win.__openinkError = err != null ? String(err) : LOAD_ERROR_MESSAGE;
+          if (win.__openinkFallback) win.__openinkFallback(win.__openinkError);
+          else {
+            const root = document.getElementById('root');
+            if (root) setRootFallback(root, win.__openinkError);
+          }
+        }
+      });
+  }
+} catch (e) {
+  const win = typeof window !== 'undefined' ? (window as unknown as { __openinkMounted?: boolean; __openinkFallback?: (m: string) => void; __openinkError?: string }) : null;
+  if (win) {
+    win.__openinkMounted = true;
+    win.__openinkError = e != null ? String(e) : LOAD_ERROR_MESSAGE;
+    if (win.__openinkFallback) win.__openinkFallback(win.__openinkError);
+    else {
+      const root = document.getElementById('root');
+      if (root) setRootFallback(root, win.__openinkError);
+    }
+  }
+}
 
 function renderShell(root: HTMLElement) {
   render(
@@ -42,7 +79,6 @@ function renderShell(root: HTMLElement) {
     />,
     root
   );
-  // Signal to legacy.html loader that the app mounted (so it doesn't show static fallback).
   if (typeof window !== 'undefined') (window as unknown as { __openinkMounted?: boolean }).__openinkMounted = true;
 }
 
@@ -50,28 +86,17 @@ async function init() {
   const root = document.getElementById('root');
   if (!root) return;
   try {
-    // Timeout so Kindle/slow localStorage does not block render (ReKindle: localStorage can be slow/volatile).
     const loadTimeout = 5000;
     await Promise.race([
-      settings.load(),
+      settings.load().catch(() => ({ ...DEFAULT_SETTINGS })),
       new Promise<void>((resolve) => setTimeout(resolve, loadTimeout)),
     ]);
     renderShell(root);
-  } catch {
-    // Signal mounted so legacy-full.html doesn't overwrite with "OpenInk did not start" (e.g. Kindle).
+  } catch (e) {
+    const win = typeof window !== 'undefined' ? (window as unknown as { __openinkMounted?: boolean; __openinkFallback?: (msg: string) => void; __openinkError?: string }) : null;
+    if (win) win.__openinkError = e != null ? String(e) : LOAD_ERROR_MESSAGE;
     if (typeof window !== 'undefined') (window as unknown as { __openinkMounted?: boolean }).__openinkMounted = true;
-    const win = typeof window !== 'undefined' ? (window as unknown as { __openinkFallback?: (msg: string) => void }) : null;
-    if (win?.__openinkFallback) win.__openinkFallback(LOAD_ERROR_MESSAGE);
-    else setRootFallback(root, LOAD_ERROR_MESSAGE);
+    if (win?.__openinkFallback) win.__openinkFallback(win?.__openinkError ?? LOAD_ERROR_MESSAGE);
+    else setRootFallback(root, win?.__openinkError ?? LOAD_ERROR_MESSAGE);
   }
-}
-
-// Only skip init when the URL is legacy *and* we're the modern bundle (server served index.html for legacy URL). When we're the legacy bundle (LEGACY), we're always on legacy.html and must run init().
-const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-const isLegacyPath = /legacy(-static)?\.html$/i.test(pathname);
-const isLegacyBundle = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
-if (isLegacyPath && !isLegacyBundle) {
-  // Modern bundle running with legacy URL = wrong file served; leave the inline message.
-} else {
-  init().catch(() => {});
 }
