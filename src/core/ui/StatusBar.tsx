@@ -55,7 +55,7 @@ export function StatusBar({ theme, settings }: StatusBarProps) {
   };
 
   const bulbOff = (
-    <svg class="status-bar-bulb status-bar-bulb-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg class="status-bar-bulb status-bar-bulb-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M9 18h6M9 21h6M12 3a6 6 0 0 1 4.5 9.75A4 4 0 0 0 15 18H9a4 4 0 0 0-.5-5.25A6 6 0 0 1 12 3z" />
     </svg>
   );

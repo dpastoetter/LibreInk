@@ -1,6 +1,7 @@
 import { memo } from 'preact/compat';
 import { useMemo, useCallback } from 'preact/hooks';
 import type { AppDescriptor } from '../../types/plugin';
+import { getAppIcon } from '@core/icons/app-icons';
 
 interface HomeScreenProps {
   apps: AppDescriptor[];
@@ -20,6 +21,7 @@ function sortAppsWithSettingsLast(apps: AppDescriptor[]): AppDescriptor[] {
 }
 
 const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
+  const IconComponent = getAppIcon(app.id);
   return (
     <li>
       <button
@@ -29,11 +31,13 @@ const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
         aria-label={`Open ${app.name}`}
       >
         <span class="app-tile-icon" aria-hidden="true">
-          {typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconLegacySvg
-            ? <span class="app-tile-icon-svg" dangerouslySetInnerHTML={{ __html: app.iconLegacySvg }} />
-            : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconFallback
-              ? app.iconFallback
-              : (app.icon ?? '◻')}
+          {IconComponent
+            ? <IconComponent className="app-tile-icon-svg" aria-hidden={true} />
+            : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconLegacySvg
+              ? <span class="app-tile-icon-svg" dangerouslySetInnerHTML={{ __html: app.iconLegacySvg }} />
+              : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconFallback
+                ? app.iconFallback
+                : (app.icon ?? '◻')}
         </span>
         <span class="app-tile-name">{app.name}</span>
       </button>

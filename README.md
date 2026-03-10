@@ -10,6 +10,16 @@ A minimal, plugin-based “webOS-style” environment for low-spec e-ink devices
 
 Toggle appearance from the status bar (light bulb icon); the bulb scales with zoom. Use **+** / **−** in the status bar to zoom for resolution fit. The same Apps and Games launcher is available in both themes.
 
+### Legacy / Kindle (legacy.html)
+
+On Kindle and other no-ESM browsers, open **legacy.html** for the full app (same home screen and widgets, grayscale, high-contrast options). Bookmark it for the fastest load.
+
+| Legacy — light | Legacy — dark |
+|----------------|---------------|
+| ![Legacy home — light](docs/screenshots/legacy-home-light.png) | ![Legacy home — dark](docs/screenshots/legacy-home-dark.png) |
+
+To regenerate all screenshots: run `npm run build` then `npm run screenshot` (or `npm run screenshot:modern` and `npm run screenshot:legacy` separately). Requires [Playwright](https://playwright.dev/) (`npx playwright install chromium` once).
+
 ### Demo
 
 <!-- Inline playback: 1) On GitHub, open this README and click Edit. 2) Download docs/demo-screencast.mp4 from the repo (or use your local copy). 3) Drag-and-drop the MP4 file onto the line below. 4) Save. GitHub will replace it with a playable embed (max 10 MB). -->

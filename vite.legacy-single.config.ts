@@ -18,6 +18,8 @@ export default defineConfig({
       '@apps': path.resolve(__dirname, 'src/apps'),
       '@types': path.resolve(__dirname, 'src/types'),
       'virtual:pwa-register': path.resolve(__dirname, 'src/stub-pwa.ts'),
+      react: 'preact/compat',
+      'react-dom': 'preact/compat',
     },
   },
   define: {

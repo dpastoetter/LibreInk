@@ -26,6 +26,8 @@ export default defineConfig({
       '@core': path.resolve(__dirname, 'src/core'),
       '@apps': path.resolve(__dirname, 'src/apps'),
       '@types': path.resolve(__dirname, 'src/types'),
+      react: 'preact/compat',
+      'react-dom': 'preact/compat',
     },
   },
   server: {

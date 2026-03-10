@@ -18,6 +18,9 @@ This document covers how to run, build, test, and work with the codebase day to 
 | `npm run lint` | Run ESLint on `src/` (TypeScript + jsx-a11y) |
 | `npm test` | Run Vitest once |
 | `npm run test:watch` | Run Vitest in watch mode |
+| `npm run screenshot:legacy` | After `npm run build`, starts preview and captures legacy.html home screen (light and dark) to `docs/screenshots/legacy-home-*.png`. Requires Playwright. |
+| `npm run screenshot:modern` | After `npm run build`, starts preview and captures modern app home screen (light and dark) to `docs/screenshots/light-mode.png` and `dark-mode.png`. Requires Playwright. |
+| `npm run screenshot` | Runs both screenshot scripts to regenerate all app screenshots. Ensure no other process is using ports 4173 or 4174. |
 
 ## Project structure
 

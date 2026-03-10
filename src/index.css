@@ -248,16 +248,15 @@ html, body {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
+  color: var(--header-fg);
 }
 
 .status-bar-bulb-off {
-  opacity: 0.5;
-  color: var(--header-fg);
+  opacity: 0.85;
 }
 
 .status-bar-bulb-on {
   opacity: 1;
-  color: var(--header-fg);
 }
 
 [data-appearance="dark"] .status-bar-bulb-on {
@@ -391,10 +390,13 @@ html, body {
   border-bottom: 1px solid var(--border);
   min-height: 0;
   background: var(--surface);
+  position: relative;
 }
 
 .app-header-title {
-  flex: 1;
+  position: absolute;
+  left: 0;
+  right: 0;
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
@@ -402,17 +404,20 @@ html, body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 0;
+  text-align: center;
+  pointer-events: none;
+  z-index: 0;
+}
+.app-header .btn-nav {
+  position: relative;
+  z-index: 1;
+  min-width: 56px;
 }
 
 .app-header .btn {
   min-height: 28px;
   padding: 0 10px;
   font-size: 0.85rem;
-}
-
-.app-header .btn-nav {
-  min-width: 56px;
 }
 
 .app-content {
@@ -1112,6 +1117,9 @@ html.legacy-browser body {
   font-family: Arial, Verdana, "Courier New", serif, sans-serif;
   image-rendering: pixelated; /* ReKindle: crisp edges on e-ink */
 }
+html.legacy-browser {
+  filter: grayscale(100%);
+}
 
 /* Legacy (Kindle) normal theme: maximum contrast for e-ink. Does not override highContrast theme. */
 html.legacy-browser[data-appearance="light"]:not([data-theme="highContrast"]) {
@@ -1152,15 +1160,15 @@ html.legacy-browser .app-header .btn-nav + .btn-nav {
   margin-left: 0.5rem;
 }
 
-/* Legacy: chess board fit (no min()/clamp); cap size so it fits on small screens */
+/* Legacy: chess board larger (no min()/clamp); still fits in #root max-width */
 html.legacy-browser .chess-board {
-  width: 85%;
-  max-width: 260px;
-  max-height: 260px;
+  width: 95%;
+  max-width: 400px;
+  max-height: 400px;
   min-width: 0;
 }
 html.legacy-browser .chess-cell {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
 /* Legacy: no CSS Grid (Chrome 44). Use flex so app tiles don’t span full width. */
