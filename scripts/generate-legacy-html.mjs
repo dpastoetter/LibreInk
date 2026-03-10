@@ -1,11 +1,7 @@
 /**
  * Post-build: generate dist/legacy.html for Kindle and other browsers that
- * fail on type="module". Designed so the screen is NEVER blank:
- * - No CSP (old WebKit can mis-handle it and blank the page).
- * - Critical inline styles in head so content is visible without any external CSS.
- * - Canary line first in body so something shows even if #root is broken.
- * - Main stylesheet loaded at end of body so first paint does not depend on it.
- * - Blocking script order: polyfill then System.import(entry); 12s timeout fallback.
+ * fail on type="module". Prefers the single-file IIFE bundle (no SystemJS)
+ * when present; otherwise falls back to polyfill + System.import.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,20 +11,30 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, '..', 'dist');
 const indexPath = path.join(distDir, 'index.html');
 
-const html = fs.readFileSync(indexPath, 'utf8');
+const singleLegacyPath = path.join(distDir, 'assets', 'openink-legacy-single.js');
+const useSingleScript = fs.existsSync(singleLegacyPath);
 
-const polyfillMatch = html.match(/id="vite-legacy-polyfill"[^>]+src="([^"]+)"/);
-const entryMatch = html.match(/id="vite-legacy-entry"[^>]+data-src="([^"]+)"/);
+let cssHref = '/assets/index.css';
+let polyfillSrc = '';
+let entrySrc = '';
 
-if (!polyfillMatch || !entryMatch) {
-  console.warn('generate-legacy-html: could not find legacy script URLs in index.html');
-  process.exit(0);
+if (useSingleScript) {
+  const html = fs.readFileSync(indexPath, 'utf8');
+  const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
+  if (cssMatch) cssHref = cssMatch[1];
+} else {
+  const html = fs.readFileSync(indexPath, 'utf8');
+  const polyfillMatch = html.match(/id="vite-legacy-polyfill"[^>]+src="([^"]+)"/);
+  const entryMatch = html.match(/id="vite-legacy-entry"[^>]+data-src="([^"]+)"/);
+  const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
+  if (cssMatch) cssHref = cssMatch[1];
+  if (!polyfillMatch || !entryMatch) {
+    console.warn('generate-legacy-html: no openink-legacy-single.js and no legacy URLs in index.html');
+    process.exit(0);
+  }
+  polyfillSrc = polyfillMatch[1];
+  entrySrc = entryMatch[1];
 }
-
-const polyfillSrc = polyfillMatch[1];
-const entrySrc = entryMatch[1];
-const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
-const cssHref = cssMatch ? cssMatch[1] : '/assets/index.css';
 
 const FALLBACK_MSG =
   'OpenInk did not start on this device. If it keeps happening, use a phone or computer.';
@@ -96,7 +102,9 @@ const legacyHtml = `<!DOCTYPE html>
   } catch(e) {}
 })();
 </script>
-<script src="${polyfillSrc}" crossorigin="anonymous"></script>
+${useSingleScript
+  ? '<script src="/assets/openink-legacy-single.js"></script>'
+  : `<script src="${polyfillSrc}" crossorigin="anonymous"></script>
 <script>
 (function(){
   function setFallback(root, msg) {
@@ -139,7 +147,7 @@ const legacyHtml = `<!DOCTYPE html>
     if (r) setFallback(r, 'OpenInk could not start.');
   }
 })();
-</script>
+</script>`}
 <link rel="stylesheet" href="${cssHref}" crossorigin="anonymous">
 </body>
 </html>
