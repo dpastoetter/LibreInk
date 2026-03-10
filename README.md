@@ -36,7 +36,7 @@ npm run dev
 
 Then open the URL shown (e.g. `http://localhost:5173`) in a browser. The dev server listens on all interfaces, so you can also use your machine’s LAN address (e.g. `http://192.168.1.5:5173`) from another device on the same network.
 
-**Kindle / limited browsers:** Kindle, Silk, and the experimental browser are redirected to `legacy.html`, which loads the full app (widgets, home screen) via a legacy bundle (no ES modules). **Bookmark `legacy.html` on the Kindle** for the fastest load. Deploy the full `dist/` including `legacy.html`. See **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** for deployment and troubleshooting.
+**Kindle / limited browsers:** Kindle, Silk, and the experimental browser are redirected to `legacy.html`, which loads the full app (widgets, home screen) via a legacy bundle (no ES modules). The legacy home screen uses black-and-white SVG icons (`iconLegacySvg`) where available, with `iconFallback` or emoji as fallback. **Bookmark `legacy.html` on the Kindle** for the fastest load. Deploy the full `dist/` including `legacy.html`. See **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** for deployment and troubleshooting.
 
 **E-ink demo (testing):** Open `/demo/eink-demo.html` (e.g. [http://localhost:5173/demo/eink-demo.html](http://localhost:5173/demo/eink-demo.html)) to run the app in a B&W mock reader: drag the corner to resize, simulated e-ink refresh every 3–4 navigations (or on a timer). See **[docs/DEMO.md](docs/DEMO.md)** for details.
 
@@ -119,6 +119,7 @@ For a site that anyone can access, the app is built with security in mind: no se
 
 - `src/core/kernel/` – Shell, home screen, app lifecycle.
 - `src/core/plugins/` – Plugin registry.
+- `src/core/icons/` – Legacy SVG icons for the app launcher (Kindle/no-emoji).
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – Core UI (StatusBar, PageNav, Button, List).
 - `src/core/utils/` – Shared helpers (e.g. stripHtml).

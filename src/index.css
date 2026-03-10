@@ -75,6 +75,17 @@
   --accent: #818cf8;
 }
 
+/* Override legacy.html critical styles so dark mode applies to body and #root (Kindle) */
+[data-appearance="dark"] body {
+  background: var(--bg);
+  color: var(--fg);
+}
+[data-appearance="dark"] #root {
+  background: var(--bg);
+  border-color: var(--border);
+  box-shadow: 4px 4px 0 var(--border);
+}
+
 [data-font-size="small"] {
   font-size: calc(15px * var(--zoom, 1));
 }
@@ -1062,4 +1073,37 @@ html.legacy-browser,
 html.legacy-browser body {
   font-family: Arial, Verdana, "Courier New", serif, sans-serif;
   image-rendering: pixelated; /* ReKindle: crisp edges on e-ink */
+}
+
+/* Legacy (Kindle) normal theme: higher contrast for e-ink readability. Does not override highContrast theme. */
+html.legacy-browser[data-appearance="light"]:not([data-theme="highContrast"]) {
+  --fg: #0a0a0a;
+  --muted: #333333;
+  --border: #1a1a1a;
+  --accent: #1a1a1a;
+  --header-fg: #0a0a0a;
+  --header-border: #1a1a1a;
+}
+html.legacy-browser[data-appearance="dark"]:not([data-theme="highContrast"]) {
+  --fg: #f5f5f5;
+  --muted: #b0b0b0;
+  --border: #555555;
+  --accent: #c0c0c0;
+  --surface: #252525;
+  --header-fg: #f5f5f5;
+  --header-border: #555555;
+}
+
+/* Legacy: no CSS Grid (Chrome 44). Use flex so app tiles don’t span full width. */
+html.legacy-browser .app-grid {
+  display: flex;
+  flex-wrap: wrap;
+  grid-template-columns: unset;
+  gap: 0;
+}
+html.legacy-browser .app-grid > li {
+  width: 6rem;
+  margin: 0.375rem;
+  aspect-ratio: auto;
+  min-height: 5rem;
 }

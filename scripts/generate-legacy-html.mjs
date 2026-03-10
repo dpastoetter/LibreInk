@@ -41,6 +41,11 @@ if (useSingleScript) {
 const FALLBACK_MSG = 'OpenInk did not start. Try again or use another device.';
 const TRY_AGAIN = '<a href="#" onclick="location.reload();return false;" style="color:#333;text-decoration:underline;">Try again</a>';
 
+// Timeouts (ms): give slow devices (e.g. Kindle) time to load and run the app.
+const FALLBACK_TIMEOUT_MS = 25000;
+const SCRIPT_LOADED_WAIT_MS = 8000;
+const SCRIPT_MOUNT_TIMEOUT_MS = 22000;
+
 const criticalStyle = [
   'body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#e5e5e5;color:#000;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center;position:fixed;inset:0;box-sizing:border-box}',
   '#root{display:block !important;visibility:visible !important;opacity:1 !important;background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px;max-height:90vh;overflow-y:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}',
@@ -62,6 +67,7 @@ const legacyHtml = `<!DOCTYPE html>
 <div id="root">${initialContent}</div>
 <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
 <script>
+// --- Legacy loader: global fallback handler and timeout ---
 (function(){
   function setFallback(root, msg) {
     if (!root) return;
@@ -96,13 +102,14 @@ const legacyHtml = `<!DOCTYPE html>
       if (window.__openinkMounted) return;
       var r = document.getElementById('root');
       if (r) setFallback(r, fallbackMsg);
-    }, 25000);
+    }, ${FALLBACK_TIMEOUT_MS});
     window.__openinkFallbackTimer = t;
   } catch(e) {}
 })();
 </script>
 ${useSingleScript
   ? `<script>
+// --- Load openink-legacy-single.js (full app bundle) ---
 (function(){
   var fallbackShown = false;
   function showFallback(msg) {
@@ -115,16 +122,17 @@ ${useSingleScript
     s.src = 'assets/openink-legacy-single.js';
     s.async = false;
     s.onerror = function() { showFallback('Could not load app. Run npm run build then npm run preview to test.'); };
-    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 8000); };
+    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, ${SCRIPT_LOADED_WAIT_MS}); };
     document.body.appendChild(s);
     setTimeout(function() {
       if (!window.__openinkMounted) showFallback('App did not start. Run npm run build then npm run preview to test.');
-    }, 22000);
+    }, ${SCRIPT_MOUNT_TIMEOUT_MS});
   } catch(e) { showFallback('Could not load app.'); }
 })();
 </script>`
   : polyfillSrc && entrySrc ? `<script src="${polyfillSrc}" crossorigin="anonymous"></script>
 <script>
+// --- SystemJS: load legacy entry (Vite legacy plugin output) ---
 (function(){
   function setFallback(root, msg) {
     if (!root) return;

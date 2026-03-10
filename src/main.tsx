@@ -9,6 +9,26 @@ import { registerAllApps } from './apps/registry';
 import { DEFAULT_SETTINGS } from './types/settings';
 import './index.css';
 
+/** Legacy loader contract: set by legacy.html so the app can report errors or mounted state. */
+interface LegacyWindow {
+  __openinkMounted?: boolean;
+  __openinkFallback?: (msg: string) => void;
+  __openinkError?: string;
+}
+
+function showLegacyFallback(error: unknown): void {
+  const win = typeof window !== 'undefined' ? (window as unknown as LegacyWindow) : null;
+  if (!win) return;
+  win.__openinkMounted = true;
+  win.__openinkError = error != null ? String(error) : LOAD_ERROR_MESSAGE;
+  if (win.__openinkFallback) {
+    win.__openinkFallback(win.__openinkError);
+  } else {
+    const root = document.getElementById('root');
+    if (root) setRootFallback(root, win.__openinkError);
+  }
+}
+
 // Register PWA service worker only on http/https; skip on Kindle/Silk and similar browsers that show "invalid protocol" or don't support SW.
 const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
 const isKindleOrRestricted = /\b(Kindle|Silk|Oasis)\b/i.test(ua);
@@ -40,31 +60,10 @@ try {
   if (isLegacyPath && !isLegacyBundle) {
     // Modern bundle running with legacy URL = wrong file served; leave the inline message.
   } else {
-    init()
-      .catch((err: unknown) => {
-        const win = typeof window !== 'undefined' ? (window as unknown as { __openinkMounted?: boolean; __openinkFallback?: (m: string) => void; __openinkError?: string }) : null;
-        if (win) {
-          win.__openinkMounted = true;
-          win.__openinkError = err != null ? String(err) : LOAD_ERROR_MESSAGE;
-          if (win.__openinkFallback) win.__openinkFallback(win.__openinkError);
-          else {
-            const root = document.getElementById('root');
-            if (root) setRootFallback(root, win.__openinkError);
-          }
-        }
-      });
+    init().catch(showLegacyFallback);
   }
 } catch (e) {
-  const win = typeof window !== 'undefined' ? (window as unknown as { __openinkMounted?: boolean; __openinkFallback?: (m: string) => void; __openinkError?: string }) : null;
-  if (win) {
-    win.__openinkMounted = true;
-    win.__openinkError = e != null ? String(e) : LOAD_ERROR_MESSAGE;
-    if (win.__openinkFallback) win.__openinkFallback(win.__openinkError);
-    else {
-      const root = document.getElementById('root');
-      if (root) setRootFallback(root, win.__openinkError);
-    }
-  }
+  showLegacyFallback(e);
 }
 
 function renderShell(root: HTMLElement) {
@@ -93,11 +92,6 @@ async function init() {
     ]);
     renderShell(root);
   } catch (e) {
-    const win = typeof window !== 'undefined' ? (window as unknown as { __openinkMounted?: boolean; __openinkFallback?: (msg: string) => void; __openinkError?: string }) : null;
-    if (win) win.__openinkError = e != null ? String(e) : LOAD_ERROR_MESSAGE;
-    if (typeof window !== 'undefined') (window as unknown as { __openinkMounted?: boolean }).__openinkMounted = true;
-    const errMsg = (win && win.__openinkError) ? win.__openinkError : LOAD_ERROR_MESSAGE;
-    if (win && win.__openinkFallback) win.__openinkFallback(errMsg);
-    else setRootFallback(root, errMsg);
+    showLegacyFallback(e);
   }
 }

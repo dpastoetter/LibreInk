@@ -35,6 +35,8 @@ src/
 │   │   └── HomeScreen.tsx    # App grid and launch
 │   ├── plugins/
 │   │   └── registry.ts       # App registry (register / getApp / getAllApps)
+│   ├── icons/
+│   │   └── legacy-svg.ts     # Inline SVG icons for legacy/Kindle launcher
 │   ├── services/             # Service implementations
 │   │   ├── storage.ts
 │   │   ├── network.ts
@@ -54,7 +56,6 @@ src/
     ├── games/
     ├── news/
     ├── reddit/
-    ├── notes/
     ├── dictionary/
     └── …
 
@@ -128,7 +129,7 @@ docs/                         # Documentation
 
 - **ESLint** – `eslint.config.js` with TypeScript and jsx-a11y; run with `npm run lint`.
 - **PWA** – [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) generates a service worker (Workbox) for offline caching; registration in `main.tsx` (production only). Manifest: [public/manifest.json](public/manifest.json).
-- **Legacy build** – A separate build (`vite.legacy-single.config.ts`) produces `openink-legacy-single.js` (IIFE, Babel Chrome 44). Kindles are redirected to `legacy.html`, which loads that bundle and shows the full app. Modern browsers load `index.html` with `type="module"`. Use `npm run build`; `dist/legacy.html` and `dist/assets/openink-legacy-single.js` are generated. [@vitejs/plugin-legacy](https://github.com/vitejs/vite/tree/main/packages/plugin-legacy) emits a second bundle for Chrome 75–level browsers (e.g. Kindle experimental). Kindles are redirected to `legacy.html`, which loads only the legacy scripts (polyfills + SystemJS). Modern browsers load `index.html` with `type="module"`; legacy gets the same app via `legacy.html`. Use `npm run build`; both bundles and `legacy.html` are in `dist/`.
+- **Legacy build** – A separate build (`vite.legacy-single.config.ts`) produces `openink-legacy-single.js` (IIFE, Babel Chrome 44). Kindles are redirected to `legacy.html`, which loads that bundle and shows the full app. Modern browsers load `index.html` with `type="module"`. Use `npm run build`; `dist/legacy.html` and `dist/assets/openink-legacy-single.js` are generated.
 
 ## Possible improvements
 

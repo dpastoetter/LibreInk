@@ -20,9 +20,11 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 
 - **Legacy bundle** – Single IIFE `openink-legacy-single.js` built with Babel (Chrome 44 target). Optional chaining and nullish coalescing are transpiled.
 - **No flexbox `gap`** – We use margin-based fallbacks in CSS; modern browsers get `gap` via `@supports (gap: 1px)`.
+- **No CSS Grid on legacy** – The app launcher grid uses flexbox on legacy (fixed-width tiles, 6rem) so tiles don’t span the full screen; modern browsers use `display: grid`.
+- **Higher contrast on legacy (normal theme)** – For e-ink readability, the normal theme on legacy uses stronger contrast: near-black text and dark borders in light mode, bright text and clearer borders in dark mode. The high-contrast theme in Settings is unchanged.
 - **No animations/transitions on legacy** – `legacy.html` sets `class="legacy-browser"` on `<html>`. Our CSS disables `transition` and `animation` for `html.legacy-browser *` to avoid e-ink ghosting.
 - **System fonts only** – No web fonts. On legacy we use `Arial, Verdana, "Courier New", serif, sans-serif` (ReKindle-style).
-- **No Unicode emoji on legacy** – App launcher icons use `iconFallback` (ASCII/symbol) when `import.meta.env.LEGACY` is true. Weather icons use text labels (Sun, Cld, Rain, etc.) in the legacy build.
+- **No Unicode emoji on legacy** – App launcher icons use inline SVG (`iconLegacySvg`, from `src/core/icons/legacy-svg.ts`) when available; otherwise `iconFallback` (ASCII/symbol) or emoji. Weather icons use text labels (Sun, Cld, Rain, etc.) in the legacy build.
 - **No `alert` / `confirm` / `prompt`** – We do not use them; use custom modals if needed.
 - **No `position: sticky` / `fixed`** – We avoid them to prevent checkerboarding on e-ink.
 - **Touch targets** – Minimum `--tap-min: 52px` for tap areas.

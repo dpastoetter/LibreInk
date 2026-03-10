@@ -12,6 +12,8 @@ This document explains how to add a new app to the webOS-style shell and how to 
      - `id`: unique string (e.g. `"myapp"`)
      - `name`: human-readable label
      - `icon`: optional string (character or icon id)
+     - `iconFallback`: optional string for legacy/Kindle when emoji are unreliable (e.g. `"?"`, `"*"`)
+     - `iconLegacySvg`: optional inline SVG string for the legacy app launcher (see `src/core/icons/legacy-svg.ts`)
      - `category`: optional `"system"` | `"game"` | `"reader"` | `"network"` or custom
      - `apiVersion`: set to `PLUGIN_API_VERSION` from `../../types/plugin`
      - `metadata`: optional `{ permissions?: string[]; requiresNetwork?: boolean }`
@@ -23,8 +25,7 @@ This document explains how to add a new app to the webOS-style shell and how to 
 
 3. **Register the app** in `src/apps/registry.ts`:
 
-   - Import your app: `import { myappApp } from './myapp';`
-   - Add it to the `APPS` array: `const APPS: WebOSApp[] = [ ..., myappApp ];`
+   - Add a descriptor and lazy loader to the `LAZY_APPS` array (e.g. `load: () => import('./myapp').then(m => m.myappApp)`). The registry calls `registerAllApps()` at startup to register each app from `LAZY_APPS`.
 
 4. **Run the project** and your app will appear on the home screen.
 
@@ -69,7 +70,7 @@ Global classes like `.panel-title`, `.list`, `.btn`, `.btn-nav` are defined in `
 
 ## Example plugins
 
-See **Notes** (`src/apps/notes/index.tsx`) for a minimal app with list/detail and in-app back. See **Dictionary** (`src/apps/dictionary/index.tsx`) for a simple search-and-fetch app. For dynamic title and back stack, see **Reddit** (`src/apps/reddit/index.tsx`) or **News** (`src/apps/news/index.tsx`).
+See **Dictionary** (`src/apps/dictionary/index.tsx`) for a simple search-and-fetch app. For dynamic title and back stack (getTitle, canGoBack, goBack), see **Reddit** (`src/apps/reddit/index.tsx`) or **News** (`src/apps/news/index.tsx`).
 
 ## Type safety
 
