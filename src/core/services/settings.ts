@@ -20,10 +20,10 @@ export function createSettingsService(
   return {
     get: () => ({ ...current }),
 
-    async set(partial: Partial<GlobalSettings>) {
+    set(partial: Partial<GlobalSettings>) {
       current = { ...current, ...partial };
       theme.applySettings(current);
-      await storage.set(SETTINGS_KEY, current);
+      return storage.set(SETTINGS_KEY, current).catch(() => {});
     },
 
     async load(): Promise<GlobalSettings> {

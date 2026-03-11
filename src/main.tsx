@@ -9,7 +9,7 @@ import { registerAllApps } from './apps/registry';
 import { DEFAULT_SETTINGS } from './types/settings';
 import './index.css';
 
-/** Bootstrap: same code path for modern (Vite ESM) and legacy (single IIFE for Kindle). Fast first paint on legacy: render with defaults, load stored settings in background. Legacy loader contract: legacy.html sets __openinkMounted / __openinkFallback for errors. */
+/** Bootstrap: single-page app (legacy build). Fast first paint: render with defaults, load stored settings in background. Loader contract: __openinkMounted / __openinkFallback for errors. */
 interface LegacyWindow {
   __openinkMounted?: boolean;
   __openinkFallback?: (msg: string) => void;
@@ -54,17 +54,10 @@ try {
   settings = createSettingsService(storage, theme);
   registerAllApps();
 
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const isLegacyPath = /legacy\.html$/i.test(pathname);
-  const isLegacyBundle = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
-  if (isLegacyPath && !isLegacyBundle) {
-    // Modern bundle running with legacy URL = wrong file served; leave the inline message.
-  } else {
-    try {
-      init();
-    } catch (e) {
-      showLegacyFallback(e);
-    }
+  try {
+    init();
+  } catch (e) {
+    showLegacyFallback(e);
   }
 } catch (e) {
   showLegacyFallback(e);
@@ -91,18 +84,14 @@ function init() {
   try {
     theme.applySettings(DEFAULT_SETTINGS);
     renderShell(root);
-    // Defer settings load to next tick so first paint is not delayed by storage read
+    // Defer settings load so first paint completes before touching storage (smoother on Kindle)
     const loadSettings = () => {
       settings
         .load()
         .then((loaded) => theme.applySettings(loaded))
         .catch(() => theme.applySettings(DEFAULT_SETTINGS));
     };
-    if (typeof requestIdleCallback !== 'undefined') {
-      requestIdleCallback(loadSettings, { timeout: 100 });
-    } else {
-      setTimeout(loadSettings, 0);
-    }
+    setTimeout(loadSettings, 280);
   } catch (e) {
     showLegacyFallback(e);
   }

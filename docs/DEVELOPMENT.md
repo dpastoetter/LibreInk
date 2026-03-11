@@ -18,9 +18,7 @@ This document covers how to run, build, test, and work with the codebase day to 
 | `npm run lint` | Run ESLint on `src/` (TypeScript + jsx-a11y) |
 | `npm test` | Run Vitest once |
 | `npm run test:watch` | Run Vitest in watch mode |
-| `npm run screenshot:legacy` | After `npm run build`, starts preview and captures legacy.html home screen (light and dark) to `docs/screenshots/legacy-home-*.png`. Requires Playwright. |
-| `npm run screenshot:modern` | After `npm run build`, starts preview and captures modern app home screen (light and dark) to `docs/screenshots/light-mode.png` and `dark-mode.png`. Requires Playwright. |
-| `npm run screenshot` | Runs both screenshot scripts to regenerate legacy and modern home screen screenshots. Ensure no other process is using ports 4173 or 4174. |
+| `npm run screenshot` | After `npm run build`, starts preview and captures home screen (light and dark) to `docs/screenshots/legacy-home-*.png`. Requires Playwright. |
 
 ## Project structure
 
@@ -39,8 +37,8 @@ src/
 │   ├── plugins/
 │   │   └── registry.ts       # App registry (register / getApp / getAllApps)
 │   ├── icons/
-│   │   ├── app-icons.tsx     # Heroicons for modern launcher; aliased to app-icons-legacy for legacy build
-│   │   ├── app-icons-legacy.ts  # No Heroicons; legacy uses legacy-svg / fallback only
+│   │   ├── app-icons.tsx     # Lucide icons (aliased to app-icons-legacy in build)
+│   │   ├── app-icons-legacy.ts  # No Lucide; uses legacy-svg / fallback only
 │   │   └── legacy-svg.ts     # Inline SVG icons for legacy/Kindle launcher
 │   ├── services/             # Service implementations
 │   │   ├── storage.ts
@@ -65,15 +63,13 @@ src/
     └── …
 
 public/
-├── demo.html                  # E-ink mock reader demo (at /demo.html; not linked from app)
 └── …
 
 scripts/
-└── generate-legacy-html.mjs   # Post-build: generates dist/legacy.html for no-ESM browsers
+└── generate-legacy-html.mjs   # Post-build: generates dist/index.html (single-page app)
 
 docs/                         # Documentation
 ├── ARCHITECTURE.md           # High-level design (this repo)
-├── DEMO.md                   # E-ink demo page (how to open, controls)
 ├── DEVELOPMENT.md            # This file
 ├── KINDLE-COMPATIBILITY.md   # Kindle/e-ink constraints and legacy behaviour
 ├── plugins.md                # How to add and implement apps
@@ -108,24 +104,16 @@ docs/                         # Documentation
 - Tests live next to source (e.g. `registry.test.ts` next to `registry.ts`) or in a `*.test.ts` / `*.test.tsx` file.
 - Run `npm test` before committing if you changed core or app logic.
 
-## E-ink demo
-
-- The demo page is at `public/demo.html` and is served at **/demo.html** (dev and production). It is not linked from the app; open it only via that URL.
-- It embeds the app in an iframe, applies grayscale, and simulates e-ink refresh (black flash every 3 navigations or on a timer).
-- See **[docs/DEMO.md](DEMO.md)** for full description and behaviour.
-
 ## Build and deploy
 
 - `npm run build` produces `dist/` (static assets). Deploy `dist/` to any static host (Netlify, Vercel, GitHub Pages, etc.). To preview the build on your LAN, run `npm run preview -- --host`.
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
-- The e-ink demo is at `dist/demo.html`; open `/demo.html` on your deployed site to use it.
-- **Kindle / old browsers:** Kindle, Silk, and Experimental user agents are redirected to `legacy.html`. That page loads the full app (widgets, home screen) via `openink-legacy-single.js` (single IIFE bundle, no ES modules). If the app does not mount within ~22 seconds, a fallback with "Try again" is shown. The legacy bundle is built with Babel (Chrome 44 target). The build generates `dist/legacy.html` via `scripts/generate-legacy-html.mjs` after Vite build. Deploy the full `dist/` including `legacy.html`. See [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md) and [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
+- **Kindle / e-ink:** The app is a single page. `npm run build` produces `dist/index.html` and `dist/assets/openink-legacy-single.js` (and CSS). The bundle is built with Babel (Chrome 44 target). If the app does not mount within ~22 seconds, a fallback with "Try again" is shown. Deploy the full `dist/`. See [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md) and [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
 
 ## Documentation
 
 - **ARCHITECTURE.md** – How the shell, plugins, and services fit together.
-- **DEMO.md** – E-ink demo page: URL, controls, and refresh behaviour.
 - **KINDLE-COMPATIBILITY.md** – Kindle/e-ink constraints (ReKindle-style): legacy loader, static fallback, no flex gap, no emoji, no animations on legacy, system fonts, etc.
 - **plugins.md** – Step-by-step app plugin implementation and use of context/services.
 - **SECURITY.md** – Security measures and deployment checklist for public sites.
@@ -136,7 +124,7 @@ docs/                         # Documentation
 
 - **ESLint** – `eslint.config.js` with TypeScript and jsx-a11y; run with `npm run lint`.
 - **PWA** – [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) generates a service worker (Workbox) for offline caching; registration in `main.tsx` (production only). Manifest: [public/manifest.json](public/manifest.json).
-- **Legacy build** – A separate build (`vite.legacy-single.config.ts`) produces `openink-legacy-single.js` (IIFE, Babel Chrome 44). Kindles are redirected to `legacy.html`, which loads that bundle and shows the full app. Modern browsers load `index.html` with `type="module"`. Use `npm run build`; `dist/legacy.html` and `dist/assets/openink-legacy-single.js` are generated.
+- **Build** – `vite.legacy-single.config.ts` produces `openink-legacy-single.js` (IIFE, Babel Chrome 44). `scripts/generate-legacy-html.mjs` then writes `dist/index.html`, which loads that bundle. There is only one app page; dev and production both use the same legacy-style bundle.
 
 ## Performance (legacy / Kindle)
 

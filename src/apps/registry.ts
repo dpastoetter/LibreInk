@@ -18,6 +18,8 @@ const LAZY_APPS: { descriptor: AppDescriptor; load: () => Promise<WebOSApp> }[] 
   { descriptor: { id: 'timer', name: 'Timer', icon: '⏱️', iconFallback: 'T', iconLegacySvg: LEGACY_ICONS.timer, category: 'system' }, load: () => import('./timer').then((m) => m.timerApp) },
   { descriptor: { id: 'weather', name: 'Weather', icon: '🌤️', iconFallback: '~', iconLegacySvg: LEGACY_ICONS.weather, category: 'network' }, load: () => import('./weather').then((m) => m.weatherApp) },
   { descriptor: { id: 'worldclock', name: 'World clock', icon: '🌐', iconFallback: 'O', iconLegacySvg: LEGACY_ICONS.worldclock, category: 'system' }, load: () => import('./worldclock').then((m) => m.worldclockApp) },
+  { descriptor: { id: 'wikipedia', name: 'Wikipedia', icon: '📚', iconFallback: 'W', iconLegacySvg: LEGACY_ICONS.wikipedia, category: 'reader' }, load: () => import('./wikipedia').then((m) => m.wikipediaApp) },
+  { descriptor: { id: 'frogfind', name: 'FrogFind', icon: '🐸', iconFallback: 'F', iconLegacySvg: LEGACY_ICONS.frogfind, category: 'network' }, load: () => import('./frogfind').then((m) => m.frogfindApp) },
   { descriptor: { id: 'settings', name: 'Settings', icon: '⚙️', iconFallback: '[*]', iconLegacySvg: LEGACY_ICONS.settings, category: 'system' }, load: () => import('./settings').then((m) => m.settingsApp) },
 ];
 

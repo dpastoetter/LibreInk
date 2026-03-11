@@ -1,6 +1,6 @@
 /**
- * Takes screenshots of legacy.html (home screen, light and dark) and saves to docs/screenshots/.
- * Requires: npm run build, then npm run screenshot:legacy (starts preview, captures, exits).
+ * Takes screenshots of the app home screen (light and dark) and saves to docs/screenshots/.
+ * Requires: npm run build, then npm run screenshot (starts preview, captures, exits).
  */
 import { spawn } from 'node:child_process';
 import path from 'node:path';
@@ -28,9 +28,9 @@ async function waitForServer(timeoutMs = 15000) {
 
 async function main() {
   const distDir = path.join(rootDir, 'dist');
-  const legacyPath = path.join(distDir, 'legacy.html');
-  if (!fs.existsSync(legacyPath)) {
-    console.error('Run npm run build first (dist/legacy.html not found).');
+  const indexPath = path.join(distDir, 'index.html');
+  if (!fs.existsSync(indexPath)) {
+    console.error('Run npm run build first (dist/index.html not found).');
     process.exit(1);
   }
 
@@ -74,7 +74,7 @@ async function main() {
 
   try {
     const page = await context.newPage();
-    await page.goto(`${baseUrl}/legacy.html`, { waitUntil: 'networkidle', timeout: 20000 });
+    await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle', timeout: 20000 });
     await page.waitForSelector('.home-screen', { timeout: 15000 });
     await page.waitForTimeout(800);
 

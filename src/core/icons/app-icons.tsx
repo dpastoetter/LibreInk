@@ -1,41 +1,48 @@
 /**
- * Heroicons (24 outline) mapping for app launcher tiles.
+ * Lucide icons for app launcher tiles.
  * Used when we want library icons instead of emoji/legacy SVG. Fallback remains legacy-svg + iconFallback.
  */
 import type { ComponentType } from 'preact';
 import {
-  CalculatorIcon,
-  BookOpenIcon,
-  ChartBarIcon,
-  NewspaperIcon,
-  ClockIcon,
-  Cog6ToothIcon,
-  GlobeAltIcon,
-  CloudIcon,
-  TableCellsIcon,
-  Squares2X2Icon,
-  ChatBubbleLeftRightIcon,
-  StopIcon,
-} from '@heroicons/react/24/outline';
+  FileText,
+  Calculator,
+  LayoutGrid,
+  BookOpen,
+  BookMarked,
+  TrendingUp,
+  Bomb,
+  Newspaper,
+  MessageCircle,
+  Timer,
+  Grid3x3,
+  Clock,
+  CloudSun,
+  Globe,
+  Settings,
+  Library,
+  Search,
+} from 'lucide-react';
 
-type IconComponent = ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+type IconComponent = ComponentType<{ className?: string; 'aria-hidden'?: boolean; size?: number }>;
 
 const APP_ICONS: Partial<Record<string, IconComponent>> = {
-  blog: NewspaperIcon as IconComponent,
-  calculator: CalculatorIcon as IconComponent,
-  chess: Squares2X2Icon as IconComponent,
-  comics: BookOpenIcon as IconComponent,
-  dictionary: BookOpenIcon as IconComponent,
-  finance: ChartBarIcon as IconComponent,
-  minesweeper: TableCellsIcon as IconComponent,
-  news: NewspaperIcon as IconComponent,
-  reddit: ChatBubbleLeftRightIcon as IconComponent,
-  stopwatch: StopIcon as IconComponent,
-  sudoku: TableCellsIcon as IconComponent,
-  timer: ClockIcon as IconComponent,
-  weather: CloudIcon as IconComponent,
-  worldclock: GlobeAltIcon as IconComponent,
-  settings: Cog6ToothIcon as IconComponent,
+  blog: FileText as IconComponent,
+  calculator: Calculator as IconComponent,
+  chess: LayoutGrid as IconComponent,
+  comics: BookOpen as IconComponent,
+  dictionary: BookMarked as IconComponent,
+  finance: TrendingUp as IconComponent,
+  minesweeper: Bomb as IconComponent,
+  news: Newspaper as IconComponent,
+  reddit: MessageCircle as IconComponent,
+  stopwatch: Timer as IconComponent,
+  sudoku: Grid3x3 as IconComponent,
+  timer: Clock as IconComponent,
+  weather: CloudSun as IconComponent,
+  worldclock: Globe as IconComponent,
+  wikipedia: Library as IconComponent,
+  frogfind: Search as IconComponent,
+  settings: Settings as IconComponent,
 };
 
 export function getAppIcon(appId: string): IconComponent | null {

@@ -165,6 +165,12 @@ function RedditApp(context: AppContext): AppInstance {
     }, [currentSub, loadSub]);
 
     useEffect(() => {
+      if (!selectedPost) return;
+      const t = setTimeout(scrollAppContentToTop, 0);
+      return () => clearTimeout(t);
+    }, [selectedPost]);
+
+    useEffect(() => {
       if (!setHeaderActions) return;
       if (currentSub != null) {
         setHeaderActions(null);

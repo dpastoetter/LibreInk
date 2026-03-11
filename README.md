@@ -2,29 +2,15 @@
 
 A minimal, plugin-based “webOS-style” environment for low-spec e-ink devices. It provides a home screen, launcher, and a set of built-in apps that run inside a shared shell.
 
-### Light and dark mode
+### Home screen
 
-| Light mode | Dark mode |
-|------------|-----------|
-| ![OpenInk home screen — light mode](docs/screenshots/light-mode.png) | ![OpenInk home screen — dark mode](docs/screenshots/dark-mode.png) |
+Toggle appearance from the status bar (light bulb icon). Use **+** / **−** in the status bar to zoom. Apps and Games launcher in both themes.
 
-Toggle appearance from the status bar (light bulb icon); the bulb scales with zoom. Use **+** / **−** in the status bar to zoom for resolution fit. The same Apps and Games launcher is available in both themes.
+| Light | Dark |
+|-------|------|
+| ![Home — light](docs/screenshots/legacy-home-light.png) | ![Home — dark](docs/screenshots/legacy-home-dark.png) |
 
-### Legacy / Kindle (legacy.html)
-
-On Kindle and other no-ESM browsers, open **legacy.html** for the full app (same home screen and widgets, grayscale, high-contrast options). Bookmark it for the fastest load.
-
-| Legacy — light | Legacy — dark |
-|----------------|---------------|
-| ![Legacy home — light](docs/screenshots/legacy-home-light.png) | ![Legacy home — dark](docs/screenshots/legacy-home-dark.png) |
-
-To regenerate home screen screenshots: run `npm run build` then `npm run screenshot` (or `npm run screenshot:modern` and `npm run screenshot:legacy` separately). Requires [Playwright](https://playwright.dev/) (`npx playwright install chromium` once).
-
-### Demo
-
-<!-- Inline playback: 1) On GitHub, open this README and click Edit. 2) Download docs/demo-screencast.mp4 from the repo (or use your local copy). 3) Drag-and-drop the MP4 file onto the line below. 4) Save. GitHub will replace it with a playable embed (max 10 MB). -->
-
-https://github.com/user-attachments/assets/78065765-93b0-42f6-a8c1-b9a5a60156c6
+To regenerate screenshots: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) (`npx playwright install chromium` once).
 
 ## Tech stack
 
@@ -42,9 +28,7 @@ npm run dev
 
 Then open the URL shown (e.g. `http://localhost:5173`) in a browser. The dev server listens on all interfaces, so you can also use your machine’s LAN address (e.g. `http://192.168.1.5:5173`) from another device on the same network.
 
-**Kindle / limited browsers:** Kindle, Silk, and the experimental browser are redirected to `legacy.html`, which loads the full app (widgets, home screen) via a legacy bundle (no ES modules). The legacy home screen uses black-and-white SVG icons (`iconLegacySvg`) where available, with `iconFallback` or emoji as fallback. **Bookmark `legacy.html` on the Kindle** for the fastest load. Deploy the full `dist/` including `legacy.html`. See **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** for deployment and troubleshooting.
-
-**E-ink demo:** Open **/demo.html** (e.g. [http://localhost:5173/demo.html](http://localhost:5173/demo.html)) to run the app in a B&W mock reader with simulated e-ink refresh. Not linked from the app. See **[docs/DEMO.md](docs/DEMO.md)** for details.
+**Kindle / e-ink:** The app is a single page (index.html) that loads one legacy bundle (no ES modules), so it runs on Kindle, Silk, and other no-ESM browsers. The home screen uses black-and-white SVG icons where available. Deploy the full `dist/`. See **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** for deployment and troubleshooting.
 
 **Build for production:**
 
@@ -112,14 +96,13 @@ For a site that anyone can access, the app is built with security in mind: no se
 - **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** – High-level design: shell, plugin system, services, and data flow.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** – Development workflow, project structure, adding services, testing, and deploy.
 - **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** – Kindle/e-ink constraints (ReKindle-style) and legacy loader behaviour.
-- **[docs/DEMO.md](docs/DEMO.md)** – E-ink demo page: how to open it, controls, and how the simulated refresh works.
 - **[docs/plugins.md](docs/plugins.md)** – How to build and register app plugins, use context and services, and optional shell integration (getTitle, canGoBack, goBack).
 
 ## Project structure
 
 - `src/core/kernel/` – Shell, home screen, app lifecycle.
 - `src/core/plugins/` – Plugin registry.
-- `src/core/icons/` – App launcher icons: Heroicons for modern build (`app-icons.tsx`); legacy build uses `app-icons-legacy.ts` and `legacy-svg.ts` (no Heroicons, smaller bundle).
+- `src/core/icons/` – App launcher icons: Lucide in `app-icons.tsx`; build uses `app-icons-legacy.ts` and `legacy-svg.ts` for legacy (smaller bundle).
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – Core UI (StatusBar, PageNav, Button, List).
 - `src/core/utils/` – Shared helpers (e.g. stripHtml).

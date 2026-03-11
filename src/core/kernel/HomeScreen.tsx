@@ -48,7 +48,7 @@ const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
   );
 });
 
-export function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
+const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
   const s = theme.getSettings();
   const [showGamesSection, setShowGamesSection] = useState(s.showGamesSection);
   const [sortOrder, setSortOrder] = useState(s.sortOrder);
@@ -108,4 +108,6 @@ export function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
       )}
     </div>
   );
-}
+};
+
+export const HomeScreen = memo(HomeScreenInner);

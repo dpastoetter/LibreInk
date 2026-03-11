@@ -49,7 +49,14 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           const contentMaxWidth = next.contentWidth === 'full' ? '100%' : next.contentWidth === 'medium' ? '40rem' : '28rem';
           root.style.setProperty('--content-max-width', contentMaxWidth);
         }
-        listeners.forEach((l) => l(settings));
+        // Defer notifications so subscribers update in one tick (fewer reflows on e-ink)
+        const snapshot = settings;
+        const list = Array.from(listeners);
+        if (typeof queueMicrotask !== 'undefined') {
+          queueMicrotask(() => { list.forEach((l) => l(snapshot)); });
+        } else {
+          setTimeout(() => { list.forEach((l) => l(snapshot)); }, 0);
+        }
       } catch (_) {
         // Old browsers (e.g. Kindle) may not support setAttribute or setProperty
       }

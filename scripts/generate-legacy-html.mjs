@@ -1,6 +1,6 @@
 /**
- * Post-build: generate legacy.html for Kindle and no-ESM browsers.
- * legacy.html = full app (openink-legacy-single.js). Single entry for Kindle/widgets.
+ * Post-build: generate index.html (single-page app for legacy/Kindle).
+ * Loads openink-legacy-single.js and its CSS. This is the only build output.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,39 +9,16 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
 const distDir = path.join(rootDir, 'dist');
-const publicDir = path.join(rootDir, 'public');
-const indexPath = path.join(distDir, 'index.html');
+const assetsDir = path.join(distDir, 'assets');
+const singleLegacyPath = path.join(assetsDir, 'openink-legacy-single.js');
+const singleCssPath = path.join(assetsDir, 'openink-legacy-single.css');
 
-const singleLegacyPath = path.join(distDir, 'assets', 'openink-legacy-single.js');
 const useSingleScript = fs.existsSync(singleLegacyPath);
-
-let cssHref = '/assets/index.css';
-let polyfillSrc = '';
-let entrySrc = '';
-
-if (useSingleScript) {
-  const html = fs.readFileSync(indexPath, 'utf8');
-  const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
-  if (cssMatch) cssHref = cssMatch[1];
-} else {
-  const html = fs.readFileSync(indexPath, 'utf8');
-  const polyfillMatch = html.match(/id="vite-legacy-polyfill"[^>]+src="([^"]+)"/);
-  const entryMatch = html.match(/id="vite-legacy-entry"[^>]+data-src="([^"]+)"/);
-  const cssMatch = html.match(/href="(\/assets\/index-[^"]+\.css)"/);
-  if (cssMatch) cssHref = cssMatch[1];
-  if (!polyfillMatch || !entryMatch) {
-    polyfillSrc = '';
-    entrySrc = '';
-  } else {
-    polyfillSrc = polyfillMatch[1];
-    entrySrc = entryMatch[1];
-  }
-}
+const cssHref = fs.existsSync(singleCssPath) ? 'assets/openink-legacy-single.css' : '';
 
 const FALLBACK_MSG = 'OpenInk did not start. Try again or use another device.';
 const TRY_AGAIN = '<a href="#" onclick="location.reload();return false;" style="color:#333;text-decoration:underline;">Try again</a>';
 
-// Timeouts (ms): balanced for slow devices (Kindle) but responsive fallback.
 const FALLBACK_TIMEOUT_MS = 22000;
 const SCRIPT_LOADED_WAIT_MS = 6000;
 const SCRIPT_MOUNT_TIMEOUT_MS = 18000;
@@ -108,8 +85,7 @@ const legacyHtml = `<!DOCTYPE html>
   } catch(e) {}
 })();
 </script>
-${useSingleScript
-  ? `<script>
+${useSingleScript ? `<script>
 // --- Load openink-legacy-single.js (full app bundle) ---
 (function(){
   var fallbackShown = false;
@@ -130,50 +106,16 @@ ${useSingleScript
     }, ${SCRIPT_MOUNT_TIMEOUT_MS});
   } catch(e) { showFallback('Could not load app.'); }
 })();
-</script>`
-  : polyfillSrc && entrySrc ? `<script src="${polyfillSrc}" crossorigin="anonymous"></script>
-<script>
-// --- SystemJS: load legacy entry (Vite legacy plugin output) ---
-(function(){
-  function setFallback(root, msg) {
-    if (!root) return;
-    root.style.display = 'block';
-    root.style.visibility = 'visible';
-    root.style.opacity = '1';
-    try {
-      root.textContent = '';
-      var p = document.createElement('p');
-      p.style.cssText = 'padding:1.5rem;font-family:Arial,Verdana,sans-serif;margin:0;';
-      p.appendChild(document.createTextNode(msg));
-      p.appendChild(document.createTextNode(' '));
-      var tryAgain = document.createElement('a');
-      tryAgain.href = '#';
-      tryAgain.textContent = 'Try again';
-      tryAgain.style.color = '#333';
-      tryAgain.style.textDecoration = 'underline';
-      tryAgain.onclick = function() { location.reload(); return false; };
-      p.appendChild(tryAgain);
-      root.appendChild(p);
-    } catch (e) { root.innerHTML = '<p style="padding:1.5rem;">' + msg + ' <a href="#" onclick="location.reload();return false;">Try again</a></p>'; }
-  }
-  try {
-    var root = document.getElementById('root');
-    var entrySrc = ${JSON.stringify(entrySrc)};
-    if (typeof System === 'undefined') { setFallback(root, 'Could not load (missing polyfill).'); return; }
-    System.import(entrySrc).then(function(){ if (window.__openinkFallbackTimer) clearTimeout(window.__openinkFallbackTimer); }).catch(function(){ setFallback(root, 'Could not load app.'); });
-  } catch (e) { var r = document.getElementById('root'); if (r) setFallback(r, 'OpenInk could not start.'); }
-})();
-</script>` : '<script>if (window.__openinkFallback) window.__openinkFallback("Full app not built. Run npm run build.");</script>'}
-<link rel="stylesheet" href="${cssHref}" crossorigin="anonymous" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="${cssHref}" crossorigin="anonymous"></noscript>
+</script>` : '<script>if (window.__openinkFallback) window.__openinkFallback("App not built. Run npm run build.");</script>'}
+${cssHref ? `<link rel="stylesheet" href="${cssHref}" crossorigin="anonymous" media="print" onload="this.media='all'">\n<noscript><link rel="stylesheet" href="${cssHref}" crossorigin="anonymous"></noscript>` : ''}
 </body>
 </html>
 `;
 
-fs.writeFileSync(path.join(distDir, 'legacy.html'), legacyHtml);
-if (fs.existsSync(publicDir)) {
-  fs.writeFileSync(path.join(publicDir, 'legacy.html'), legacyHtml);
+if (!useSingleScript) {
+  console.error('assets/openink-legacy-single.js not found. Run the legacy build first.');
+  process.exit(1);
 }
 
-console.log('Generated dist/legacy.html (full app for Kindle)');
-if (fs.existsSync(publicDir)) console.log('Also written to public/legacy.html for dev server.');
+fs.writeFileSync(path.join(distDir, 'index.html'), legacyHtml);
+console.log('Generated dist/index.html (single-page app).');

@@ -1,3 +1,4 @@
+import { memo } from 'preact/compat';
 import { useState, useEffect } from 'preact/hooks';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
@@ -29,7 +30,7 @@ function useClock(timeFormat: '12h' | '24h') {
   return time;
 }
 
-export function StatusBar({ theme, settings }: StatusBarProps) {
+function StatusBarInner({ theme, settings }: StatusBarProps) {
   const s = theme.getSettings();
   const [showClock, setShowClock] = useState(s.showClock);
   const [timeFormat, setTimeFormat] = useState(s.timeFormat);
@@ -112,3 +113,5 @@ export function StatusBar({ theme, settings }: StatusBarProps) {
     </header>
   );
 }
+
+export const StatusBar = memo(StatusBarInner);

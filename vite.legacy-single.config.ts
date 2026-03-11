@@ -32,7 +32,7 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: { compress: { passes: 1 }, format: { comments: false } },
     sourcemap: false,
-    emptyOutDir: false,
+    emptyOutDir: true,
     outDir: 'dist',
     lib: {
       entry: path.resolve(__dirname, 'src/legacy-entry.ts'),

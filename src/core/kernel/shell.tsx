@@ -128,17 +128,6 @@ export function Shell({ services }: ShellProps) {
   const appDescriptors = useMemo(() => AppRegistry.getAllAppDescriptors(), []);
   const handleLaunch = useCallback((d: AppDescriptor) => launchAppById(d.id), [launchAppById]);
 
-  // Notify parent frame (e.g. e-ink demo) when view changes so it can simulate refresh
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.self !== window.parent) {
-      try {
-        window.parent.postMessage({ type: 'openink-refresh' }, '*');
-      } catch {
-        /* ignore */
-      }
-    }
-  }, [currentAppId, showHome, loadingAppId]);
-
   return (
     <div class="shell">
       <StatusBar theme={services.theme} settings={services.settings} />

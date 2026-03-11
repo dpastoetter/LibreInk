@@ -210,16 +210,18 @@ html, body {
   flex-direction: column;
 }
 
-/* Shell */
+/* Shell – containment limits reflow on e-ink */
 .shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  contain: layout style;
 }
 
 .shell-main {
   flex: 1;
   overflow: auto;
+  contain: layout style;
 }
 
 .shell-loading {
@@ -240,6 +242,7 @@ html, body {
   background: var(--header-bg);
   color: var(--header-fg);
   box-shadow: var(--shadow-soft);
+  contain: layout style;
 }
 
 .status-bar-left {
@@ -314,6 +317,7 @@ html, body {
   max-width: min(100%, var(--content-max-width, 28rem));
   margin-left: auto;
   margin-right: auto;
+  contain: layout style;
 }
 
 .home-title {
@@ -340,6 +344,7 @@ html, body {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 6rem), 1fr));
+  contain: layout style;
   gap: 0.75rem;
   max-width: min(100%, var(--content-max-width, 28rem));
 }
@@ -733,7 +738,7 @@ textarea {
   border: none;
   background: var(--bg);
   color: var(--fg);
-  font-size: clamp(0.75rem, 4.5vmin, 1.5rem);
+  font-size: var(--chess-piece-size, clamp(0.75rem, 4.5vmin, 1.5rem));
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -894,7 +899,8 @@ textarea {
 .news-error-hint { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
 
 /* Blog */
-.blog-app { }
+.blog-app { cursor: none; }
+.blog-article { cursor: none; }
 .blog-add { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
 .blog-add .input { min-width: 10rem; }
 .blog-add-input { flex: 1; min-width: 12rem; }
@@ -1015,6 +1021,27 @@ textarea {
 .dictionary-defs { margin: 0.25em 0 0 1em; padding: 0; list-style: disc; }
 .dictionary-example { color: var(--muted); font-style: italic; }
 
+/* Wikipedia */
+.wikipedia-app { }
+.wikipedia-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
+.wikipedia-results { list-style: none; margin: 0; padding: 0; }
+.wikipedia-result-item { display: block; width: 100%; text-align: left; padding: var(--space); margin-bottom: 0.5em; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); cursor: pointer; min-height: var(--tap-min); }
+.wikipedia-result-item:hover { border-color: var(--accent); }
+.wikipedia-result-title { font-weight: 600; display: block; margin-bottom: 0.25em; }
+.wikipedia-result-desc { font-size: 0.9rem; color: var(--muted); display: block; margin-bottom: 0.25em; }
+.wikipedia-result-excerpt { font-size: 0.9rem; color: var(--muted); display: block; }
+.wikipedia-article-header { margin-bottom: var(--space); }
+.wikipedia-article-title { font-size: 1.25rem; margin: 0 0 var(--space); }
+.wikipedia-extract { margin-top: var(--space); }
+.wikipedia-extract p { margin: 0 0 0.75em; }
+
+/* FrogFind */
+.frogfind-app { }
+.frogfind-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
+.frogfind-frame-wrap { margin-top: var(--space); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; min-height: 24rem; }
+.frogfind-iframe { width: 100%; height: 28rem; border: 0; display: block; }
+.frogfind-placeholder { color: var(--muted); margin: var(--space) 0; }
+
 /* Stopwatch */
 .stopwatch-app { }
 .stopwatch-app .timer-display { font-size: 3rem; font-weight: 600; font-variant-numeric: tabular-nums; margin: var(--space) 0; text-align: center; }
@@ -1087,11 +1114,16 @@ textarea {
 .timer-actions > * + *,
 .widget-actions > * + *,
 .dictionary-search > * + *,
+.wikipedia-search > * + *,
+.frogfind-search > * + *,
 .comics-source-tabs > * + * {
   margin-left: var(--space);
 }
 .chess-mode-select > * + * { margin-left: var(--space); }
 .chess-mode-buttons > * + * { margin-top: var(--space); }
+.chess-footer > * + * { margin-left: var(--space); }
+.app-header-actions > * + * { margin-left: var(--space); }
+.chess-board-zoom > * + * { margin-left: 0.5rem; }
 .sudoku-numpad > * + * { margin-left: 6px; margin-top: 6px; }
 .calculator-app > * + * { margin-top: var(--space); }
 @supports (gap: 1px) {
@@ -1108,10 +1140,15 @@ textarea {
   .timer-presets > * + *,
   .timer-actions > * + *,
   .widget-actions > * + *,
-.dictionary-search > * + *,
-.comics-source-tabs > * + * { margin-left: 0; }
+  .dictionary-search > * + *,
+  .wikipedia-search > * + *,
+  .frogfind-search > * + *,
+  .comics-source-tabs > * + * { margin-left: 0; }
   .chess-mode-select > * + * { margin-left: 0; }
   .chess-mode-buttons > * + * { margin-top: 0; }
+  .chess-footer > * + * { margin-left: 0; }
+  .app-header-actions > * + * { margin-left: 0; }
+  .chess-board-zoom > * + * { margin-left: 0; }
   .sudoku-numpad > * + * { margin-left: 0; margin-top: 0; }
   .calculator-app > * + * { margin-top: 0; }
 }
@@ -1171,6 +1208,34 @@ html.legacy-browser .app-header .btn-nav + .btn-nav {
   margin-left: 0.5rem;
 }
 
+/* Legacy: chess widget – same settings layout as modern (header zoom, turn beside New game, mode/engine) */
+html.legacy-browser .app-header-actions .chess-board-zoom {
+  display: flex;
+  align-items: center;
+}
+html.legacy-browser .chess-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+html.legacy-browser .chess-footer .chess-turn {
+  margin: 0;
+  margin-right: var(--space);
+}
+html.legacy-browser .chess-mode-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+html.legacy-browser .chess-engine-level {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  border-top: 1.5px solid var(--border);
+  padding-top: var(--space);
+  margin-top: var(--space);
+}
+
 /* Legacy: chess board square; size set by JS (zoom buttons) or default 320px */
 html.legacy-browser .chess-board {
   width: 320px;
@@ -1180,9 +1245,7 @@ html.legacy-browser .chess-board {
   min-width: 0;
   aspect-ratio: unset;
 }
-html.legacy-browser .chess-cell {
-  font-size: 0.85rem;
-}
+/* Legacy: piece size follows --chess-piece-size set by JS on .chess-board */
 
 /* Legacy: no CSS Grid (Chrome 44). Use flex so app tiles don’t span full width. */
 html.legacy-browser .app-grid {

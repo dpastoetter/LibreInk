@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#ffffff">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self'; base-uri 'self'; form-action 'self'">
 <link rel="icon" type="image/svg+xml" href="/openink-logo.svg">
 <title>OpenInk</title>
 <style>body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#e5e5e5;color:#000;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center;position:fixed;inset:0;box-sizing:border-box}#root{display:block !important;visibility:visible !important;opacity:1 !important;background:#fff;border:2px solid #000;box-shadow:4px 4px 0 #000;width:95%;max-width:600px;min-height:200px;max-height:90vh;overflow-y:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}</style>
@@ -48,7 +49,7 @@
       if (window.__openinkMounted) return;
       var r = document.getElementById('root');
       if (r) setFallback(r, fallbackMsg);
-    }, 25000);
+    }, 22000);
     window.__openinkFallbackTimer = t;
   } catch(e) {}
 })();
@@ -67,14 +68,15 @@
     s.src = 'assets/openink-legacy-single.js';
     s.async = false;
     s.onerror = function() { showFallback('Could not load app. Run npm run build then npm run preview to test.'); };
-    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 8000); };
+    s.onload = function() { if (!window.__openinkMounted) setTimeout(function(){ if (!window.__openinkMounted) showFallback('App script loaded but did not start.'); }, 6000); };
     document.body.appendChild(s);
     setTimeout(function() {
       if (!window.__openinkMounted) showFallback('App did not start. Run npm run build then npm run preview to test.');
-    }, 22000);
+    }, 18000);
   } catch(e) { showFallback('Could not load app.'); }
 })();
 </script>
-<link rel="stylesheet" href="/assets/index-B0wURLL5.css" crossorigin="anonymous">
+<link rel="stylesheet" href="/assets/index-Dfp6mLmk.css" crossorigin="anonymous" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="/assets/index-Dfp6mLmk.css" crossorigin="anonymous"></noscript>
 </body>
 </html>

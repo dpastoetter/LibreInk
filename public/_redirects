@@ -1,3 +1,2 @@
-# Serve legacy and demo as files (must appear before any SPA catch-all like /* /index.html 200)
-/legacy.html   /legacy.html  200
-/demo.html     /demo.html    200
+# Redirect old legacy.html bookmarks to main page (must appear before any SPA catch-all)
+/legacy.html   /   302

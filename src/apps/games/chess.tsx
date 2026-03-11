@@ -343,7 +343,13 @@ export function ChessGame() {
     return () => setHeaderActions(null);
   }, [setHeaderActions, mode, boardSizePx]);
 
-  const boardStyle = { width: boardSizePx + 'px', height: boardSizePx + 'px' };
+  const cellPx = boardSizePx / 8;
+  const pieceSizePx = cellPx * 0.85;
+  const boardStyle = {
+    width: boardSizePx + 'px',
+    height: boardSizePx + 'px',
+    ['--chess-piece-size' as string]: pieceSizePx + 'px',
+  };
 
   return (
     <div class="chess-game">
