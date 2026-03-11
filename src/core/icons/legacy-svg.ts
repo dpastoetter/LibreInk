@@ -1,6 +1,7 @@
 /**
  * Higher-quality black/white inline SVGs for legacy/Kindle (no external assets).
  * 24×24 viewBox, stroke/fill currentColor, SVG 1.1 safe. Refined outlines for clarity on e-ink.
+ * Security: content is build-time constant only; no <script> or event handlers. Do not inject user/API data.
  */
 const S = (content: string) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" aria-hidden="true">${content}</svg>`;
@@ -11,10 +12,9 @@ export const LEGACY_ICONS: Record<string, string> = {
   comics: S('<path d="M4 4v16a2 2 0 002 2h6V4H4z"/><path d="M14 4h4a2 2 0 012 2v12a2 2 0 01-2 2h-4V4z"/><rect x="6" y="7" width="4" height="3" fill="currentColor"/><rect x="14" y="7" width="4" height="3" fill="currentColor"/><circle cx="7" cy="15" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="17" cy="15" r="1.2" fill="none" stroke="currentColor" stroke-width="1"/>'),
   dictionary: S('<path d="M4 4h12l4 4v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M8 4v16"/><path d="M8 9h8M8 13h6M8 17h8"/>'),
   finance: S('<polyline points="3 17 7 11 11 13 15 7 21 11"/>'),
-  mario: S('<circle cx="12" cy="9" r="5"/><ellipse cx="12" cy="19" rx="6" ry="2.5"/>'),
   minesweeper: S('<rect x="2" y="2" width="20" height="20" rx="1"/><path d="M8 2v20M14 2v20M2 8h20M2 14h20"/><circle cx="5" cy="5" r="1.8" fill="currentColor"/><circle cx="19" cy="5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/>'),
+  blog: S('<path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M4 10h16"/><path d="M7 6h4M7 14h10"/>'),
   news: S('<path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z"/><path d="M4 10h16"/><rect x="6" y="6" width="5" height="3" fill="currentColor"/>'),
-  racing: S('<rect x="3" y="9" width="18" height="8" rx="1"/><circle cx="7" cy="17" r="2.5"/><circle cx="17" cy="17" r="2.5"/><path d="M7 15h10"/><rect x="10" y="6" width="4" height="3" rx="0.5" fill="currentColor"/>'),
   reddit: S('<circle cx="12" cy="12" r="9"/><circle cx="9.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="14.5" cy="10.5" r="1.2" fill="currentColor"/><path d="M8 15c0 0 2 2 4 2s4-2 4-2"/>'),
   stopwatch: S('<circle cx="12" cy="13" r="8"/><path d="M12 7v3l2.5 2.5"/><path d="M12 2v2"/>'),
   sudoku: S('<rect x="2" y="2" width="20" height="20" rx="1"/><path d="M8 2v20M14 2v20M2 8h20M2 14h20"/>'),

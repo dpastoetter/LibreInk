@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'preact/hooks';
+import { useState, useEffect, useCallback, useMemo, useContext } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
 import { formatDateLegacy } from '@core/utils/date';
-import { CORS_PROXY } from '@core/constants';
+import { getCorsProxyUrl } from '@core/constants';
+import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
 const REDDIT_JSON = (path: string) => `https://www.reddit.com${path}.json?raw_json=1&limit=25`;
 
@@ -38,6 +39,28 @@ interface RedditComment {
 
 const DEFAULT_SUBS = ['books', 'cryptocurrencies', 'popular', 'technology', 'wallstreetbets', 'worldnews'];
 
+function parseRedditSubreddits(json: string | undefined): string[] {
+  if (!json || !json.trim()) return [...DEFAULT_SUBS];
+  try {
+    const arr = JSON.parse(json) as unknown;
+    if (!Array.isArray(arr)) return [...DEFAULT_SUBS];
+    const out: string[] = [];
+    for (const x of arr) {
+      if (typeof x === 'string' && x.trim()) {
+        const sub = x.trim().toLowerCase().replace(/^r\//, '');
+        if (sub && !out.includes(sub)) out.push(sub);
+      }
+    }
+    return out.length ? out : [...DEFAULT_SUBS];
+  } catch {
+    return [...DEFAULT_SUBS];
+  }
+}
+
+function redditSubredditsToJson(subs: string[]): string {
+  return JSON.stringify(subs);
+}
+
 const POSTS_PER_PAGE = 10;
 
 function scrollAppContentToTop() {
@@ -69,7 +92,7 @@ type RedditPostCommentsResponse = [
 ];
 
 function RedditApp(context: AppContext): AppInstance {
-  const { network } = context.services;
+  const { network, settings } = context.services;
   const backRef: {
     current: {
       setSelectedPost: (p: RedditPost['data'] | null) => void;
@@ -81,9 +104,30 @@ function RedditApp(context: AppContext): AppInstance {
   const titleRef: { current: string } = { current: 'Subreddits' };
 
   function RedditUI() {
-    const [subs] = useState<string[]>(DEFAULT_SUBS);
+    const [subs, setSubs] = useState<string[]>(() => parseRedditSubreddits(settings.get().redditSubreddits));
     const [searchInput, setSearchInput] = useState('');
     const [currentSub, setCurrentSub] = useState<string | null>(null);
+    const [editMode, setEditMode] = useState(false);
+    const setHeaderActions = useContext(AppHeaderActionsContext);
+
+    const persistSubs = useCallback(
+      (next: string[]) => {
+        setSubs(next);
+        settings.set({ redditSubreddits: redditSubredditsToJson(next) });
+      },
+      [settings]
+    );
+
+    const removeSub = (sub: string) => {
+      persistSubs(subs.filter((s) => s !== sub));
+    };
+
+    const addSub = (name: string) => {
+      const trimmed = name.trim().toLowerCase().replace(/^r\//, '');
+      if (!trimmed || subs.includes(trimmed)) return;
+      persistSubs([...subs, trimmed]);
+      setSearchInput('');
+    };
     const [posts, setPosts] = useState<RedditPost['data'][]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -99,7 +143,8 @@ function RedditApp(context: AppContext): AppInstance {
       setError(null);
       try {
         const url = REDDIT_JSON(`/r/${sub}`);
-        const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+        const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
+        const proxyUrl = proxy + encodeURIComponent(url);
         const data = await network.fetchJson<{ data: { children: RedditPost[] } }>(proxyUrl);
         setPosts(data.data.children.map((c) => c.data));
         setListPage(1);
@@ -119,12 +164,34 @@ function RedditApp(context: AppContext): AppInstance {
       if (currentSub) loadSub(currentSub);
     }, [currentSub, loadSub]);
 
+    useEffect(() => {
+      if (!setHeaderActions) return;
+      if (currentSub != null) {
+        setHeaderActions(null);
+        return () => setHeaderActions(null);
+      }
+      const node = (
+        <button
+          type="button"
+          class="btn"
+          onClick={() => setEditMode((e) => !e)}
+          aria-label={editMode ? 'Done editing' : 'Edit subreddits'}
+          title={editMode ? 'Done' : 'Edit'}
+        >
+          {editMode ? 'Done' : 'Edit'}
+        </button>
+      );
+      setHeaderActions(node);
+      return () => setHeaderActions(null);
+    }, [setHeaderActions, currentSub, editMode]);
+
     const openPost = useCallback(async (post: RedditPost['data']) => {
       setSelectedPost(post);
       setComments([]);
       try {
         const commentsUrl = REDDIT_JSON(post.permalink);
-        const proxyCommentsUrl = CORS_PROXY + encodeURIComponent(commentsUrl);
+        const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
+        const proxyCommentsUrl = proxy + encodeURIComponent(commentsUrl);
         const data = await network.fetchJson<RedditPostCommentsResponse>(proxyCommentsUrl);
         const list = data[1]?.data?.children ?? [];
         const flatten = (nodes: RedditCommentNode[], depth: number): RedditComment[] => {
@@ -204,17 +271,33 @@ function RedditApp(context: AppContext): AppInstance {
               placeholder="Subreddit name (e.g. programming)"
               value={searchInput}
               onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
-              onKeyDown={(e) => e.key === 'Enter' && openSubreddit(searchInput)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') openSubreddit(searchInput);
+              }}
             />
             <button type="button" class="btn" onClick={() => openSubreddit(searchInput)}>
               Open
             </button>
+            <button type="button" class="btn" onClick={() => addSub(searchInput)}>
+              Add
+            </button>
           </div>
           <p class="reddit-search-hint">Or pick one below:</p>
-          <ul class="list">
+          <ul class="list reddit-sub-list">
             {subs.map((sub) => (
-              <li key={sub}>
+              <li key={sub} class="reddit-sub-item">
                 <button type="button" onClick={() => setCurrentSub(sub)}>r/{sub}</button>
+                {editMode && (
+                  <button
+                    type="button"
+                    class="btn btn-small reddit-sub-delete"
+                    onClick={() => removeSub(sub)}
+                    aria-label={`Remove r/${sub}`}
+                    title="Remove"
+                  >
+                    ×
+                  </button>
+                )}
               </li>
             ))}
           </ul>

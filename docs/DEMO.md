@@ -1,12 +1,11 @@
 # E-ink / Kindle demo
 
-The e-ink demo is a standalone page that runs the OpenInk **legacy** app (same as Kindle) inside a mock e-ink reader for testing and presentation.
+The e-ink demo is a standalone page that runs the OpenInk **legacy** app (same as Kindle) inside a mock e-ink reader for testing and presentation. It is **not** linked from the app; open it only via the URL below.
 
 ## How to open
 
-- **Dev:** After `npm run dev`, open `http://localhost:5173/demo/eink-demo.html`
-- **Production:** Open `https://your-domain.com/demo/eink-demo.html` (the file is in `public/demo/`, copied to `dist/demo/` on build)
-- **From the app (including Kindle):** Open **Settings** → **E-ink demo**. That link loads the demo page in the same tab (you can use “← Back to OpenInk” to return to the app).
+- **Dev:** After `npm run dev`, open `http://localhost:5173/demo.html`
+- **Production:** Open `https://your-domain.com/demo.html` (the file is in `public/demo.html`, copied to `dist/demo.html` on build)
 
 ## What it does
 
@@ -25,21 +24,21 @@ The e-ink demo is a standalone page that runs the OpenInk **legacy** app (same a
 
 ## Using the demo on a Kindle
 
-The demo page is built to work when opened **on a Kindle device** (same browser as legacy.html):
+The demo page is built to work when opened **on a Kindle device** (same browser as legacy.html). Open `/demo.html` directly in the browser (e.g. bookmark it):
 
 - **Layout:** No `gap` or `inset`; spacing uses margins and `top/right/bottom/left`. Fonts are Arial/Verdana for wide support.
 - **Narrow viewport:** On small screens the “device” frame uses `max-width: 100%` and the screen height uses `70vh` so the embedded app is readable.
-- **Reachable from the app:** In the legacy app, open **Settings** and tap **E-ink demo** to load this page; use “← Back to OpenInk” to return.
+- Use “← Back to OpenInk” to return to the app (legacy.html).
 
-Netlify (and similar) should serve the file as-is: `public/_redirects` includes `/demo/eink-demo.html` so it is not rewritten to the SPA.
+Netlify (and similar) should serve the file as-is: `public/_redirects` includes `/demo.html` so it is not rewritten to the SPA.
 
 ## Technical notes
 
 - The iframe **src** is **/legacy.html** so the demo shows the same app and layout as on Kindle.
 - The shell sends `postMessage({ type: 'openink-refresh' })` to the parent on each navigation; the demo counts and runs refresh every 3.
 - **Bleed:** A second overlay (`.eink-bleed`) is faded in to low opacity then out after the main refresh to simulate ghosting.
-- The demo is plain HTML/CSS/JS in `public/demo/eink-demo.html`; no app build step. It only needs the app served from the same origin.
+- The demo is plain HTML/CSS/JS in `public/demo.html`; no app build step. It only needs the app served from the same origin.
 
 ## Files
 
-- `public/demo/eink-demo.html` – Single file: markup, styles, and script. Shipped as-is.
+- `public/demo.html` – Single file: markup, styles, and script. Shipped as-is.

@@ -32,8 +32,22 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           root.setAttribute('data-font-size', next.fontSize);
           root.setAttribute('data-theme', next.theme);
           root.setAttribute('data-appearance', next.appearance);
+          root.setAttribute('data-reduce-motion', next.reduceMotion);
+          root.setAttribute('data-line-height', next.lineHeight);
+          root.setAttribute('data-content-width', next.contentWidth);
+          root.setAttribute('data-letter-spacing', next.letterSpacing);
+          root.setAttribute('data-tap-target-size', next.tapTargetSize);
+          root.setAttribute('data-focus-ring', next.focusRing);
+          root.setAttribute('data-high-contrast-focus', next.highContrastFocus ? 'true' : 'false');
+          root.setAttribute('data-invert-colors', next.invertColors ? 'true' : 'false');
+          root.setAttribute('data-reduce-flashes', next.reduceFlashes ? 'true' : 'false');
+          root.setAttribute('data-apps-per-row', next.appsPerRow);
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           root.style.setProperty('--zoom', String(zoom));
+          const tapMin = next.tapTargetSize === 'extraLarge' ? 60 : next.tapTargetSize === 'large' ? 52 : 44;
+          root.style.setProperty('--tap-min', `${tapMin}px`);
+          const contentMaxWidth = next.contentWidth === 'full' ? '100%' : next.contentWidth === 'medium' ? '40rem' : '28rem';
+          root.style.setProperty('--content-max-width', contentMaxWidth);
         }
         listeners.forEach((l) => l(settings));
       } catch (_) {

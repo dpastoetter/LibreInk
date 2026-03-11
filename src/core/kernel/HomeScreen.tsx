@@ -1,20 +1,23 @@
 import { memo } from 'preact/compat';
-import { useMemo, useCallback } from 'preact/hooks';
+import { useMemo, useCallback, useState, useEffect } from 'preact/hooks';
 import type { AppDescriptor } from '../../types/plugin';
 import { getAppIcon } from '@core/icons/app-icons';
+import type { ThemeService } from '../services/theme';
 
 interface HomeScreenProps {
   apps: AppDescriptor[];
   onLaunch: (app: AppDescriptor) => void;
+  theme: ThemeService;
 }
 
-function sortByName(apps: AppDescriptor[]): AppDescriptor[] {
-  return [...apps].sort((a, b) => a.name.localeCompare(b.name));
+function sortByName(apps: AppDescriptor[], order: 'a-z' | 'z-a'): AppDescriptor[] {
+  const sorted = [...apps].sort((a, b) => a.name.localeCompare(b.name));
+  return order === 'z-a' ? sorted.reverse() : sorted;
 }
 
-/** Apps list: alphabetical but Settings always last. */
-function sortAppsWithSettingsLast(apps: AppDescriptor[]): AppDescriptor[] {
-  const sorted = sortByName(apps);
+/** Apps list: alphabetical (or Z–A) but Settings always last. */
+function sortAppsWithSettingsLast(apps: AppDescriptor[], order: 'a-z' | 'z-a'): AppDescriptor[] {
+  const sorted = sortByName(apps, order);
   const settings = sorted.filter((a) => a.id === 'settings');
   const rest = sorted.filter((a) => a.id !== 'settings');
   return [...rest, ...settings];
@@ -45,14 +48,24 @@ const AppTile = memo(function AppTile({ app }: { app: AppDescriptor }) {
   );
 });
 
-export function HomeScreen({ apps, onLaunch }: HomeScreenProps) {
+export function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
+  const s = theme.getSettings();
+  const [showGamesSection, setShowGamesSection] = useState(s.showGamesSection);
+  const [sortOrder, setSortOrder] = useState(s.sortOrder);
+  useEffect(() => {
+    return theme.subscribe((next) => {
+      setShowGamesSection(next.showGamesSection);
+      setSortOrder(next.sortOrder);
+    });
+  }, [theme]);
+
   const games = useMemo(
-    () => sortByName(apps.filter((a) => a.category === 'game')),
-    [apps]
+    () => sortByName(apps.filter((a) => a.category === 'game'), sortOrder),
+    [apps, sortOrder]
   );
   const appsOnly = useMemo(
-    () => sortAppsWithSettingsLast(apps.filter((a) => a.category !== 'game')),
-    [apps]
+    () => sortAppsWithSettingsLast(apps.filter((a) => a.category !== 'game'), sortOrder),
+    [apps, sortOrder]
   );
 
   const appById = useMemo(() => {
@@ -83,14 +96,16 @@ export function HomeScreen({ apps, onLaunch }: HomeScreenProps) {
           ))}
         </ul>
       </section>
-      <section class="home-category">
-        <h2 class="home-category-title">Games</h2>
-        <ul class="app-grid" onClick={handleGridClick}>
-          {games.map((app) => (
-            <AppTile key={app.id} app={app} />
-          ))}
-        </ul>
-      </section>
+      {showGamesSection && (
+        <section class="home-category">
+          <h2 class="home-category-title">Games</h2>
+          <ul class="app-grid" onClick={handleGridClick}>
+            {games.map((app) => (
+              <AppTile key={app.id} app={app} />
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
-import { formatTimeLegacy } from '../utils/date';
+import { formatTimeLegacy, formatTimeLegacy12h } from '../utils/date';
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
@@ -14,29 +14,35 @@ interface StatusBarProps {
 
 const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
 
+function formatTime(d: Date, timeFormat: '12h' | '24h'): string {
+  if (isLegacy) return timeFormat === '12h' ? formatTimeLegacy12h(d) : formatTimeLegacy(d);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: timeFormat === '12h' });
+}
+
 /** Clock updates every 60s to keep e-ink / low-spec refresh and CPU minimal. */
-function useClock() {
-  const [time, setTime] = useState(() =>
-    isLegacy ? formatTimeLegacy(new Date()) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  );
+function useClock(timeFormat: '12h' | '24h') {
+  const [time, setTime] = useState(() => formatTime(new Date(), timeFormat));
   useEffect(() => {
-    const id = setInterval(() => {
-      setTime(isLegacy ? formatTimeLegacy(new Date()) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    }, 60_000);
+    const id = setInterval(() => setTime(formatTime(new Date(), timeFormat)), 60_000);
     return () => clearInterval(id);
-  }, []);
+  }, [timeFormat]);
   return time;
 }
 
 export function StatusBar({ theme, settings }: StatusBarProps) {
-  const time = useClock();
-  const [appearance, setAppearance] = useState<'light' | 'dark'>(() => theme.getSettings().appearance);
-  const [zoom, setZoom] = useState(() => theme.getSettings().zoom);
+  const s = theme.getSettings();
+  const [showClock, setShowClock] = useState(s.showClock);
+  const [timeFormat, setTimeFormat] = useState(s.timeFormat);
+  const time = useClock(timeFormat);
+  const [appearance, setAppearance] = useState<'light' | 'dark'>(s.appearance);
+  const [zoom, setZoom] = useState(s.zoom);
 
   useEffect(() => {
-    return theme.subscribe((s) => {
-      setAppearance(s.appearance);
-      setZoom(s.zoom);
+    return theme.subscribe((next) => {
+      setAppearance(next.appearance);
+      setZoom(next.zoom);
+      setShowClock(next.showClock);
+      setTimeFormat(next.timeFormat);
     });
   }, [theme]);
 
@@ -68,9 +74,13 @@ export function StatusBar({ theme, settings }: StatusBarProps) {
   return (
     <header class="status-bar" role="banner">
       <span class="status-bar-left">OpenInk</span>
-      <span class="status-bar-center" aria-label="Current time">
-        {time}
-      </span>
+      {showClock ? (
+        <span class="status-bar-center" aria-label="Current time">
+          {time}
+        </span>
+      ) : (
+        <span class="status-bar-center" aria-hidden="true" />
+      )}
       <span class="status-bar-right">
         <button
           type="button"

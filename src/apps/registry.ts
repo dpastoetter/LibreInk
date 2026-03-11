@@ -4,15 +4,14 @@ import { LEGACY_ICONS } from '../core/icons/legacy-svg';
 
 /** Descriptor + lazy loader for each app. iconFallback = ASCII for Kindle; iconLegacySvg = simple B&W icon. */
 const LAZY_APPS: { descriptor: AppDescriptor; load: () => Promise<WebOSApp> }[] = [
+  { descriptor: { id: 'blog', name: 'Blog', icon: '📝', iconFallback: 'B', iconLegacySvg: LEGACY_ICONS.blog, category: 'reader' }, load: () => import('./blog').then((m) => m.blogApp) },
   { descriptor: { id: 'calculator', name: 'Calculator', icon: '🔢', iconFallback: '#', iconLegacySvg: LEGACY_ICONS.calculator, category: 'reader' }, load: () => import('./calculator').then((m) => m.calculatorApp) },
   { descriptor: { id: 'chess', name: 'Chess', icon: '♟️', iconFallback: 'P', iconLegacySvg: LEGACY_ICONS.chess, category: 'game' }, load: () => import('./games/chess-app').then((m) => m.chessApp) },
   { descriptor: { id: 'comics', name: 'Comics', icon: '🗞️', iconFallback: 'C', iconLegacySvg: LEGACY_ICONS.comics, category: 'reader' }, load: () => import('./comics').then((m) => m.comicsApp) },
   { descriptor: { id: 'dictionary', name: 'Dictionary', icon: '📖', iconFallback: 'D', iconLegacySvg: LEGACY_ICONS.dictionary, category: 'reader' }, load: () => import('./dictionary').then((m) => m.dictionaryApp) },
   { descriptor: { id: 'finance', name: 'Finance', icon: '📈', iconFallback: '$', iconLegacySvg: LEGACY_ICONS.finance, category: 'network' }, load: () => import('./finance').then((m) => m.financeApp) },
-  { descriptor: { id: 'mario', name: 'Mario', icon: '🍄', iconFallback: 'M', iconLegacySvg: LEGACY_ICONS.mario, category: 'game' }, load: () => import('./games/mario-app').then((m) => m.marioApp) },
   { descriptor: { id: 'minesweeper', name: 'Minesweeper', icon: '💣', iconFallback: '*', iconLegacySvg: LEGACY_ICONS.minesweeper, category: 'game' }, load: () => import('./games/minesweeper-app').then((m) => m.minesweeperApp) },
   { descriptor: { id: 'news', name: 'News', icon: '📰', iconFallback: 'N', iconLegacySvg: LEGACY_ICONS.news, category: 'network' }, load: () => import('./news').then((m) => m.newsApp) },
-  { descriptor: { id: 'racing', name: 'Racing', icon: '🏎️', iconFallback: 'R', iconLegacySvg: LEGACY_ICONS.racing, category: 'game' }, load: () => import('./games/racing-app').then((m) => m.racingApp) },
   { descriptor: { id: 'reddit', name: 'Reddit', icon: '🔴', iconFallback: 'r', iconLegacySvg: LEGACY_ICONS.reddit, category: 'network' }, load: () => import('./reddit').then((m) => m.redditApp) },
   { descriptor: { id: 'stopwatch', name: 'Stopwatch', icon: '⏲️', iconFallback: 'S', iconLegacySvg: LEGACY_ICONS.stopwatch, category: 'system' }, load: () => import('./stopwatch').then((m) => m.stopwatchApp) },
   { descriptor: { id: 'sudoku', name: 'Sudoku', icon: '🔢', iconFallback: '9', iconLegacySvg: LEGACY_ICONS.sudoku, category: 'game' }, load: () => import('./games/sudoku-app').then((m) => m.sudokuApp) },

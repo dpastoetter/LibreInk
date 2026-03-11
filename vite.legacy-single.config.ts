@@ -29,7 +29,9 @@ export default defineConfig({
   },
   build: {
     target: 'es2015',
-    minify: true,
+    minify: 'terser',
+    terserOptions: { compress: { passes: 1 }, format: { comments: false } },
+    sourcemap: false,
     emptyOutDir: false,
     outDir: 'dist',
     lib: {

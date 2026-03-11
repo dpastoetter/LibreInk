@@ -41,10 +41,10 @@ if (useSingleScript) {
 const FALLBACK_MSG = 'OpenInk did not start. Try again or use another device.';
 const TRY_AGAIN = '<a href="#" onclick="location.reload();return false;" style="color:#333;text-decoration:underline;">Try again</a>';
 
-// Timeouts (ms): give slow devices (e.g. Kindle) time to load and run the app.
-const FALLBACK_TIMEOUT_MS = 25000;
-const SCRIPT_LOADED_WAIT_MS = 8000;
-const SCRIPT_MOUNT_TIMEOUT_MS = 22000;
+// Timeouts (ms): balanced for slow devices (Kindle) but responsive fallback.
+const FALLBACK_TIMEOUT_MS = 22000;
+const SCRIPT_LOADED_WAIT_MS = 6000;
+const SCRIPT_MOUNT_TIMEOUT_MS = 18000;
 
 const criticalStyle = [
   'body{margin:0;padding:0;height:100vh;width:100vw;overflow:hidden;background:#e5e5e5;color:#000;font-family:Geneva,Verdana,sans-serif;display:flex;align-items:center;justify-content:center;position:fixed;inset:0;box-sizing:border-box}',
@@ -59,6 +59,7 @@ const legacyHtml = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#ffffff">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self'; base-uri 'self'; form-action 'self'">
 <link rel="icon" type="image/svg+xml" href="/openink-logo.svg">
 <title>OpenInk</title>
 <style>${criticalStyle}</style>
@@ -163,7 +164,8 @@ ${useSingleScript
   } catch (e) { var r = document.getElementById('root'); if (r) setFallback(r, 'OpenInk could not start.'); }
 })();
 </script>` : '<script>if (window.__openinkFallback) window.__openinkFallback("Full app not built. Run npm run build.");</script>'}
-<link rel="stylesheet" href="${cssHref}" crossorigin="anonymous">
+<link rel="stylesheet" href="${cssHref}" crossorigin="anonymous" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="${cssHref}" crossorigin="anonymous"></noscript>
 </body>
 </html>
 `;

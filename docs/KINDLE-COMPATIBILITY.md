@@ -28,7 +28,6 @@ OpenInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKind
 - **No `alert` / `confirm` / `prompt`** – We do not use them; use custom modals if needed.
 - **No `position: sticky` / `fixed`** – We avoid them to prevent checkerboarding on e-ink.
 - **Touch targets** – Minimum `--tap-min: 52px` for tap areas.
-- **Mario game** – Discrete tick (200 ms), no requestAnimationFrame; Left / Right / Jump buttons with large tap targets; keyboard arrows + Space on desktop. Blocky graphics with `image-rendering: pixelated` for e-ink.
 
 ## Quick tips for Kindle users
 

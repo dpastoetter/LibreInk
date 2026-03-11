@@ -3,7 +3,7 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
-import { CORS_PROXY, CACHE_TTL_SHORT_MS } from '@core/constants';
+import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
 
 const CACHE_KEY = 'news:cache';
 
@@ -54,7 +54,6 @@ interface CachedFeed {
   fetchedAt: number;
 }
 
-const CACHE_TTL = CACHE_TTL_SHORT_MS;
 
 function parseRss(xml: string, source: string): NewsItem[] {
   const items: NewsItem[] = [];
@@ -75,7 +74,7 @@ function parseRss(xml: string, source: string): NewsItem[] {
 const ITEMS_PER_PAGE = 5;
 
 function NewsApp(context: AppContext): AppInstance {
-  const { storage, network } = context.services;
+  const { storage, network, settings } = context.services;
   const titleRef: { current: string } = { current: 'Headlines' };
   const backRef: {
     current: { setSelected: (item: NewsItem | null) => void; setArticlePage: (p: number) => void } | null;
@@ -97,17 +96,19 @@ function NewsApp(context: AppContext): AppInstance {
       setError(null);
       const all: NewsItem[] = [];
       let lastError: string | null = null;
+      const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
+      const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
       for (const url of feeds) {
         const sourceName = sourceNameFromUrl(url);
         try {
           const cacheKey = CACHE_KEY + ':' + encodeURIComponent(url).slice(0, 500);
           const cached = await storage.get<CachedFeed>(cacheKey);
-          if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
+          if (cached && Date.now() - cached.fetchedAt < cacheTtl) {
             const withSource = cached.items.map((it) => ({ ...it, source: it.source ?? sourceName }));
             all.push(...withSource);
             continue;
           }
-          const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+          const proxyUrl = proxy + encodeURIComponent(url);
           const xml = await network.fetchText(proxyUrl);
           const parsed = parseRss(xml, sourceName);
           await storage.set(cacheKey, { url, items: parsed, fetchedAt: Date.now() });
@@ -124,7 +125,7 @@ function NewsApp(context: AppContext): AppInstance {
       setItems(byDate.slice(0, 50));
       setError(all.length === 0 ? lastError : null);
       setLoading(false);
-    }, [feeds, storage, network]);
+    }, [feeds, storage, network, settings]);
 
     useEffect(() => {
       loadFeeds();

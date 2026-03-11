@@ -65,8 +65,7 @@ src/
     └── …
 
 public/
-├── demo/
-│   └── eink-demo.html        # E-ink mock reader demo (B&W, resize, simulated refresh)
+├── demo.html                  # E-ink mock reader demo (at /demo.html; not linked from app)
 └── …
 
 scripts/
@@ -111,8 +110,8 @@ docs/                         # Documentation
 
 ## E-ink demo
 
-- The demo page lives in `public/demo/eink-demo.html` and is served at `/demo/eink-demo.html` (dev and production).
-- It embeds the app in an iframe, applies grayscale, and simulates e-ink refresh (black flash every 3–4 navigations or on a timer). You can resize the “screen” by dragging the bottom-right corner.
+- The demo page is at `public/demo.html` and is served at **/demo.html** (dev and production). It is not linked from the app; open it only via that URL.
+- It embeds the app in an iframe, applies grayscale, and simulates e-ink refresh (black flash every 3 navigations or on a timer).
 - See **[docs/DEMO.md](DEMO.md)** for full description and behaviour.
 
 ## Build and deploy
@@ -120,7 +119,7 @@ docs/                         # Documentation
 - `npm run build` produces `dist/` (static assets). Deploy `dist/` to any static host (Netlify, Vercel, GitHub Pages, etc.). To preview the build on your LAN, run `npm run preview -- --host`.
 - If the app is served from a subpath (e.g. `/browserOS/`), set `base: '/browserOS/'` in `vite.config.ts` and rebuild.
 - The app uses the History API; the server must serve `index.html` for all routes (SPA fallback).
-- The e-ink demo is copied to `dist/demo/eink-demo.html`; open that URL on your deployed site to use it.
+- The e-ink demo is at `dist/demo.html`; open `/demo.html` on your deployed site to use it.
 - **Kindle / old browsers:** Kindle, Silk, and Experimental user agents are redirected to `legacy.html`. That page loads the full app (widgets, home screen) via `openink-legacy-single.js` (single IIFE bundle, no ES modules). If the app does not mount within ~22 seconds, a fallback with "Try again" is shown. The legacy bundle is built with Babel (Chrome 44 target). The build generates `dist/legacy.html` via `scripts/generate-legacy-html.mjs` after Vite build. Deploy the full `dist/` including `legacy.html`. See [KINDLE-COMPATIBILITY.md](KINDLE-COMPATIBILITY.md) and [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKindle/blob/main/COMPATIBILITY.md).
 
 ## Documentation

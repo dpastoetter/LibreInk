@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
-import { CACHE_TTL_SHORT_MS } from '@core/constants';
+import { getDefaultCacheTtlMs } from '@core/constants';
 import { formatWeekdayShortLegacy } from '@core/utils/date';
 
 const CACHE_KEY = 'weather:cache';
@@ -72,7 +72,7 @@ interface CachedWeather {
 }
 
 function WeatherApp(context: AppContext): AppInstance {
-  const { network, storage } = context.services;
+  const { network, storage, settings } = context.services;
   const titleRef: { current: string } = { current: 'Weather' };
 
   function WeatherUI() {
@@ -149,8 +149,9 @@ function WeatherApp(context: AppContext): AppInstance {
       setLoading(true);
       setError(null);
       try {
+        const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
         const cached = await storage.get<CachedWeather>(CACHE_KEY);
-        if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_SHORT_MS) {
+        if (cached && Date.now() - cached.fetchedAt < cacheTtl) {
           setData(cached);
           titleRef.current = cached.cityName ? `Weather · ${cached.cityName}` : 'Weather';
           setLoading(false);

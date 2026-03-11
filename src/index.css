@@ -8,6 +8,7 @@
 :root {
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --tap-min: 52px;
+  --content-max-width: 28rem;
   --space: 16px;
   --radius: 10px;
   --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -120,6 +121,50 @@ html.legacy-browser[data-appearance="dark"][data-theme="highContrast"] {
 [data-font-size="large"] {
   font-size: calc(21px * var(--zoom, 1));
 }
+
+/* Line height (display) */
+[data-line-height="compact"] { line-height: 1.4; }
+[data-line-height="normal"] { line-height: 1.55; }
+[data-line-height="relaxed"] { line-height: 1.75; }
+
+/* Letter spacing */
+[data-letter-spacing="tight"] { letter-spacing: -0.01em; }
+[data-letter-spacing="normal"] { letter-spacing: 0; }
+[data-letter-spacing="wide"] { letter-spacing: 0.05em; }
+
+/* Reduce motion (user override: always reduce) */
+[data-reduce-motion="always"] *,
+[data-reduce-motion="always"] *::before,
+[data-reduce-motion="always"] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Focus ring */
+[data-focus-ring="never"] *:focus { outline: none; }
+[data-focus-ring="always"] *:focus-visible,
+[data-focus-ring="keyboard"] *:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+[data-high-contrast-focus="true"] *:focus-visible {
+  outline-width: 3px;
+  outline-offset: 1px;
+}
+
+/* Invert colors (e-ink) */
+[data-invert-colors="true"] { filter: invert(1); }
+[data-invert-colors="true"] img, [data-invert-colors="true"] [style*="background-image"] { filter: invert(1); }
+
+/* Reduce flashes (e-ink) */
+[data-reduce-flashes="true"] .app-tile,
+[data-reduce-flashes="true"] .btn,
+[data-reduce-flashes="true"] .panel { transition: none; box-shadow: none; }
+
+/* Apps per row (home grid) */
+[data-apps-per-row="2"] .app-grid { grid-template-columns: repeat(2, 1fr); }
+[data-apps-per-row="3"] .app-grid { grid-template-columns: repeat(3, 1fr); }
+[data-apps-per-row="4"] .app-grid { grid-template-columns: repeat(4, 1fr); }
 
 /* Pixel optics: e-ink friendly rendering and spacing */
 [data-pixel-optics="standard"] {
@@ -266,7 +311,7 @@ html, body {
 /* Home screen – touch-friendly grid for small Kindle; centered on all pages */
 .home-screen {
   padding: var(--space);
-  max-width: min(100%, 28rem);
+  max-width: min(100%, var(--content-max-width, 28rem));
   margin-left: auto;
   margin-right: auto;
 }
@@ -296,7 +341,7 @@ html, body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 6rem), 1fr));
   gap: 0.75rem;
-  max-width: min(100%, 28rem);
+  max-width: min(100%, var(--content-max-width, 28rem));
 }
 
 .app-grid > li {
@@ -388,7 +433,7 @@ html, body {
   gap: var(--space);
   padding: 4px calc(var(--space) * 1.25);
   border-bottom: 1px solid var(--border);
-  min-height: 0;
+  min-height: 2.75rem;
   background: var(--surface);
   position: relative;
 }
@@ -420,6 +465,42 @@ html, body {
   font-size: 0.85rem;
 }
 
+.app-header-actions {
+  margin-left: auto;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+.app-header-actions .btn,
+.app-header-actions .chess-board-zoom .btn {
+  min-height: 28px;
+}
+
+.app-header .chess-board-zoom {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Shared design with legacy: consistent borders and spacing on modern and legacy */
+.btn,
+.app-tile,
+.panel,
+input,
+select,
+textarea {
+  border-width: 1.5px;
+}
+.status-bar,
+.app-header {
+  border-bottom-width: 1.5px;
+}
+.app-header .btn-nav + .btn-nav {
+  margin-left: 0.5rem;
+}
+
 .app-content {
   flex: 1;
   display: flex;
@@ -432,7 +513,7 @@ html, body {
 }
 
 .app-content > * {
-  max-width: min(100%, 28rem);
+  max-width: min(100%, var(--content-max-width, 28rem));
   width: 100%;
   box-sizing: border-box;
 }
@@ -565,10 +646,32 @@ html, body {
   min-height: 0;
 }
 
+.chess-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  flex-shrink: 0;
+  margin-top: var(--space);
+}
+
 .chess-turn {
   flex-shrink: 0;
-  margin-bottom: var(--space);
+  margin: 0;
   font-weight: 500;
+}
+
+.chess-board-zoom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: var(--space);
+  flex-shrink: 0;
+}
+.chess-board-zoom-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+  min-width: 3rem;
+  text-align: center;
 }
 
 .chess-mode-select {
@@ -583,17 +686,44 @@ html, body {
   align-items: center;
 }
 
+.chess-engine-level {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space);
+  margin-top: var(--space);
+  padding-top: var(--space);
+  border-top: 1px solid var(--border);
+}
+
+.chess-engine-level label {
+  font-weight: 500;
+}
+
+.chess-level-select {
+  padding: 0.25em 0.5em;
+  font-size: 1rem;
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 4ch;
+}
+
+.chess-level-hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .chess-board {
   width: min(85vmin, 100%);
   aspect-ratio: 1;
-  max-height: min(85vmin, 100%);
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   gap: 2px;
   background: var(--border);
-  flex-shrink: 1;
-  min-height: 0;
+  flex-shrink: 0;
 }
 
 .chess-cell {
@@ -624,11 +754,6 @@ html, body {
   align-items: center;
   flex: 1;
   min-height: 0;
-}
-
-.sudoku-status {
-  flex-shrink: 0;
-  margin-bottom: var(--space);
 }
 
 .sudoku-grid {
@@ -689,9 +814,16 @@ html, body {
   min-height: 0;
 }
 
-.minesweeper-status {
+.minesweeper-flag-row {
   flex-shrink: 0;
-  margin-bottom: var(--space);
+  margin-bottom: 0.25rem;
+}
+
+.minesweeper-flag-btn {
+  padding: 0.2em 0.5em;
+  font-size: 0.75rem;
+  min-height: 0;
+  line-height: 1.2;
 }
 
 .minesweeper-grid {
@@ -727,184 +859,28 @@ html, body {
 .minesweeper-cell.flagged { background: var(--muted); }
 [data-appearance="dark"] .minesweeper-cell.flagged { background: #444; }
 
-.minesweeper-game > .btn {
-  flex-shrink: 0;
-}
-
-/* Racing — discrete tick, no animation; e-ink / low-spec friendly */
-.racing-game {
+.minesweeper-footer {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  flex: 1;
-  min-height: 0;
+  gap: var(--space);
+  flex-shrink: 0;
+  margin-top: var(--space);
 }
 
-.racing-intro,
-.racing-meta {
-  margin: 0 0 var(--space);
+.minesweeper-status {
+  font-weight: 500;
   color: var(--muted);
   font-size: 0.9rem;
-  text-align: center;
-}
-
-.racing-score {
-  flex-shrink: 0;
-  margin: 0 0 var(--space);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.racing-track {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--border);
-  padding: 4px;
-  border-radius: var(--radius);
-  flex-shrink: 1;
-  min-height: 0;
-}
-
-.racing-row {
-  display: flex;
-  gap: 2px;
-}
-
-.racing-cell {
-  width: clamp(48px, 18vmin, 72px);
-  height: clamp(32px, 12vmin, 48px);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-
-.racing-player {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
-}
-
-.racing-obstacle {
-  background: var(--muted);
-  border-color: var(--fg);
-}
-
-.racing-controls {
-  display: flex;
-  gap: var(--space);
-  margin-top: var(--space);
-  flex-shrink: 0;
-}
-
-.racing-controls .btn {
-  min-width: 100px;
-}
-
-.racing-game > .btn {
-  margin-top: var(--space);
-  flex-shrink: 0;
-}
-
-/* Mario — discrete tick, no animation; e-ink / Kindle friendly */
-.mario-game {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  min-height: 0;
-}
-
-.mario-intro,
-.mario-meta {
-  margin: 0 0 var(--space);
-  color: var(--muted);
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.mario-score {
-  flex-shrink: 0;
-  margin: 0 0 var(--space);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.mario-world {
-  position: relative;
-  background: #5c94fc;
-  border: 2px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  flex-shrink: 0;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-}
-
-.mario-ground,
-.mario-platform,
-.mario-player,
-.mario-enemy,
-.mario-coin {
-  position: absolute;
-  box-sizing: border-box;
-}
-
-.mario-ground {
-  background: #8b4513;
-  border: 1px solid #654321;
-}
-
-.mario-platform {
-  background: #8b4513;
-  border: 1px solid #654321;
-}
-
-.mario-player {
-  background: #e52521;
-  border: 2px solid #000;
-  border-radius: 2px;
-}
-
-.mario-enemy {
-  background: #8b4513;
-  border: 2px solid #000;
-  border-radius: 2px;
-}
-
-.mario-coin {
-  background: #f7dc0a;
-  border: 1px solid #b7950b;
-  border-radius: 50%;
-}
-
-.mario-controls {
-  display: flex;
-  gap: var(--space);
-  margin-top: var(--space);
-  flex-shrink: 0;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.mario-btn {
-  min-height: var(--tap-min);
-  min-width: 80px;
-}
-
-.mario-jump {
-  min-width: 100px;
-}
-
-.mario-game > .btn {
-  margin-top: var(--space);
-  flex-shrink: 0;
 }
 
 /* Reddit */
 .reddit-search { display: flex; gap: var(--space); align-items: center; margin-bottom: var(--space); }
 .reddit-search .input { flex: 1; min-width: 0; }
 .reddit-search-hint { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
+.reddit-sub-list { margin: 0; padding: 0; }
+.reddit-sub-item { display: flex; justify-content: space-between; align-items: center; gap: var(--space); }
+.reddit-sub-item .btn:first-child { flex: 1; text-align: left; }
+.reddit-sub-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: 1.2rem; line-height: 1; }
 .reddit-meta { color: var(--muted); font-size: 0.9rem; }
 .reddit-selftext { margin: var(--space) 0; }
 .reddit-comments { list-style: none; margin: 0; padding: 0; }
@@ -917,6 +893,27 @@ html, body {
 .news-actions { margin-bottom: var(--space); }
 .news-error-hint { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
 
+/* Blog */
+.blog-app { }
+.blog-add { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
+.blog-add .input { min-width: 10rem; }
+.blog-add-input { flex: 1; min-width: 12rem; }
+.blog-add-error { color: var(--finance-down, #c00); font-size: 0.9rem; margin: 0 0 var(--space); }
+.blog-discover-results { list-style: none; margin: 0 0 var(--space); padding: 0; }
+.blog-discover-item { display: flex; justify-content: space-between; align-items: center; gap: var(--space); padding: 0.25em 0; border-bottom: 1px solid var(--border); }
+.blog-discover-item:last-child { border-bottom: none; }
+.blog-hint { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
+.blog-feed-list { margin: 0; padding: 0; }
+.blog-feed-item { display: flex; justify-content: space-between; align-items: center; gap: var(--space); }
+.blog-feed-item .btn:first-child { flex: 1; text-align: left; }
+.blog-feed-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: 1.2rem; line-height: 1; }
+.blog-meta { color: var(--muted); font-size: 0.9rem; }
+.blog-article-body p { margin: 0 0 1em; }
+.blog-link { margin-top: var(--space); }
+.blog-link a { color: var(--accent); }
+.blog-actions { margin-bottom: var(--space); }
+.blog-error-hint { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
+
 /* Finance */
 .finance-list { list-style: none; margin: 0; padding: 0; }
 .finance-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space); border-bottom: 1px solid var(--border); min-height: var(--tap-min); }
@@ -926,7 +923,17 @@ html, body {
 .finance-change { font-size: 0.9rem; font-weight: 500; }
 .finance-change-up { color: var(--finance-up, #0d7a0d); }
 .finance-change-down { color: var(--finance-down, #c00); }
-.finance-actions { display: flex; gap: var(--space); flex-wrap: wrap; margin-top: calc(var(--space) * 2); }
+.finance-actions { display: flex; gap: var(--space); flex-wrap: wrap; margin-top: calc(var(--space) * 2); align-items: center; }
+.finance-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: 1.2rem; line-height: 1; }
+.finance-add-section { margin-top: calc(var(--space) * 2); padding-top: var(--space); border-top: 1px solid var(--border); }
+.finance-add-heading { margin: 0 0 var(--space); font-size: 1rem; font-weight: 600; }
+.finance-add-row { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
+.finance-add-input { flex: 1; min-width: 12rem; }
+.finance-add-error { color: var(--finance-down, #c00); font-size: 0.9rem; margin: 0 0 var(--space); }
+.finance-search-label { margin: var(--space) 0 0.25em; font-size: 0.95rem; }
+.finance-search-results { list-style: none; margin: 0 0 var(--space); padding: 0; }
+.finance-search-item { display: flex; justify-content: space-between; align-items: center; padding: 0.25em 0; gap: var(--space); }
+.btn-small { padding: 0.25em 0.5em; font-size: 0.9rem; }
 
 /* Weather */
 .weather-app { }
@@ -1014,11 +1021,15 @@ html, body {
 
 /* World clock */
 .worldclock-app { }
+.worldclock-add { display: flex; gap: var(--space); align-items: center; flex-wrap: wrap; margin-bottom: var(--space); }
+.worldclock-add .input { min-width: 8rem; }
+.worldclock-add-offset { width: 6rem; }
 .worldclock-list { list-style: none; margin: 0; padding: 0; }
-.worldclock-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space) 0; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.worldclock-row { display: flex; justify-content: space-between; align-items: center; padding: var(--space) 0; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; gap: var(--space); }
 .worldclock-row:last-child { border-bottom: none; }
 .worldclock-label { font-weight: 500; }
 .worldclock-time { color: var(--muted); font-size: 1.1rem; }
+.worldclock-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: 1.2rem; line-height: 1; flex-shrink: 0; }
 
 /* Comics (xkcd + Comics RSS) */
 .comics-app { }
@@ -1041,6 +1052,10 @@ html, body {
 .settings-app .panel .btn { margin-right: var(--space); margin-bottom: var(--space); }
 .settings-app .panel-description { color: var(--muted); font-size: 0.9rem; margin: 0 0 var(--space); }
 .settings-app .settings-import-message { margin: 0.5rem 0 0; font-size: 0.9rem; color: var(--muted); }
+.settings-app .settings-row { margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.settings-app .settings-row .settings-label { min-width: 6rem; color: var(--muted); font-size: 0.9rem; }
+.settings-app .settings-toggle { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.95rem; cursor: pointer; }
+.settings-app .settings-input { width: 100%; max-width: 20rem; margin-bottom: 0.5rem; padding: 0.5rem; font: inherit; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--fg); box-sizing: border-box; }
 
 /* Panel / card */
 .panel {
@@ -1072,15 +1087,12 @@ html, body {
 .timer-actions > * + *,
 .widget-actions > * + *,
 .dictionary-search > * + *,
-.comics-source-tabs > * + *,
-.racing-controls > * + * {
+.comics-source-tabs > * + * {
   margin-left: var(--space);
 }
 .chess-mode-select > * + * { margin-left: var(--space); }
 .chess-mode-buttons > * + * { margin-top: var(--space); }
 .sudoku-numpad > * + * { margin-left: 6px; margin-top: 6px; }
-.racing-track > * + * { margin-top: 2px; }
-.racing-row > * + * { margin-left: 2px; }
 .calculator-app > * + * { margin-top: var(--space); }
 @supports (gap: 1px) {
   .status-bar-left > * + *,
@@ -1096,14 +1108,11 @@ html, body {
   .timer-presets > * + *,
   .timer-actions > * + *,
   .widget-actions > * + *,
-  .dictionary-search > * + *,
-  .comics-source-tabs > * + *,
-  .racing-controls > * + * { margin-left: 0; }
+.dictionary-search > * + *,
+.comics-source-tabs > * + * { margin-left: 0; }
   .chess-mode-select > * + * { margin-left: 0; }
   .chess-mode-buttons > * + * { margin-top: 0; }
   .sudoku-numpad > * + * { margin-left: 0; margin-top: 0; }
-  .racing-track > * + * { margin-top: 0; }
-  .racing-row > * + * { margin-left: 0; }
   .calculator-app > * + * { margin-top: 0; }
 }
 
@@ -1162,12 +1171,14 @@ html.legacy-browser .app-header .btn-nav + .btn-nav {
   margin-left: 0.5rem;
 }
 
-/* Legacy: chess board larger (no min()/clamp); still fits in #root max-width */
+/* Legacy: chess board square; size set by JS (zoom buttons) or default 320px */
 html.legacy-browser .chess-board {
-  width: 95%;
-  max-width: 400px;
+  width: 320px;
+  height: 320px;
+  max-width: 100%;
   max-height: 400px;
   min-width: 0;
+  aspect-ratio: unset;
 }
 html.legacy-browser .chess-cell {
   font-size: 0.85rem;

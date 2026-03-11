@@ -91,10 +91,18 @@ function init() {
   try {
     theme.applySettings(DEFAULT_SETTINGS);
     renderShell(root);
-    settings
-      .load()
-      .then((loaded) => theme.applySettings(loaded))
-      .catch(() => theme.applySettings(DEFAULT_SETTINGS));
+    // Defer settings load to next tick so first paint is not delayed by storage read
+    const loadSettings = () => {
+      settings
+        .load()
+        .then((loaded) => theme.applySettings(loaded))
+        .catch(() => theme.applySettings(DEFAULT_SETTINGS));
+    };
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(loadSettings, { timeout: 100 });
+    } else {
+      setTimeout(loadSettings, 0);
+    }
   } catch (e) {
     showLegacyFallback(e);
   }

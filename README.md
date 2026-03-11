@@ -49,7 +49,7 @@ Then open the URL shown (e.g. `http://localhost:5173`) in a browser. The dev ser
 
 **Kindle / limited browsers:** Kindle, Silk, and the experimental browser are redirected to `legacy.html`, which loads the full app (widgets, home screen) via a legacy bundle (no ES modules). The legacy home screen uses black-and-white SVG icons (`iconLegacySvg`) where available, with `iconFallback` or emoji as fallback. **Bookmark `legacy.html` on the Kindle** for the fastest load. Deploy the full `dist/` including `legacy.html`. See **[docs/KINDLE-COMPATIBILITY.md](docs/KINDLE-COMPATIBILITY.md)** for deployment and troubleshooting.
 
-**E-ink demo (testing):** Open `/demo/eink-demo.html` (e.g. [http://localhost:5173/demo/eink-demo.html](http://localhost:5173/demo/eink-demo.html)) to run the app in a B&W mock reader: drag the corner to resize, simulated e-ink refresh every 3–4 navigations (or on a timer). See **[docs/DEMO.md](docs/DEMO.md)** for details.
+**E-ink demo:** Open **/demo.html** (e.g. [http://localhost:5173/demo.html](http://localhost:5173/demo.html)) to run the app in a B&W mock reader with simulated e-ink refresh. Not linked from the app. See **[docs/DEMO.md](docs/DEMO.md)** for details.
 
 **Build for production:**
 
@@ -76,7 +76,7 @@ Full steps and how to use shared services and respect global settings are in **[
 
 - **Settings** – Pixel optics, font size, theme, appearance.
 - **Calculator** – Basic arithmetic; offline.
-- **Games** – Chess (local 2p or vs computer), Sudoku, Minesweeper, Racing (discrete-tick, e-ink friendly).
+- **Games** – Chess (local 2p or vs computer), Sudoku, Minesweeper.
 - **News** – RSS reader with multiple sources, CORS proxy, source labels, date-sorted mix.
 - **Reddit** – Read-only subreddit and post list with paginated comments. Choose a subreddit from the list or open one by name; server errors (e.g. 500) show a friendly message—try another subreddit.
 
@@ -90,7 +90,7 @@ Full steps and how to use shared services and respect global settings are in **[
 
 The site is tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 
-- **No animation loops** – No `requestAnimationFrame`; updates are discrete (StatusBar 60s, Timer/Stopwatch/World clock 1s, Racing 500ms).
+- **No animation loops** – No `requestAnimationFrame`; updates are discrete (StatusBar 60s, Timer/Stopwatch/World clock 1s).
 - **Reduced motion** – When `prefers-reduced-motion: reduce`, all transitions and decorative shadows are disabled to cut repaints.
 - **Containment** – Shell, app content, and home sections use `contain: layout style` to limit reflow/repaint scope.
 - **Light JS** – Memoized app lists and paginated slices; event delegation on the home grid; minimal work per render.

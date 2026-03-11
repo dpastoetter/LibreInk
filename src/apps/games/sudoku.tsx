@@ -1,4 +1,10 @@
-import { useState, useCallback } from 'preact/hooks';
+import { useState, useCallback, useEffect, useContext } from 'preact/hooks';
+import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
+
+const BOARD_SIZE_MIN = 240;
+const BOARD_SIZE_MAX = 480;
+const BOARD_SIZE_STEP = 40;
+const BOARD_SIZE_DEFAULT = 320;
 
 function createPuzzle(): { puzzle: number[][]; solution: number[][] } {
   const grid = Array(9).fill(null).map(() => Array(9).fill(0));
@@ -32,9 +38,24 @@ function createPuzzle(): { puzzle: number[][]; solution: number[][] } {
 
 export function SudokuGame() {
   const [state, setState] = useState(() => createPuzzle());
-  const { puzzle, solution } = state;
+  const { puzzle } = state;
   const [cells, setCells] = useState<number[][]>(() => puzzle.map((r) => [...r]));
   const [selected, setSelected] = useState<[number, number] | null>(null);
+  const [boardSizePx, setBoardSizePx] = useState(BOARD_SIZE_DEFAULT);
+  const setHeaderActions = useContext(AppHeaderActionsContext);
+
+  useEffect(() => {
+    if (!setHeaderActions) return;
+    const node = (
+      <div class="chess-board-zoom" role="group" aria-label="Board size">
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.max(BOARD_SIZE_MIN, s - BOARD_SIZE_STEP))} aria-label="Smaller board">−</button>
+        <span class="chess-board-zoom-label">{boardSizePx}px</span>
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.min(BOARD_SIZE_MAX, s + BOARD_SIZE_STEP))} aria-label="Larger board">+</button>
+      </div>
+    );
+    setHeaderActions(node);
+    return () => setHeaderActions(null);
+  }, [setHeaderActions, boardSizePx]);
 
   const initialFixed = puzzle.map((r) => r.map((v) => v !== 0));
 
@@ -59,12 +80,9 @@ export function SudokuGame() {
     setSelected(null);
   };
 
-  const solved = cells.every((row, r) => row.every((v, c) => v === solution[r][c]));
-
   return (
     <div class="sudoku-game">
-      <p class="sudoku-status">{solved ? 'Solved!' : 'Select a cell, then tap a number'}</p>
-      <div class="sudoku-grid">
+      <div class="sudoku-grid" style={{ width: boardSizePx + 'px', height: boardSizePx + 'px', maxHeight: 'none' }}>
         {cells.map((row, r) =>
           row.map((v, c) => (
             <button

@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'preact/hooks';
+import type { VNode } from 'preact';
 import type { WebOSApp, AppInstance, AppContext, AppDescriptor } from '../../types/plugin';
 import { AppRegistry } from '../plugins/registry';
 import { HomeScreen } from './HomeScreen';
 import { StatusBar } from '../ui/StatusBar';
+import { AppHeaderActionsContext } from './AppHeaderActionsContext';
 import type { StorageService } from '../services/storage';
 import type { NetworkService } from '../services/network';
 import type { ThemeService } from '../services/theme';
@@ -114,7 +116,15 @@ export function Shell({ services }: ShellProps) {
 
   const showHome = currentAppId === null && !loadingAppId;
   const currentApp = currentAppId ? AppRegistry.getApp(currentAppId) : null;
-  const headerTitle = instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '';
+  const [showAppTitle, setShowAppTitle] = useState(() => services.theme.getSettings().showAppTitle);
+  useEffect(() => {
+    return services.theme.subscribe((s) => setShowAppTitle(s.showAppTitle));
+  }, [services.theme]);
+  const headerTitle = showAppTitle ? (instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '') : '';
+  const [headerActions, setHeaderActions] = useState<VNode | null>(null);
+  useEffect(() => {
+    setHeaderActions(null);
+  }, [currentAppId]);
   const appDescriptors = useMemo(() => AppRegistry.getAllAppDescriptors(), []);
   const handleLaunch = useCallback((d: AppDescriptor) => launchAppById(d.id), [launchAppById]);
 
@@ -134,7 +144,7 @@ export function Shell({ services }: ShellProps) {
       <StatusBar theme={services.theme} settings={services.settings} />
       <main class="shell-main" role="main">
         {showHome ? (
-          <HomeScreen apps={appDescriptors} onLaunch={handleLaunch} />
+          <HomeScreen apps={appDescriptors} onLaunch={handleLaunch} theme={services.theme} />
         ) : loadingAppId ? (
           <div class="shell-loading" role="status" aria-live="polite">
             <p>Loading…</p>
@@ -154,8 +164,13 @@ export function Shell({ services }: ShellProps) {
                 Back
               </button>
               {headerTitle && <h1 class="app-header-title">{headerTitle}</h1>}
+              {headerActions != null && <div class="app-header-actions">{headerActions}</div>}
             </header>
-            <div class="app-content">{instance.render()}</div>
+            <div class="app-content">
+              <AppHeaderActionsContext.Provider value={setHeaderActions}>
+                {instance.render()}
+              </AppHeaderActionsContext.Provider>
+            </div>
           </div>
         ) : null}
       </main>

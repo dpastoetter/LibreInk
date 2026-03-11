@@ -14,6 +14,15 @@ export function formatTimeLegacy(d: Date): string {
   return pad2(d.getHours()) + ':' + pad2(d.getMinutes());
 }
 
+/** Time as h:MM AM/PM (12h). Safe on legacy/Kindle. */
+export function formatTimeLegacy12h(d: Date): string {
+  const h = d.getHours();
+  const m = d.getMinutes();
+  const am = h < 12;
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return h12 + ':' + pad2(m) + (am ? ' AM' : ' PM');
+}
+
 /** Time as HH:MM:SS (24h). Safe on legacy/Kindle. */
 export function formatTimeWithSecondsLegacy(d: Date): string {
   return pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());

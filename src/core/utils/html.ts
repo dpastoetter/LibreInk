@@ -1,4 +1,5 @@
-const MAX_STRIP_HTML_LENGTH = 1024 * 1024; // 1MB to prevent DoS
+const MAX_STRIP_HTML_LENGTH = 1024 * 1024; // 1MB input cap to prevent DoS
+const MAX_STRIP_HTML_OUTPUT = 50000; // 50k chars output cap for performance
 
 /**
  * Strip HTML tags and decode entities, returning plain text.
@@ -9,7 +10,8 @@ export function stripHtml(html: string): string {
   if (html.length > MAX_STRIP_HTML_LENGTH) return html.slice(0, MAX_STRIP_HTML_LENGTH);
   try {
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    return doc.body?.textContent?.trim() ?? '';
+    const out = doc.body?.textContent?.trim() ?? '';
+    return out.length > MAX_STRIP_HTML_OUTPUT ? out.slice(0, MAX_STRIP_HTML_OUTPUT) : out;
   } catch {
     return '';
   }

@@ -1,8 +1,14 @@
-import { useState, useCallback } from 'preact/hooks';
+import { useState, useCallback, useEffect, useContext } from 'preact/hooks';
+import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
 const ROWS = 9;
 const COLS = 9;
 const MINES = 10;
+
+const BOARD_SIZE_MIN = 240;
+const BOARD_SIZE_MAX = 480;
+const BOARD_SIZE_STEP = 40;
+const BOARD_SIZE_DEFAULT = 320;
 
 function createGrid(): { mine: boolean; revealed: boolean; flagged: boolean; count: number }[][] {
   const grid = Array(ROWS).fill(null).map(() =>
@@ -35,6 +41,21 @@ export function MinesweeperGame() {
   const [lost, setLost] = useState(false);
   const [won, setWon] = useState(false);
   const [flagMode, setFlagMode] = useState(false);
+  const [boardSizePx, setBoardSizePx] = useState(BOARD_SIZE_DEFAULT);
+  const setHeaderActions = useContext(AppHeaderActionsContext);
+
+  useEffect(() => {
+    if (!setHeaderActions) return;
+    const node = (
+      <div class="chess-board-zoom" role="group" aria-label="Board size">
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.max(BOARD_SIZE_MIN, s - BOARD_SIZE_STEP))} aria-label="Smaller board">−</button>
+        <span class="chess-board-zoom-label">{boardSizePx}px</span>
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.min(BOARD_SIZE_MAX, s + BOARD_SIZE_STEP))} aria-label="Larger board">+</button>
+      </div>
+    );
+    setHeaderActions(node);
+    return () => setHeaderActions(null);
+  }, [setHeaderActions, boardSizePx]);
 
   const reveal = useCallback((r: number, c: number) => {
     const cell = grid[r][c];
@@ -78,9 +99,10 @@ export function MinesweeperGame() {
 
   return (
     <div class="minesweeper-game">
-      <p class="minesweeper-status">{lost ? 'Game over' : won ? 'You win!' : flagMode ? 'Tap cell to place/remove flag' : 'Tap cell to reveal'}</p>
-      <button type="button" class={`btn ${flagMode ? 'btn-active' : ''}`} onClick={() => setFlagMode((f) => !f)}>Flag mode</button>
-      <div class="minesweeper-grid">
+      <div class="minesweeper-flag-row">
+        <button type="button" class={`btn minesweeper-flag-btn ${flagMode ? 'btn-active' : ''}`} onClick={() => setFlagMode((f) => !f)}>Flag</button>
+      </div>
+      <div class="minesweeper-grid" style={{ width: boardSizePx + 'px', height: boardSizePx + 'px', maxHeight: 'none' }}>
         {grid.map((row, r) =>
           row.map((cell, c) => (
             <button
@@ -95,7 +117,10 @@ export function MinesweeperGame() {
           ))
         )}
       </div>
-      <button type="button" class="btn" onClick={reset}>New game</button>
+      <div class="minesweeper-footer">
+        <span class="minesweeper-status">{lost ? 'Game over' : won ? 'You win!' : flagMode ? 'Flag mode' : 'Tap to reveal'}</span>
+        <button type="button" class="btn" onClick={reset}>New game</button>
+      </div>
     </div>
   );
 }

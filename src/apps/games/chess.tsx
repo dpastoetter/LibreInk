@@ -1,4 +1,6 @@
-import { useState, useCallback, useEffect } from 'preact/hooks';
+import { useState, useCallback, useEffect, useContext } from 'preact/hooks';
+import { boardToFen, getStockfishMove, isStockfishAvailable } from './stockfish-worker';
+import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
 type Piece = 'K' | 'Q' | 'R' | 'B' | 'N' | 'P' | 'k' | 'q' | 'r' | 'b' | 'n' | 'p' | null;
 type Board = (Piece)[][];
@@ -163,6 +165,17 @@ function getMoves(board: Board, row: number, col: number): [number, number][] {
 
 type GameMode = '2p' | 'vsComputer' | null;
 
+const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
+const CHESS_BOARD_MIN = 240;
+const CHESS_BOARD_MAX = 480;
+const CHESS_BOARD_STEP = 40;
+const CHESS_BOARD_DEFAULT = 320;
+
+const STOCKFISH_LEVEL_MIN = 1;
+const STOCKFISH_LEVEL_MAX = 20;
+const STOCKFISH_LEVEL_DEFAULT = 10;
+const STOCKFISH_MOVETIME_MS = 1500;
+
 export function ChessGame() {
   const [mode, setMode] = useState<GameMode>(null);
   const [board, setBoard] = useState<Board>(initialBoard);
@@ -170,6 +183,8 @@ export function ChessGame() {
   const [moves, setMoves] = useState<[number, number][]>([]);
   const [turn, setTurn] = useState<'w' | 'b'>('w');
   const [computerThinking, setComputerThinking] = useState(false);
+  const [boardSizePx, setBoardSizePx] = useState(CHESS_BOARD_DEFAULT);
+  const [engineLevel, setEngineLevel] = useState(STOCKFISH_LEVEL_DEFAULT);
 
   const applyMove = useCallback((fromR: number, fromC: number, toR: number, toC: number) => {
     const next = copyBoard(board);
@@ -198,7 +213,34 @@ export function ChessGame() {
 
   useEffect(() => {
     if (mode !== 'vsComputer' || turn !== 'b' || computerThinking) return;
-    /* Single 400ms delay for computer move — no continuous loop; e-ink friendly. */
+    setComputerThinking(true);
+    const useStockfish = !isLegacy && isStockfishAvailable();
+    if (useStockfish) {
+      getStockfishMove(
+        boardToFen(board, 'b'),
+        engineLevel,
+        STOCKFISH_MOVETIME_MS,
+        ([fromR, fromC], [toR, toC]) => {
+          setBoard((prev) => {
+            const next = copyBoard(prev);
+            const piece = next[fromR][fromC];
+            if (piece) {
+              next[toR][toC] = piece;
+              next[fromR][fromC] = null;
+            }
+            return next;
+          });
+          setTurn('w');
+          setComputerThinking(false);
+        },
+        () => {
+          setComputerThinking(false);
+          setTurn('w');
+        }
+      );
+      return;
+    }
+    /* Fallback: simple engine with 400ms delay — e-ink / legacy friendly. */
     const timer = setTimeout(() => {
       const comp = getComputerMove(board);
       if (comp) {
@@ -213,9 +255,8 @@ export function ChessGame() {
       }
       setComputerThinking(false);
     }, 400);
-    setComputerThinking(true);
     return () => clearTimeout(timer);
-  }, [mode, turn, board]);
+  }, [mode, turn, board, engineLevel]);
 
   const onCell = (row: number, col: number) => {
     if (mode === 'vsComputer' && turn === 'b') return;
@@ -263,16 +304,50 @@ export function ChessGame() {
           <button type="button" class="btn" onClick={() => startGame('2p')}>Two players</button>
           <button type="button" class="btn" onClick={() => startGame('vsComputer')}>vs Computer</button>
         </div>
+        <div class="chess-engine-level" role="group" aria-label="Engine level">
+          <label for="chess-level">Engine level</label>
+          <select
+            id="chess-level"
+            class="chess-level-select"
+            value={engineLevel}
+            onChange={(e) => setEngineLevel(Number((e.target as HTMLSelectElement).value))}
+            aria-describedby="chess-level-hint"
+          >
+            {Array.from({ length: STOCKFISH_LEVEL_MAX - STOCKFISH_LEVEL_MIN + 1 }, (_, i) => i + STOCKFISH_LEVEL_MIN).map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
+          <span id="chess-level-hint" class="chess-level-hint">
+            {isLegacy ? '1–20 (simple engine on this device)' : '1 = easiest, 20 = strongest'}
+          </span>
+        </div>
       </div>
     );
   }
 
+  const setHeaderActions = useContext(AppHeaderActionsContext);
+  useEffect(() => {
+    if (!setHeaderActions) return;
+    if (mode === null) {
+      setHeaderActions(null);
+      return () => setHeaderActions(null);
+    }
+    const node = (
+      <div class="chess-board-zoom" role="group" aria-label="Board size">
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.max(CHESS_BOARD_MIN, s - CHESS_BOARD_STEP))} aria-label="Smaller board">−</button>
+        <span class="chess-board-zoom-label">{boardSizePx}px</span>
+        <button type="button" class="btn btn-status btn-status-zoom" onClick={() => setBoardSizePx((s) => Math.min(CHESS_BOARD_MAX, s + CHESS_BOARD_STEP))} aria-label="Larger board">+</button>
+      </div>
+    );
+    setHeaderActions(node);
+    return () => setHeaderActions(null);
+  }, [setHeaderActions, mode, boardSizePx]);
+
+  const boardStyle = { width: boardSizePx + 'px', height: boardSizePx + 'px' };
+
   return (
     <div class="chess-game">
-      <p class="chess-turn">
-        {mode === 'vsComputer' ? (turn === 'w' ? 'Your turn (White)' : computerThinking ? 'Computer thinking…' : 'Computer (Black)') : `Turn: ${turn === 'w' ? 'White' : 'Black'}`}
-      </p>
-      <div class="chess-board">
+      <div class="chess-board" style={boardStyle}>
         {board.map((row, r) =>
           row.map((cell, c) => {
             const isSel = selected?.[0] === r && selected?.[1] === c;
@@ -283,7 +358,7 @@ export function ChessGame() {
                 type="button"
                 class={`chess-cell ${(r + c) % 2 === 0 ? 'chess-light' : 'chess-dark'} ${isSel ? 'chess-selected' : ''} ${isMove ? 'chess-move' : ''}`}
                 onClick={() => onCell(r, c)}
-                aria-label={`${cell ? symbols[cell] ?? cell : 'empty'} row ${r + 1} col ${c + 1}`}
+                aria-label={`${cell ? (symbols[cell] ?? cell) : 'empty'} row ${r + 1} col ${c + 1}`}
               >
                 {cell ? (symbols[cell] ?? cell) : ''}
               </button>
@@ -291,7 +366,12 @@ export function ChessGame() {
           })
         )}
       </div>
-      <button type="button" class="btn" onClick={() => setMode(null)} style={{ marginTop: 'var(--space)' }}>New game</button>
+      <div class="chess-footer">
+        <p class="chess-turn">
+          {mode === 'vsComputer' ? (turn === 'w' ? 'Your turn (White)' : computerThinking ? 'Computer thinking…' : 'Computer (Black)') : `Turn: ${turn === 'w' ? 'White' : 'Black'}`}
+        </p>
+        <button type="button" class="btn" onClick={() => setMode(null)}>New game</button>
+      </div>
     </div>
   );
 }

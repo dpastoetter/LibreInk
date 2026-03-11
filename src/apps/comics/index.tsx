@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
-import { CORS_PROXY, CACHE_TTL_DAY_MS, CACHE_TTL_SHORT_MS } from '@core/constants';
+import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
 import { sanitizeUrl, isSafeUrl } from '@core/utils/url';
 
 const XKCD_JSON = (num: number) => `https://xkcd.com/${num}/info.0.json`;
@@ -77,7 +77,7 @@ function parseComicsRss(xml: string): RssComicItem[] {
 }
 
 function ComicsApp(context: AppContext): AppInstance {
-  const { network, storage } = context.services;
+  const { network, storage, settings } = context.services;
   const titleRef: { current: string } = { current: 'Comics' };
 
   function ComicsUI() {
@@ -101,15 +101,17 @@ function ComicsApp(context: AppContext): AppInstance {
 
     const fetchComic = useCallback(
       async (num: number) => {
+        const cacheTtlDay = getDefaultCacheTtlMs('24h');
         const cacheKey = CACHE_PREFIX_XKCD + num;
         const cached = await storage.get<{ data: XkcdComic; fetchedAt: number }>(cacheKey);
-        if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_DAY_MS) {
+        if (cached && Date.now() - cached.fetchedAt < cacheTtlDay) {
           setComic(cached.data);
           setError(null);
           return;
         }
         try {
-          const url = CORS_PROXY + encodeURIComponent(XKCD_JSON(num));
+          const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
+          const url = proxy + encodeURIComponent(XKCD_JSON(num));
           const data = await network.fetchJson<XkcdComic>(url);
           setComic(data);
           setError(null);
@@ -128,7 +130,8 @@ function ComicsApp(context: AppContext): AppInstance {
       let cancelled = false;
       (async () => {
         try {
-          const url = CORS_PROXY + encodeURIComponent(XKCD_LATEST);
+          const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
+          const url = proxy + encodeURIComponent(XKCD_LATEST);
           const latest = await network.fetchJson<XkcdComic>(url);
           if (cancelled) return;
           setMaxNum(latest.num);
@@ -145,7 +148,7 @@ function ComicsApp(context: AppContext): AppInstance {
       return () => {
         cancelled = true;
       };
-    }, [source, network, storage]);
+    }, [source, network, storage, settings]);
 
     useEffect(() => {
       if (source !== 'xkcd' || currentNum == null || currentNum === comic?.num) return;
@@ -174,15 +177,17 @@ function ComicsApp(context: AppContext): AppInstance {
         const feedUrl = COMICSRSS_BASE + slug + '.rss';
         const cacheKey = CACHE_PREFIX_RSS + slug;
         try {
+          const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
           const cached = await storage.get<{ items: RssComicItem[]; fetchedAt: number }>(cacheKey);
-          if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_SHORT_MS) {
+          if (cached && Date.now() - cached.fetchedAt < cacheTtl) {
             setRssItems(cached.items);
             setRssIndex(0);
             titleRef.current = `Comics · ${name}`;
             setRssLoading(false);
             return;
           }
-          const proxyUrl = CORS_PROXY + encodeURIComponent(feedUrl);
+          const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
+          const proxyUrl = proxy + encodeURIComponent(feedUrl);
           const xml = await network.fetchText(proxyUrl);
           const items = parseComicsRss(xml);
           setRssItems(items);
@@ -196,7 +201,7 @@ function ComicsApp(context: AppContext): AppInstance {
           setRssLoading(false);
         }
       },
-      [network, storage]
+      [network, storage, settings]
     );
 
     const rssGoPrev = useCallback(() => {

@@ -12,8 +12,6 @@ import {
   Cog6ToothIcon,
   GlobeAltIcon,
   CloudIcon,
-  TruckIcon,
-  PuzzlePieceIcon,
   TableCellsIcon,
   Squares2X2Icon,
   ChatBubbleLeftRightIcon,
@@ -23,15 +21,14 @@ import {
 type IconComponent = ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
 
 const APP_ICONS: Partial<Record<string, IconComponent>> = {
+  blog: NewspaperIcon as IconComponent,
   calculator: CalculatorIcon as IconComponent,
   chess: Squares2X2Icon as IconComponent,
   comics: BookOpenIcon as IconComponent,
   dictionary: BookOpenIcon as IconComponent,
   finance: ChartBarIcon as IconComponent,
-  mario: PuzzlePieceIcon as IconComponent,
   minesweeper: TableCellsIcon as IconComponent,
   news: NewspaperIcon as IconComponent,
-  racing: TruckIcon as IconComponent,
   reddit: ChatBubbleLeftRightIcon as IconComponent,
   stopwatch: StopIcon as IconComponent,
   sudoku: TableCellsIcon as IconComponent,

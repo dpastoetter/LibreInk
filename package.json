@@ -5,8 +5,8 @@
   "repository": "https://github.com/dpastoetter/OpenInk-WebOS.git",
   "homepage": "https://github.com/dpastoetter/OpenInk-WebOS#readme",
   "scripts": {
-    "dev": "vite --host",
-    "build": "tsc -b && vite build && vite build --config vite.legacy-single.config.ts && node scripts/generate-legacy-html.mjs",
+    "dev": "node scripts/copy-stockfish.mjs && vite --host",
+    "build": "node scripts/copy-stockfish.mjs && tsc -b && vite build && vite build --config vite.legacy-single.config.ts && node scripts/generate-legacy-html.mjs",
     "build:legacy-single": "vite build --config vite.legacy-single.config.ts",
     "preview": "vite preview",
     "test": "vitest run",
@@ -19,7 +19,8 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "preact": "^10.19.2",
-    "regenerator-runtime": "^0.14.1"
+    "regenerator-runtime": "^0.14.1",
+    "stockfish.js": "^10.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
