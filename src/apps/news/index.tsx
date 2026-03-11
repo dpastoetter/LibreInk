@@ -164,13 +164,8 @@ function NewsApp(context: AppContext): AppInstance {
     return (
       <div class="news-app">
         {error && items.length > 0 && <p class="news-error-hint">{error}</p>}
-        <div class="news-actions">
-          <button type="button" class="btn" onClick={loadFeeds} disabled={loading}>
-            Refresh
-          </button>
-        </div>
         <ul class="list">
-          {listItems.length === 0 && !loading && <li><p class="news-meta">No headlines. Try Refresh.</p></li>}
+          {listItems.length === 0 && !loading && <li><p class="news-meta">No headlines. Reload the page to refresh.</p></li>}
           {listItems.map((item, i) => (
             <li key={item.link || i}>
               <button type="button" onClick={() => setSelected(item)}>

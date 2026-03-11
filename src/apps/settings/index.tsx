@@ -2,13 +2,9 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import type {
   GlobalSettings,
-  PixelOpticsPreset,
   FontSize,
   ThemePreset,
   Appearance,
-  TimeFormatPreset,
-  AppsPerRowPreset,
-  SortOrderPreset,
 } from '../../types/settings';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 
@@ -107,12 +103,6 @@ function parseSettingsFromCsv(csv: string): Partial<GlobalSettings> | null {
   return Object.keys(out).length ? out : null;
 }
 
-const OPTICS_OPTIONS: { value: PixelOpticsPreset; label: string }[] = [
-  { value: 'standard', label: 'Standard' },
-  { value: 'highContrastText', label: 'High contrast text' },
-  { value: 'lowGhosting', label: 'Low ghosting' },
-];
-
 const FONT_OPTIONS: { value: FontSize; label: string }[] = [
   { value: 'small', label: 'Small' },
   { value: 'medium', label: 'Medium' },
@@ -127,23 +117,6 @@ const THEME_OPTIONS: { value: ThemePreset; label: string }[] = [
 const APPEARANCE_OPTIONS: { value: Appearance; label: string }[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
-];
-
-const TIME_FORMAT_OPTIONS: { value: TimeFormatPreset; label: string }[] = [
-  { value: '12h', label: '12-hour' },
-  { value: '24h', label: '24-hour' },
-];
-
-const APPS_PER_ROW_OPTIONS: { value: AppsPerRowPreset; label: string }[] = [
-  { value: 'auto', label: 'Auto' },
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-];
-
-const SORT_ORDER_OPTIONS: { value: SortOrderPreset; label: string }[] = [
-  { value: 'a-z', label: 'A–Z' },
-  { value: 'z-a', label: 'Z–A' },
 ];
 
 function SettingsApp(context: AppContext): AppInstance {
@@ -226,19 +199,6 @@ function SettingsApp(context: AppContext): AppInstance {
     return (
       <div class="settings-app">
         <section class="panel">
-          <h2 class="panel-title">Pixel optics</h2>
-          {OPTICS_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              class={`btn ${settings.pixelOptics === opt.value ? 'btn-active' : ''}`}
-              onClick={() => update({ pixelOptics: opt.value })}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </section>
-        <section class="panel">
           <h2 class="panel-title">Font size</h2>
           {FONT_OPTIONS.map((opt) => (
             <button
@@ -276,43 +236,6 @@ function SettingsApp(context: AppContext): AppInstance {
               {opt.label}
             </button>
           ))}
-        </section>
-        <section class="panel">
-          <h2 class="panel-title">Status bar</h2>
-          <div class="settings-row">
-            <label class="settings-toggle"><input type="checkbox" checked={settings.showClock} onChange={(e) => update({ showClock: (e.target as HTMLInputElement).checked })} /> Show clock</label>
-          </div>
-          <div class="settings-row">
-            <span class="settings-label">Time format</span>
-            {TIME_FORMAT_OPTIONS.map((opt) => (
-              <button key={opt.value} type="button" class={`btn ${settings.timeFormat === opt.value ? 'btn-active' : ''}`} onClick={() => update({ timeFormat: opt.value })}>{opt.label}</button>
-            ))}
-          </div>
-        </section>
-        <section class="panel">
-          <h2 class="panel-title">Shell</h2>
-          <label class="settings-toggle"><input type="checkbox" checked={settings.showAppTitle} onChange={(e) => update({ showAppTitle: (e.target as HTMLInputElement).checked })} /> Show app title in header</label>
-        </section>
-        <section class="panel">
-          <h2 class="panel-title">Home screen</h2>
-          <label class="settings-toggle"><input type="checkbox" checked={settings.showGamesSection} onChange={(e) => update({ showGamesSection: (e.target as HTMLInputElement).checked })} /> Show Games section</label>
-          <div class="settings-row">
-            <span class="settings-label">Apps per row</span>
-            {APPS_PER_ROW_OPTIONS.map((opt) => (
-              <button key={opt.value} type="button" class={`btn ${settings.appsPerRow === opt.value ? 'btn-active' : ''}`} onClick={() => update({ appsPerRow: opt.value })}>{opt.label}</button>
-            ))}
-          </div>
-          <div class="settings-row">
-            <span class="settings-label">Sort order</span>
-            {SORT_ORDER_OPTIONS.map((opt) => (
-              <button key={opt.value} type="button" class={`btn ${settings.sortOrder === opt.value ? 'btn-active' : ''}`} onClick={() => update({ sortOrder: opt.value })}>{opt.label}</button>
-            ))}
-          </div>
-        </section>
-        <section class="panel">
-          <h2 class="panel-title">E-ink</h2>
-          <label class="settings-toggle"><input type="checkbox" checked={settings.invertColors} onChange={(e) => update({ invertColors: (e.target as HTMLInputElement).checked })} /> Invert colors</label>
-          <label class="settings-toggle"><input type="checkbox" checked={settings.reduceFlashes} onChange={(e) => update({ reduceFlashes: (e.target as HTMLInputElement).checked })} /> Reduce flashes</label>
         </section>
         <section class="panel">
           <h2 class="panel-title">Data</h2>

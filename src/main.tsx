@@ -5,6 +5,7 @@ import { createThemeService } from './core/services/theme';
 import { createSettingsService } from './core/services/settings';
 import { setRootFallback, LOAD_ERROR_MESSAGE } from './core/utils/fallback-ui';
 import { Shell } from './core/kernel/shell';
+import { AppRegistry } from './core/plugins/registry';
 import { registerAllApps } from './apps/registry';
 import { DEFAULT_SETTINGS } from './types/settings';
 import './index.css';
@@ -14,6 +15,7 @@ interface LegacyWindow {
   __openinkMounted?: boolean;
   __openinkFallback?: (msg: string) => void;
   __openinkError?: string;
+  __openinkSnake?: { id: string; name: string; launch: (c: unknown) => unknown; apiVersion: number; category?: string };
 }
 
 function showLegacyFallback(error: unknown): void {
@@ -53,6 +55,11 @@ try {
   theme = createThemeService(DEFAULT_SETTINGS);
   settings = createSettingsService(storage, theme);
   registerAllApps();
+  const win = typeof window !== 'undefined' ? (window as unknown as LegacyWindow) : null;
+  if (win?.__openinkSnake) {
+    AppRegistry.registerApp(win.__openinkSnake as Parameters<typeof AppRegistry.registerApp>[0]);
+    delete win.__openinkSnake;
+  }
 
   try {
     init();

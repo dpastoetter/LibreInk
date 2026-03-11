@@ -104,7 +104,6 @@ function RedditApp(context: AppContext): AppInstance {
       currentSub: string | null;
     } | null;
   } = { current: null };
-  const titleRef: { current: string } = { current: 'Subreddits' };
 
   function RedditUI() {
     const [subs, setSubs] = useState<string[]>(() => parseRedditSubreddits(settings.get().redditSubreddits));
@@ -137,7 +136,6 @@ function RedditApp(context: AppContext): AppInstance {
     const [selectedPost, setSelectedPost] = useState<RedditPost['data'] | null>(null);
     const [listSort, setListSort] = useState<ListSort>('hot');
     backRef.current = { setSelectedPost, selectedPost, setCurrentSub, currentSub };
-    titleRef.current = selectedPost ? selectedPost.title : currentSub ? `r/${currentSub}` : 'Subreddits';
     const [comments, setComments] = useState<RedditComment[]>([]);
     const [listPage, setListPage] = useState(1);
     const [commentPage, setCommentPage] = useState(1);
@@ -358,7 +356,7 @@ function RedditApp(context: AppContext): AppInstance {
 
   return {
     render: () => <RedditUI />,
-    getTitle: () => titleRef.current,
+    getTitle: () => '', // Keep header uncluttered; subreddit and post title not shown in app bar
     canGoBack: () => backRef.current != null && (backRef.current.selectedPost != null || backRef.current.currentSub != null),
     goBack: () => {
       const c = backRef.current;
