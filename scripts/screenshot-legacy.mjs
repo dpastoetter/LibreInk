@@ -76,27 +76,21 @@ async function main() {
     const page = await context.newPage();
     await page.goto(`${baseUrl}/`, { waitUntil: 'networkidle', timeout: 20000 });
     await page.waitForSelector('.home-screen', { timeout: 15000 });
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(500);
 
-    // Set apps per row to 3 so screenshots show that layout
-    const settingsTile = await page.$('button[data-app-id="settings"]');
-    if (settingsTile) {
-      await settingsTile.click();
-      await page.waitForSelector('.settings-app', { timeout: 8000 }).catch(() => null);
-      await page.waitForTimeout(400);
-      const homeSection = page.locator('section.panel').filter({ has: page.getByRole('heading', { name: 'Home' }) });
-      const threeBtn = homeSection.getByRole('button', { name: '3' });
-      if (await threeBtn.count() > 0) {
-        await threeBtn.click();
-        await page.waitForTimeout(300);
-      }
-      const homeBtn = await page.$('button[aria-label="Home"]');
-      if (homeBtn) {
-        await homeBtn.click();
-        await page.waitForSelector('.home-screen', { timeout: 5000 });
-        await page.waitForTimeout(500);
-      }
-    }
+    // Persist apps-per-row 3 and reload so home screen renders 3 columns
+    await page.evaluate(() => {
+      const key = 'webos:global-settings';
+      try {
+        const raw = localStorage.getItem(key);
+        const current = raw ? JSON.parse(raw) : {};
+        current.appsPerRow = '3';
+        localStorage.setItem(key, JSON.stringify(current));
+      } catch (_) {}
+    });
+    await page.reload({ waitUntil: 'networkidle', timeout: 20000 });
+    await page.waitForSelector('.home-screen', { timeout: 15000 });
+    await page.waitForTimeout(800);
 
     await page.screenshot({
       path: path.join(screenshotsDir, 'legacy-home-light.png'),
