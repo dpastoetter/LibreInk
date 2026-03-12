@@ -14,7 +14,6 @@ const LAZY_APPS: { descriptor: AppDescriptor; load: () => Promise<WebOSApp> }[] 
   { descriptor: { id: 'news', name: 'News', icon: '📰', iconFallback: 'N', iconLegacySvg: LEGACY_ICONS.news, category: 'network' }, load: () => import('./news').then((m) => m.newsApp) },
   { descriptor: { id: 'reddit', name: 'Reddit', icon: '🔴', iconFallback: 'r', iconLegacySvg: LEGACY_ICONS.reddit, category: 'network' }, load: () => import('./reddit').then((m) => m.redditApp) },
   { descriptor: { id: 'stopwatch', name: 'Stopwatch', icon: '⏲️', iconFallback: 'S', iconLegacySvg: LEGACY_ICONS.stopwatch, category: 'system' }, load: () => import('./stopwatch').then((m) => m.stopwatchApp) },
-  { descriptor: { id: 'sudoku', name: 'Sudoku', icon: '🔢', iconFallback: '9', iconLegacySvg: LEGACY_ICONS.sudoku, category: 'game' }, load: () => import('./games/sudoku-app').then((m) => m.sudokuApp) },
   { descriptor: { id: 'snake', name: 'Snake', icon: '🐍', iconFallback: 's', iconLegacySvg: LEGACY_ICONS.snake, category: 'game' }, load: () => import('./games/snake-app').then((m) => m.snakeApp) },
   { descriptor: { id: 'timer', name: 'Timer', icon: '⏱️', iconFallback: 'T', iconLegacySvg: LEGACY_ICONS.timer, category: 'system' }, load: () => import('./timer').then((m) => m.timerApp) },
   { descriptor: { id: 'weather', name: 'Weather', icon: '🌤️', iconFallback: '~', iconLegacySvg: LEGACY_ICONS.weather, category: 'network' }, load: () => import('./weather').then((m) => m.weatherApp) },

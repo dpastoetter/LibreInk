@@ -14,7 +14,7 @@
     "screenshot": "node scripts/screenshot-legacy.mjs"
   },
   "dependencies": {
-    "lucide-react": "^0.577.0",
+    "@heroicons/react": "^2.2.0",
     "preact": "^10.19.2",
     "regenerator-runtime": "^0.14.1",
     "stockfish.js": "^10.0.2"

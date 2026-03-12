@@ -6,7 +6,7 @@ A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink device
 
 ## Features
 
-- **Home screen** – Apps and Games sections; tap any tile to open an app. Touch and click both supported for reliable launch on Kindle.
+- **Home screen** – Apps and Games sections; tap any tile to open an app. Touch and click both supported for reliable launch on Kindle. Extra side padding gives a scroll gutter so swiping doesn’t open apps by mistake. Scroll-vs-tap detection ignores taps when the pointer has moved (reduces accidental launches on Kindle).
 - **Status bar** – Zoom (+ / −), theme toggle (light/dark), clock (optional), compact controls.
 - **Single-page legacy build** – One HTML file and one JS bundle (no ES modules), so it runs on Kindle, Silk, and other no-ESM browsers. Black-and-white SVG icons where needed.
 
@@ -68,7 +68,7 @@ npm test
 - **Timer**, **Stopwatch**, **World clock** – Time utilities.
 - **To-do** – Tasks with add/toggle/remove; stored locally.
 - **Recipes** – Search TheMealDB; list and detail view; cached.
-- **Picture Frame** – Slideshow of built-in and custom images; optional wake lock; add by URL or browse sample photos.
+- **Picture Frame** – Slideshow of built-in images (landmarks, scenery, city sights); ‹ / › to change; Full screen with × to close. On legacy/Kindle only four local SVGs (no network). Optional keep-screen-on (modern only).
 
 ## Performance & e-ink
 
@@ -113,12 +113,12 @@ No secrets in the bundle; sanitized API content (XSS prevention); Content-Securi
 
 - `src/core/kernel/` – Shell, home screen, app lifecycle, AppHeaderActionsContext.
 - `src/core/plugins/` – Plugin registry (lazy load on first launch).
-- `src/core/icons/` – App launcher icons: Lucide in `app-icons.tsx`; legacy build uses `app-icons-legacy.ts` and `legacy-svg.ts`.
+- `src/core/icons/` – App launcher icons: Heroicons (outline) in `app-icons.tsx`; legacy build uses `app-icons-legacy.ts` and `legacy-svg.ts`.
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – StatusBar, PageNav, Button, List, shared UI.
 - `src/core/utils/` – html (stripHtml), url (isSafeUrl, sanitizeUrl), safe-svg (isSafeLegacySvg), date, fallback-ui.
-- `src/apps/` – App plugins: settings, games (chess, snake, sudoku, minesweeper), news, reddit, comics, blog, dictionary, finance, weather, timer, stopwatch, worldclock, todo, recipes, pictureframe.
-- `src/apps/games/` – GameBoardResize (shared − / size / + header controls for all game boards).
+- `src/apps/` – App plugins: settings, games (chess, snake, minesweeper), news, reddit, comics, blog, dictionary, finance, weather, timer, stopwatch, worldclock, todo, recipes, pictureframe.
+- `src/apps/games/` – GameBoardResize (shared − / size / + header controls for Chess, Snake, Minesweeper).
 - `src/types/` – Shared types and plugin API.
 
 ## License

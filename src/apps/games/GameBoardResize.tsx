@@ -1,5 +1,5 @@
 /**
- * Board size controls for every game (Chess, Snake, Sudoku, Minesweeper).
+ * Board size controls for every game (Chess, Snake, Minesweeper).
  * MUST be shown in the app header for each game: − / size label / + for consistent board sizing.
  */
 

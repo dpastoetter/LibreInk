@@ -1,6 +1,6 @@
 /**
- * Lucide-style inline SVGs for legacy/Kindle (no external assets).
- * 24×24 viewBox, stroke/fill currentColor, SVG 1.1 safe. Matches app-icons (Lucide) semantics.
+ * Heroicons-style simple outline SVGs for legacy/Kindle (no external assets).
+ * 24×24 viewBox, stroke currentColor, SVG 1.1 safe. Matches app-icons (Heroicons) semantics.
  * Security: content is build-time constant only; no <script> or event handlers. Do not inject user/API data.
  */
 const S = (content: string) =>
@@ -63,12 +63,6 @@ export const LEGACY_ICONS: Record<string, string> = {
       '<line x1="12" y1="14" x2="15" y2="11"/>' +
       '<circle cx="12" cy="14" r="8"/>'
   ),
-  sudoku: S(
-    '<line x1="3" y1="9" x2="21" y2="9"/>' +
-      '<line x1="3" y1="15" x2="21" y2="15"/>' +
-      '<line x1="9" y1="3" x2="9" y2="21"/>' +
-      '<line x1="15" y1="3" x2="15" y2="21"/>'
-  ),
   timer: S(
     '<circle cx="12" cy="12" r="10"/>' +
       '<path d="M12 6v6l4 2"/>'
@@ -87,9 +81,8 @@ export const LEGACY_ICONS: Record<string, string> = {
       '<path d="M2 12h20"/>'
   ),
   snake: S(
-    '<path d="M4 12c0-2 2-4 4-4s4 2 4 4-2 4-4 4-4-2-4-4"/>' +
-      '<path d="M12 12c0-2 2-4 4-4s4 2 4 4-2 4-4 4-4-2-4-4"/>' +
-      '<circle cx="20" cy="12" r="2"/>'
+    '<path d="M4 18 Q 8 18 10 14 Q 12 10 16 10 Q 20 10 21 7"/>' +
+      '<circle cx="21" cy="7" r="2" fill="currentColor"/>'
   ),
   settings: S(
     '<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/>' +

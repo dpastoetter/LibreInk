@@ -55,6 +55,26 @@ const PREINSTALLED_GRAPHICS: PictureItem[] = [
   { id: 'pf-34', name: 'Seaside', src: 'https://picsum.photos/seed/seaside1/1200/800' },
   { id: 'pf-35', name: 'Vineyard', src: 'https://picsum.photos/seed/vineyard1/1200/800' },
   { id: 'pf-36', name: 'Alps', src: 'https://picsum.photos/seed/alps1/1200/800' },
+  { id: 'pf-37', name: 'Temple', src: 'https://picsum.photos/seed/temple1/1200/800' },
+  { id: 'pf-38', name: 'Garden', src: 'https://picsum.photos/seed/garden2/1200/800' },
+  { id: 'pf-39', name: 'Fjord', src: 'https://picsum.photos/seed/fjord1/1200/800' },
+  { id: 'pf-40', name: 'Volcano', src: 'https://picsum.photos/seed/volcano1/1200/800' },
+  { id: 'pf-41', name: 'Meadow', src: 'https://picsum.photos/seed/meadow1/1200/800' },
+  { id: 'pf-42', name: 'Cliff', src: 'https://picsum.photos/seed/cliff1/1200/800' },
+  { id: 'pf-43', name: 'Arch', src: 'https://picsum.photos/seed/arch1/1200/800' },
+  { id: 'pf-44', name: 'Stadium', src: 'https://picsum.photos/seed/stadium1/1200/800' },
+  { id: 'pf-45', name: 'Opera house', src: 'https://picsum.photos/seed/opera1/1200/800' },
+  { id: 'pf-46', name: 'Museum', src: 'https://picsum.photos/seed/museum1/1200/800' },
+  { id: 'pf-47', name: 'Fountain', src: 'https://picsum.photos/seed/fountain1/1200/800' },
+  { id: 'pf-48', name: 'Cherry blossom', src: 'https://picsum.photos/seed/cherry1/1200/800' },
+  { id: 'pf-49', name: 'Snow peak', src: 'https://picsum.photos/seed/snowpeak1/1200/800' },
+  { id: 'pf-50', name: 'Waterfall', src: 'https://picsum.photos/seed/water2/1200/800' },
+  { id: 'pf-51', name: 'Cape', src: 'https://picsum.photos/seed/cape1/1200/800' },
+  { id: 'pf-52', name: 'Plaza', src: 'https://picsum.photos/seed/plaza1/1200/800' },
+  { id: 'pf-53', name: 'Canal', src: 'https://picsum.photos/seed/canal1/1200/800' },
+  { id: 'pf-54', name: 'Wildflowers', src: 'https://picsum.photos/seed/wildflowers1/1200/800' },
+  { id: 'pf-55', name: 'Dunes', src: 'https://picsum.photos/seed/dunes1/1200/800' },
+  { id: 'pf-56', name: 'Pagoda', src: 'https://picsum.photos/seed/pagoda1/1200/800' },
 ];
 
 const WAKE_DURATIONS = [
@@ -135,6 +155,10 @@ function PictureFrameApp(_context: AppContext): AppInstance {
       }
     }, [hasWakeLock, wakeDurationIndex, releaseWakeLock, requestWakeLockOnly]);
 
+    const openFullscreen = useCallback(() => {
+      setFullscreen(true);
+    }, []);
+
     const closeFullscreen = useCallback(() => {
       setFullscreen(false);
       releaseWakeLock();
@@ -162,25 +186,31 @@ function PictureFrameApp(_context: AppContext): AppInstance {
     const prev = () => setCurrentIndex((i) => (i === 0 ? allPictures.length - 1 : i - 1));
     const next = () => setCurrentIndex((i) => (i === allPictures.length - 1 ? 0 : i + 1));
 
-    if (!isLegacy && fullscreen && typeof document !== 'undefined' && document.body && current) {
-      const fullscreenEl = (
-        <div class="pictureframe-fullscreen" role="dialog" aria-label="Picture frame full screen">
-          <button
-            type="button"
-            class="pictureframe-fullscreen-close"
-            onClick={closeFullscreen}
-            aria-label="Close"
-          >
-            ×
-          </button>
-          <img
-            src={current.src}
-            alt={current.name}
-            class="pictureframe-fullscreen-img"
-          />
-        </div>
-      );
-      return createPortal(fullscreenEl, document.body);
+    const fullscreenContent = current && (
+      <div class="pictureframe-fullscreen" role="dialog" aria-label="Picture frame full screen">
+        <button
+          type="button"
+          class="pictureframe-fullscreen-close"
+          onClick={closeFullscreen}
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <img
+          src={current.src}
+          alt={current.name}
+          class="pictureframe-fullscreen-img"
+        />
+      </div>
+    );
+
+    if (fullscreen && fullscreenContent) {
+      if (typeof document !== 'undefined' && document.body) {
+        return createPortal(fullscreenContent, document.body);
+      }
+      if (isLegacy) {
+        return fullscreenContent;
+      }
     }
 
     return (
@@ -203,6 +233,11 @@ function PictureFrameApp(_context: AppContext): AppInstance {
           <span class="pictureframe-name">{current?.name ?? '—'}</span>
           <button type="button" class="btn pictureframe-nav" onClick={next} aria-label="Next">
             ›
+          </button>
+        </div>
+        <div class="pictureframe-fullscreen-row">
+          <button type="button" class="btn" onClick={openFullscreen}>
+            Full screen
           </button>
         </div>
         {!isLegacy && (

@@ -303,9 +303,10 @@ html, body {
   opacity: 0.4;
 }
 
-/* Home screen – touch-friendly grid for small Kindle; centered on all pages */
+/* Home screen – touch-friendly grid for small Kindle; centered on all pages.
+   Extra horizontal padding gives a scroll gutter so swiping doesn't open apps. */
 .home-screen {
-  padding: var(--space);
+  padding: var(--space) calc(var(--space) * 2.5);
   max-width: min(100%, var(--content-max-width, 28rem));
   margin-left: auto;
   margin-right: auto;
@@ -1205,24 +1206,36 @@ textarea {
   align-items: center;
   justify-content: center;
 }
+.pictureframe-fullscreen-row {
+  margin-top: var(--space);
+}
 .pictureframe-fullscreen-close {
   position: absolute;
   top: var(--space);
   right: var(--space);
-  width: 2rem;
-  height: 2rem;
+  width: 1.375rem;
+  height: 1.375rem;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 50%;
   background: var(--surface);
   color: var(--fg);
-  font-size: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 300;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
+  box-shadow: var(--shadow-soft);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.pictureframe-fullscreen-close:hover {
+  background: var(--muted);
+}
+.pictureframe-fullscreen-close:active {
+  box-shadow: none;
 }
 .pictureframe-fullscreen-img {
   position: absolute;
