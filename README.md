@@ -6,7 +6,7 @@ A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink device
 
 ## Features
 
-- **Home screen** – Apps and Games sections; tap any tile to open an app. Touch and click both supported for reliable launch on Kindle. Extra side padding gives a scroll gutter so swiping doesn’t open apps by mistake. Scroll-vs-tap detection ignores taps when the pointer has moved (reduces accidental launches on Kindle).
+- **Home screen** – Apps and Games sections; tap any tile to open an app. In **Settings → Home** you can set **apps per row** to 2, 3, or 4 (or Auto). Touch and click both supported for reliable launch on Kindle. Extra side padding gives a scroll gutter so swiping doesn’t open apps by mistake. Scroll-vs-tap detection ignores taps when the pointer has moved (reduces accidental launches on Kindle).
 - **Status bar** – Zoom (+ / −), theme toggle (light/dark), clock (optional), compact controls.
 - **Single-page legacy build** – One HTML file and one JS bundle (no ES modules), so it runs on Kindle, Silk, and other no-ESM browsers. Black-and-white SVG icons where needed.
 
@@ -18,7 +18,7 @@ A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink device
 |---------------|-----------------|
 | ![Reddit app](docs/screenshots/reddit-widget.png) | ![Chess game](docs/screenshots/chess-widget.png) |
 
-Screenshots show the home screen (light/dark), Reddit app, and Chess game from the built app. To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
+Screenshots show the home screen in light and dark mode (with **3 apps per row**), the Reddit app, and the Chess game. To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
 
 ## Tech stack
 
@@ -52,7 +52,7 @@ npm test
 
 ## Built-in apps
 
-- **Settings** – Pixel optics, font size, theme, appearance, subreddit list, CORS proxy, and more.
+- **Settings** – Pixel optics, font size, theme, appearance, **home layout (apps per row: 2, 3, or 4)**, subreddit list, CORS proxy, and more.
 - **Calculator** – Basic arithmetic; offline.
 - **Chess** – Two players or vs computer. Full rules: castling, en passant, pawn promotion to queen, queen and rook captures along ranks and files, checkmate and stalemate. Stockfish (WASM) is used when the browser supports Web Workers and WebAssembly; if Stockfish fails to load or respond, the built-in fallback engine is used so vs computer still works (e.g. on legacy/Kindle).
 - **Snake** – Classic snake: arrow keys or on-screen D-pad, pause, score. Touch-friendly for e-ink.

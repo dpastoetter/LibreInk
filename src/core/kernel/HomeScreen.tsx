@@ -104,6 +104,7 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
           </ul>
         </section>
       )}
+      <footer class="home-footer" aria-label="Product name">OpenInk</footer>
     </div>
   );
 };
