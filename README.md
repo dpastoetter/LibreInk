@@ -18,7 +18,7 @@ A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink device
 |---------------|-----------------|
 | ![Reddit app](docs/screenshots/reddit-widget.png) | ![Chess game](docs/screenshots/chess-widget.png) |
 
-Screenshots show the home screen and sample apps (Reddit, Chess) from the built app. To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
+Screenshots show the home screen (light/dark), Reddit app, and Chess game from the built app. To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
 
 ## Tech stack
 
