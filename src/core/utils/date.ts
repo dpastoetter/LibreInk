@@ -37,3 +37,8 @@ export function formatDateLegacy(d: Date): string {
 export function formatWeekdayShortLegacy(d: Date): string {
   return WEEKDAY_SHORT[d.getDay()] ?? '?';
 }
+
+/** Date + time short (e.g. M/D/YYYY HH:MM). Safe on legacy/Kindle. */
+export function formatDateTimeLegacy(d: Date): string {
+  return formatDateLegacy(d) + ' ' + formatTimeLegacy(d);
+}

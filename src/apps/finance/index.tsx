@@ -52,9 +52,19 @@ function parseFinanceItems(json: string | undefined): FinanceItem[] {
   }
 }
 
+/** Legacy-safe number with decimals (no Intl). */
+function formatNumberLegacy(n: number, minDec: number, maxDec: number): string {
+  return n.toFixed(Math.min(maxDec, Math.max(minDec, 0)));
+}
+
 function formatPrice(n: number, currency: Currency): string {
   const symbol = currency === 'EUR' ? '€' : '$';
   if (n >= 1e6) return `${symbol}${(n / 1e6).toFixed(2)}M`;
+  const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
+  if (isLegacy) {
+    const str = n >= 1e3 ? formatNumberLegacy(n, 2, 2) : formatNumberLegacy(n, 2, 4);
+    return symbol + str;
+  }
   try {
     const locale = currency === 'EUR' ? 'de-DE' : 'en-US';
     if (n >= 1e3) return `${symbol}${n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
