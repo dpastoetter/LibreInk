@@ -52,7 +52,7 @@ const AppTile = memo(function AppTile({
         <span class="app-tile-icon" aria-hidden="true">
           {IconComponent
             ? <IconComponent className="app-tile-icon-svg" aria-hidden={true} />
-            : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && isSafeLegacySvg(app.iconLegacySvg)
+            : isSafeLegacySvg(app.iconLegacySvg)
               ? <span class="app-tile-icon-svg" dangerouslySetInnerHTML={{ __html: app.iconLegacySvg! }} />
               : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconFallback
                 ? app.iconFallback
