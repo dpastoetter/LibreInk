@@ -13,8 +13,6 @@ interface StatusBarProps {
   settings: SettingsService;
 }
 
-const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
-
 function formatTime(d: Date, timeFormat: '12h' | '24h'): string {
   return timeFormat === '12h' ? formatTimeLegacy12h(d) : formatTimeLegacy(d);
 }
@@ -127,7 +125,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           onClick={toggleAppearance}
           aria-label={`Switch to ${appearance === 'light' ? 'dark' : 'light'} mode`}
         >
-          {isLegacy ? (appearance === 'light' ? 'D' : 'L') : (appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />)}
+          {appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />}
         </button>
       </span>
     </header>
