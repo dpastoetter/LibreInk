@@ -128,7 +128,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           onClick={toggleAppearance}
           aria-label={`Switch to ${appearance === 'light' ? 'dark' : 'light'} mode`}
         >
-          {appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />}
+          {isLegacy ? (appearance === 'light' ? 'D' : 'L') : (appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />)}
         </button>
       </span>
     </header>
