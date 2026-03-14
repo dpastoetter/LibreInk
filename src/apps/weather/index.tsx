@@ -43,25 +43,15 @@ function weatherLabel(code: number): string {
   return 'Storm';
 }
 
-/** ReKindle: no Unicode emoji on Kindle; use ASCII for legacy build. */
+/** Text labels for weather codes (Kindle/e-ink safe, no Unicode emoji). */
 function weatherIcon(code: number): string {
-  const legacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
-  if (legacy) {
-    if (code === 0) return 'Sun';
-    if (code <= 3) return 'Cld';
-    if (code <= 49) return 'Fog';
-    if (code <= 69) return 'Rain';
-    if (code <= 79) return 'Snow';
-    if (code <= 94) return 'T-storm';
-    return 'Storm';
-  }
-  if (code === 0) return '☀️';
-  if (code <= 3) return '⛅';
-  if (code <= 49) return '🌫️';
-  if (code <= 69) return '🌧️';
-  if (code <= 79) return '❄️';
-  if (code <= 94) return '⛈️';
-  return '🌪️';
+  if (code === 0) return 'Sun';
+  if (code <= 3) return 'Cld';
+  if (code <= 49) return 'Fog';
+  if (code <= 69) return 'Rain';
+  if (code <= 79) return 'Snow';
+  if (code <= 94) return 'T-storm';
+  return 'Storm';
 }
 
 interface CachedWeather {
@@ -269,7 +259,7 @@ function WeatherApp(context: AppContext): AppInstance {
             <ul class="weather-forecast list">
               {data.daily.map((day) => (
                 <li key={day.date}>
-                  <span class="weather-day">{import.meta.env.LEGACY ? formatWeekdayShortLegacy(new Date(day.date)) : new Date(day.date).toLocaleDateString([], { weekday: 'short' })}</span>
+                  <span class="weather-day">{formatWeekdayShortLegacy(new Date(day.date))}</span>
                   <span class="weather-day-icon">{weatherIcon(day.code)}</span>
                   <span class="weather-day-range">{Math.round(day.min)}° – {Math.round(day.max)}°</span>
                 </li>

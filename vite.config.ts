@@ -7,9 +7,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [preact()],
-  define: {
-    'import.meta.env.LEGACY': 'true',
-  },
   resolve: {
     alias: {
       '@core': path.resolve(__dirname, 'src/core'),

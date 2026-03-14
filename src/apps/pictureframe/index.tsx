@@ -4,25 +4,23 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { sanitizeUrl } from '@core/utils/url';
 
-const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
-
 interface PictureItem {
   id: string;
   src: string;
   name: string;
 }
 
-/** Legacy/Kindle: only local SVGs, no network, no heavy decode. Prevents crashes on e-ink. */
-const LEGACY_GRAPHICS: PictureItem[] = [
+/** Local SVGs only (Kindle/e-ink safe: no network, no heavy decode). */
+const LOCAL_GRAPHICS: PictureItem[] = [
   { id: 'pf-1', name: 'Sun', src: '/pictureframe/1-sun.svg' },
   { id: 'pf-2', name: 'Mountain', src: '/pictureframe/2-mountain.svg' },
   { id: 'pf-3', name: 'Tree', src: '/pictureframe/3-tree.svg' },
   { id: 'pf-4', name: 'Moon', src: '/pictureframe/4-moon.svg' },
 ];
 
-/** Full list: local SVGs + external (modern only). */
+/** Full list: local SVGs + external (optional; network images can be heavy on e-ink). */
 const PREINSTALLED_GRAPHICS: PictureItem[] = [
-  ...LEGACY_GRAPHICS,
+  ...LOCAL_GRAPHICS,
   { id: 'pf-5', name: 'Ocean', src: 'https://picsum.photos/seed/ocean2/1200/800' },
   { id: 'pf-6', name: 'Forest', src: 'https://picsum.photos/seed/forest2/1200/800' },
   { id: 'pf-7', name: 'Sunset', src: 'https://picsum.photos/seed/sunset2/1200/800' },
@@ -87,12 +85,13 @@ const WAKE_DURATIONS = [
 ] as const;
 
 function PictureFrameApp(_context: AppContext): AppInstance {
-  const allPictures = isLegacy
-    ? LEGACY_GRAPHICS
-    : PREINSTALLED_GRAPHICS.map((p) => ({
+  const allPictures = PREINSTALLED_GRAPHICS.map((p) => ({
         ...p,
         src: p.src.startsWith('http') ? sanitizeUrl(p.src) || p.src : p.src,
       })).filter((p) => p.src.length > 0);
+  /* Kindle/e-ink: use only local SVGs to avoid crashes and heavy decode. */
+  const pictures = allPictures.filter((p) => !p.src.startsWith('http'));
+  const usePictures = pictures.length > 0 ? pictures : allPictures;
 
   function PictureFrameUI() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -103,14 +102,14 @@ function PictureFrameApp(_context: AppContext): AppInstance {
     const wakeLockRef = useRef<WakeLockSentinel | null>(null);
     const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const hasWakeLock = !isLegacy && typeof navigator !== 'undefined' && 'wakeLock' in navigator;
-    const current = allPictures[Math.min(currentIndex, allPictures.length - 1)] ?? allPictures[0];
+    const hasWakeLock = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
+    const current = usePictures[Math.min(currentIndex, usePictures.length - 1)] ?? usePictures[0];
 
     useEffect(() => {
-      if (allPictures.length > 0 && currentIndex >= allPictures.length) {
-        setCurrentIndex(allPictures.length - 1);
+      if (usePictures.length > 0 && currentIndex >= usePictures.length) {
+        setCurrentIndex(usePictures.length - 1);
       }
-    }, [allPictures.length, currentIndex]);
+    }, [usePictures.length, currentIndex]);
 
     const releaseWakeLock = useCallback(async () => {
       if (releaseTimerRef.current) {
@@ -183,8 +182,8 @@ function PictureFrameApp(_context: AppContext): AppInstance {
       };
     }, []);
 
-    const prev = () => setCurrentIndex((i) => (i === 0 ? allPictures.length - 1 : i - 1));
-    const next = () => setCurrentIndex((i) => (i === allPictures.length - 1 ? 0 : i + 1));
+    const prev = () => setCurrentIndex((i) => (i === 0 ? usePictures.length - 1 : i - 1));
+    const next = () => setCurrentIndex((i) => (i === usePictures.length - 1 ? 0 : i + 1));
 
     const fullscreenContent = current && (
       <div class="pictureframe-fullscreen" role="dialog" aria-label="Picture frame full screen">
@@ -208,9 +207,7 @@ function PictureFrameApp(_context: AppContext): AppInstance {
       if (typeof document !== 'undefined' && document.body) {
         return createPortal(fullscreenContent, document.body);
       }
-      if (isLegacy) {
-        return fullscreenContent;
-      }
+      return fullscreenContent;
     }
 
     return (
@@ -240,8 +237,7 @@ function PictureFrameApp(_context: AppContext): AppInstance {
             Full screen
           </button>
         </div>
-        {!isLegacy && (
-          <div class="pictureframe-wake">
+        <div class="pictureframe-wake">
             <label class="pictureframe-wake-label" htmlFor="pictureframe-wake-duration">Keep screen on</label>
             <select
               id="pictureframe-wake-duration"
@@ -271,8 +267,7 @@ function PictureFrameApp(_context: AppContext): AppInstance {
               </button>
             )}
           </div>
-        )}
-        {!isLegacy && wakeUnsupported && (
+        {wakeUnsupported && (
           <p class="pictureframe-unsupported">Keep-awake not supported in this browser.</p>
         )}
       </div>

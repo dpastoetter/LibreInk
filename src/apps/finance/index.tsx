@@ -110,10 +110,11 @@ function FinanceApp(context: AppContext): AppInstance {
       const node = (
         <button
           type="button"
-          class="btn"
+          class="btn btn-header-action"
           onClick={() => setEditMode((e) => !e)}
           aria-label={editMode ? 'Done editing' : 'Edit list'}
           title={editMode ? 'Done' : 'Edit'}
+          aria-pressed={editMode}
         >
           {editMode ? 'Done' : 'Edit'}
         </button>
