@@ -119,9 +119,37 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
 
   return (
     <div class="home-screen">
+      <header class="home-category-header" aria-label="Category">
+        {showPager && (
+          <nav class="home-page-nav" aria-label="Switch between Apps and Games">
+            <button
+              type="button"
+              class="btn home-page-btn"
+              aria-label="Apps"
+              onClick={() => setPage('apps')}
+              disabled={page === 'apps'}
+            >
+              <svg class="home-page-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="btn home-page-btn"
+              aria-label="Games"
+              onClick={() => setPage('games')}
+              disabled={page === 'games'}
+            >
+              <svg class="home-page-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </nav>
+        )}
+        <h2 class="home-category-title">{page === 'games' ? 'Games' : 'Apps'}</h2>
+      </header>
       {(!showPager || page === 'apps') && (
         <section class="home-category">
-          <h2 class="home-category-title">Apps</h2>
           <ul class="app-grid">
             {appsToShow.map((app) => (
               <AppTile key={app.id} app={app} onLaunch={onLaunch} />
@@ -131,35 +159,12 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
       )}
       {showPager && page === 'games' && (
         <section class="home-category">
-          <h2 class="home-category-title">Games</h2>
           <ul class="app-grid">
             {gamesToShow.map((app) => (
               <AppTile key={app.id} app={app} onLaunch={onLaunch} />
             ))}
           </ul>
         </section>
-      )}
-      {showPager && (
-        <nav class="home-page-nav" aria-label="Switch between Apps and Games">
-          <button
-            type="button"
-            class="btn home-page-btn"
-            aria-label="Apps"
-            onClick={() => setPage('apps')}
-            disabled={page === 'apps'}
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            class="btn home-page-btn"
-            aria-label="Games"
-            onClick={() => setPage('games')}
-            disabled={page === 'games'}
-          >
-            →
-          </button>
-        </nav>
       )}
       <footer class="home-footer" aria-label="Product name">OpenInk - Designed for E-Ink Devices</footer>
     </div>
