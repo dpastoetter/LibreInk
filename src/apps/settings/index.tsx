@@ -3,7 +3,6 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import type {
   GlobalSettings,
   FontSize,
-  ThemePreset,
   Appearance,
 } from '../../types/settings';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
@@ -109,11 +108,6 @@ const FONT_OPTIONS: { value: FontSize; label: string }[] = [
   { value: 'large', label: 'Large' },
 ];
 
-const THEME_OPTIONS: { value: ThemePreset; label: string }[] = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'highContrast', label: 'High contrast' },
-];
-
 const APPEARANCE_OPTIONS: { value: Appearance; label: string }[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
@@ -206,19 +200,6 @@ function SettingsApp(context: AppContext): AppInstance {
               type="button"
               class={`btn ${settings.fontSize === opt.value ? 'btn-active' : ''}`}
               onClick={() => update({ fontSize: opt.value })}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </section>
-        <section class="panel">
-          <h2 class="panel-title">Theme</h2>
-          {THEME_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              class={`btn ${settings.theme === opt.value ? 'btn-active' : ''}`}
-              onClick={() => update({ theme: opt.value })}
             >
               {opt.label}
             </button>
