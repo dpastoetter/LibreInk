@@ -114,17 +114,22 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
   const appsToShow = appsOnly.slice(0, tileLimits.apps);
   const gamesToShow = games.slice(0, tileLimits.games);
 
+  const [page, setPage] = useState<'apps' | 'games'>('apps');
+  const showPager = showGamesSection && games.length > 0;
+
   return (
     <div class="home-screen">
-      <section class="home-category">
-        <h2 class="home-category-title">Apps</h2>
-        <ul class="app-grid">
-          {appsToShow.map((app) => (
-            <AppTile key={app.id} app={app} onLaunch={onLaunch} />
-          ))}
-        </ul>
-      </section>
-      {showGamesSection && (
+      {(!showPager || page === 'apps') && (
+        <section class="home-category">
+          <h2 class="home-category-title">Apps</h2>
+          <ul class="app-grid">
+            {appsToShow.map((app) => (
+              <AppTile key={app.id} app={app} onLaunch={onLaunch} />
+            ))}
+          </ul>
+        </section>
+      )}
+      {showPager && page === 'games' && (
         <section class="home-category">
           <h2 class="home-category-title">Games</h2>
           <ul class="app-grid">
@@ -133,6 +138,28 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
             ))}
           </ul>
         </section>
+      )}
+      {showPager && (
+        <nav class="home-page-nav" aria-label="Switch between Apps and Games">
+          <button
+            type="button"
+            class="btn home-page-btn"
+            aria-label="Apps"
+            onClick={() => setPage('apps')}
+            disabled={page === 'apps'}
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            class="btn home-page-btn"
+            aria-label="Games"
+            onClick={() => setPage('games')}
+            disabled={page === 'games'}
+          >
+            →
+          </button>
+        </nav>
       )}
       <footer class="home-footer" aria-label="Product name">OpenInk - Designed for E-Ink Devices</footer>
     </div>
