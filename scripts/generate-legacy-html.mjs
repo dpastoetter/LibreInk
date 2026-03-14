@@ -1,5 +1,5 @@
 /**
- * Post-build: generate index.html (single-page app for legacy/Kindle).
+ * Post-build: generate index.html (single-page app for Kindle/e-ink).
  * Loads openink-legacy-single.js and its CSS. This is the only build output.
  */
 import fs from 'node:fs';
@@ -30,7 +30,7 @@ const criticalStyle = [
 const initialContent = `<div style="padding:1.5rem;font-family:Arial,Verdana,sans-serif;max-width:28em;margin:0 auto;"><img src="/openink-logo.svg" alt="" width="40" height="40" style="display:block;margin:0 auto 0.5rem;vertical-align:middle"><h1 style="font-size:1.35rem;margin:0 0 0.5rem;">OpenInk</h1><p style="margin:0 0 0.75rem;font-size:0.9rem;color:#666;">Loading…</p><p style="margin:0;">${TRY_AGAIN}</p></div>`;
 
 const legacyHtml = `<!DOCTYPE html>
-<html lang="en" class="legacy-browser">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -41,7 +41,7 @@ const legacyHtml = `<!DOCTYPE html>
 <title>OpenInk</title>
 <style>${criticalStyle}</style>
 </head>
-<body class="legacy-browser">
+<body>
 <div id="root">${initialContent}</div>
 <noscript><p style="padding:1rem;font-family:Arial,Verdana,sans-serif;">OpenInk needs JavaScript.</p></noscript>
 <script>

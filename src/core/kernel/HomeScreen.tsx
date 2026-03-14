@@ -54,9 +54,7 @@ const AppTile = memo(function AppTile({
             ? <IconComponent className="app-tile-icon-svg" aria-hidden={true} />
             : isSafeLegacySvg(app.iconLegacySvg)
               ? <span class="app-tile-icon-svg" dangerouslySetInnerHTML={{ __html: app.iconLegacySvg! }} />
-              : typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY && app.iconFallback
-                ? app.iconFallback
-                : (app.icon ?? '◻')}
+              : (app.iconFallback ?? app.icon ?? '◻')}
         </span>
         <span class="app-tile-name">{app.name}</span>
       </button>
@@ -104,7 +102,7 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
           </ul>
         </section>
       )}
-      <footer class="home-footer" aria-label="Product name">OpenInk</footer>
+      <footer class="home-footer" aria-label="Product name">OpenInk - Designed for E-Ink Devices</footer>
     </div>
   );
 };

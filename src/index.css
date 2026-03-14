@@ -68,8 +68,8 @@
   --header-border: #555;
 }
 
-/* Legacy + high contrast: maximum contrast for e-ink (pure black/white) */
-html.legacy-browser[data-appearance="light"][data-theme="highContrast"] {
+/* High contrast: maximum contrast for e-ink (pure black/white) */
+html[data-appearance="light"][data-theme="highContrast"] {
   --fg: #000000;
   --muted: #000000;
   --border: #000000;
@@ -79,7 +79,7 @@ html.legacy-browser[data-appearance="light"][data-theme="highContrast"] {
   --header-fg: #000000;
   --header-border: #000000;
 }
-html.legacy-browser[data-appearance="dark"][data-theme="highContrast"] {
+html[data-appearance="dark"][data-theme="highContrast"] {
   --bg: #000000;
   --fg: #ffffff;
   --muted: #ffffff;
@@ -256,6 +256,10 @@ html, body {
   display: flex;
   align-items: center;
   gap: var(--space);
+}
+
+.status-bar-right {
+  gap: 6px;
 }
 
 .status-bar .btn-status {
@@ -484,7 +488,8 @@ html, body {
 }
 
 .app-header-actions .btn,
-.app-header-actions .game-board-zoom .btn {
+.app-header-actions .game-board-zoom .btn,
+.app-header-actions .btn-header-action {
   min-height: 28px;
 }
 
@@ -525,6 +530,17 @@ textarea {
   max-width: min(100%, var(--content-max-width, 28rem));
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Widget buttons: match app header size + lightweight 3D (raised / pressed) */
+.app-content .btn {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.15) inset, 0 2px 2px rgba(0, 0, 0, 0.07);
+}
+.app-content .btn:active {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
 }
 
 /* Buttons */
@@ -1067,7 +1083,7 @@ textarea {
 .finance-search-label { margin: var(--space) 0 0.25em; font-size: 0.95rem; }
 .finance-search-results { list-style: none; margin: 0 0 var(--space); padding: 0; }
 .finance-search-item { display: flex; justify-content: space-between; align-items: center; padding: 0.25em 0; gap: var(--space); }
-.btn-small { padding: 0.25em 0.5em; font-size: 0.9rem; }
+.btn-small { min-height: 28px; padding: 0 8px; font-size: 0.85rem; }
 
 /* Weather */
 .weather-app { }
@@ -1336,6 +1352,9 @@ textarea {
 .pictureframe-wake > * + * {
   margin-left: var(--space);
 }
+.status-bar-right > * + * {
+  margin-left: 6px;
+}
 .chess-mode-select > * + * { margin-left: var(--space); }
 .chess-mode-buttons > * + * { margin-top: var(--space); }
 .chess-footer > * + * { margin-left: var(--space); }
@@ -1372,24 +1391,24 @@ textarea {
   .calculator-app > * + * { margin-top: 0; }
 }
 
-/* ReKindle/Kindle compatibility (legacy.html has class="legacy-browser" on html): no animations/transitions (e-ink ghosting), system fonts only. See ReKindle COMPATIBILITY.md */
-html.legacy-browser *,
-html.legacy-browser *::before,
-html.legacy-browser *::after {
+/* Kindle/e-ink: one build. No animations (ghosting), system fonts, grayscale. */
+html *,
+html *::before,
+html *::after {
   transition: none !important;
   animation: none !important;
 }
-html.legacy-browser,
-html.legacy-browser body {
+html,
+html body {
   font-family: Arial, Verdana, "Courier New", serif, sans-serif;
   image-rendering: pixelated; /* ReKindle: crisp edges on e-ink */
 }
-html.legacy-browser {
+html {
   filter: grayscale(100%);
 }
 
-/* Legacy (Kindle) normal theme: maximum contrast for e-ink. Does not override highContrast theme. */
-html.legacy-browser[data-appearance="light"]:not([data-theme="highContrast"]) {
+/* Normal theme: maximum contrast for e-ink. Does not override highContrast theme. */
+html[data-appearance="light"]:not([data-theme="highContrast"]) {
   --fg: #000000;
   --muted: #1a1a1a;
   --border: #000000;
@@ -1399,7 +1418,7 @@ html.legacy-browser[data-appearance="light"]:not([data-theme="highContrast"]) {
   --header-fg: #000000;
   --header-border: #000000;
 }
-html.legacy-browser[data-appearance="dark"]:not([data-theme="highContrast"]) {
+html[data-appearance="dark"]:not([data-theme="highContrast"]) {
   --fg: #ffffff;
   --muted: #cccccc;
   --border: #666666;
@@ -1410,43 +1429,43 @@ html.legacy-browser[data-appearance="dark"]:not([data-theme="highContrast"]) {
   --header-border: #666666;
 }
 
-/* Legacy: thicker borders and lines for e-ink visibility */
-html.legacy-browser .btn,
-html.legacy-browser .app-tile,
-html.legacy-browser .panel,
-html.legacy-browser input,
-html.legacy-browser select,
-html.legacy-browser textarea {
+/* Thicker borders and lines for e-ink visibility */
+html .btn,
+html .app-tile,
+html .panel,
+html input,
+html select,
+html textarea {
   border-width: 1.5px;
 }
-html.legacy-browser .status-bar,
-html.legacy-browser .app-header {
+html .status-bar,
+html .app-header {
   border-bottom-width: 1.5px;
 }
-html.legacy-browser .app-header .btn-nav + .btn-nav {
+html .app-header .btn-nav + .btn-nav {
   margin-left: 0.5rem;
 }
 
-/* Legacy (Kindle): board zoom in header for every game */
-html.legacy-browser .app-header-actions .game-board-zoom {
+/* Board zoom in header for every game */
+html .app-header-actions .game-board-zoom {
   display: flex;
   align-items: center;
 }
-html.legacy-browser .chess-footer {
+html .chess-footer {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
-html.legacy-browser .chess-footer .chess-turn {
+html .chess-footer .chess-turn {
   margin: 0;
   margin-right: var(--space);
 }
-html.legacy-browser .chess-mode-select {
+html .chess-mode-select {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-html.legacy-browser .chess-engine-level {
+html .chess-engine-level {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1455,8 +1474,8 @@ html.legacy-browser .chess-engine-level {
   margin-top: var(--space);
 }
 
-/* Legacy: chess board square; size set by JS (zoom buttons) or default 320px */
-html.legacy-browser .chess-board {
+/* Chess board square; size set by JS (zoom buttons) or default 320px */
+html .chess-board {
   width: 320px;
   height: 320px;
   max-width: 100%;
@@ -1464,17 +1483,17 @@ html.legacy-browser .chess-board {
   min-width: 0;
   aspect-ratio: unset;
 }
-/* Legacy: piece size follows --chess-piece-size set by JS on .chess-board */
+/* Piece size follows --chess-piece-size set by JS on .chess-board */
 
-/* Legacy: no CSS Grid (Chrome 44). Use flex so app tiles don’t span full width. */
-html.legacy-browser .app-grid {
+/* App grid: flex (Chrome 44). Use flex so app tiles don’t span full width. */
+html .app-grid {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   grid-template-columns: unset;
   gap: 0;
 }
-html.legacy-browser .app-grid > li {
+html .app-grid > li {
   width: 6rem;
   margin: 0.375rem;
   aspect-ratio: auto;

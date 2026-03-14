@@ -255,7 +255,7 @@ function RedditApp(context: AppContext): AppInstance {
         <div class="reddit-post-view">
           {showMainThread && (
             <>
-              <p class="reddit-meta">u/{selectedPost.author} · {selectedPost.score} pts · {import.meta.env.LEGACY ? formatDateLegacy(new Date(selectedPost.created_utc * 1000)) : new Date(selectedPost.created_utc * 1000).toLocaleDateString()}</p>
+              <p class="reddit-meta">u/{selectedPost.author} · {selectedPost.score} pts · {formatDateLegacy(new Date(selectedPost.created_utc * 1000))}</p>
               <div class="reddit-selftext">
                 {stripHtml(selectedPost.selftext_html || selectedPost.selftext || '') || (selectedPost.is_self ? '' : `Link: ${selectedPost.url}`)}
               </div>

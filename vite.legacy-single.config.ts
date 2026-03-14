@@ -24,7 +24,6 @@ export default defineConfig({
     },
   },
   define: {
-    'import.meta.env.LEGACY': 'true',
     'import.meta.env.PROD': 'true',
   },
   build: {

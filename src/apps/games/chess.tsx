@@ -270,7 +270,6 @@ function getMoves(board: Board, row: number, col: number, state: ChessState = IN
 
 type GameMode = '2p' | 'vsComputer' | null;
 
-const isLegacy = typeof import.meta.env.LEGACY !== 'undefined' && import.meta.env.LEGACY;
 const CHESS_BOARD_MIN = 240;
 const CHESS_BOARD_MAX = 480;
 const CHESS_BOARD_STEP = 40;
@@ -428,7 +427,7 @@ export function ChessGame() {
             ))}
           </select>
           <span id="chess-level-hint" class="chess-level-hint">
-            {isLegacy ? '1–20 (simple engine on this device)' : '1 = easiest, 20 = strongest'}
+            1 = easiest, 20 = strongest
           </span>
         </div>
       </div>
