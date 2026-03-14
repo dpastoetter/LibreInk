@@ -34,6 +34,9 @@ const AppTile = memo(function AppTile({
   const IconComponent = getAppIcon(app.id);
   const handleActivate = useCallback(
     (e: Event) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'HomeScreen.tsx:handleActivate', message: 'tile activate', data: { appId: app.id, eventType: e.type }, hypothesisId: 'H2', timestamp: Date.now() }) }).catch(() => {});
+      // #endregion
       if (e.type === 'touchend') (e as TouchEvent).preventDefault();
       onLaunch(app);
     },
