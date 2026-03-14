@@ -96,7 +96,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 
   invertColors: false,
   reduceFlashes: false,
-  simpleLayout: false,
+  simpleLayout: true,
 
   financeItems: '[{"id":"^GSPC","name":"S&P 500","source":"yahoo"},{"id":"GC=F","name":"Gold","source":"yahoo"},{"id":"bitcoin","name":"Bitcoin","source":"coingecko"},{"id":"ethereum","name":"Ethereum","source":"coingecko"}]',
 

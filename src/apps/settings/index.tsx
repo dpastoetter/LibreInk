@@ -217,17 +217,6 @@ function SettingsApp(context: AppContext): AppInstance {
               {opt.label}
             </button>
           ))}
-          <div class="settings-row">
-            <span>Simple layout (e-ink)</span>
-            <button
-              type="button"
-              class={`btn ${settings.simpleLayout ? 'btn-active' : ''}`}
-              onClick={() => update({ simpleLayout: !settings.simpleLayout })}
-            >
-              {settings.simpleLayout ? 'On' : 'Off'}
-            </button>
-          </div>
-          <p class="panel-description">Hides search/filter UIs and uses larger font for e-ink.</p>
         </section>
         <section class="panel">
           <h2 class="panel-title">Data</h2>

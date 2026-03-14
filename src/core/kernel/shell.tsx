@@ -288,7 +288,7 @@ export function Shell({ services }: ShellProps) {
               <button type="button" class="btn btn-nav" onClick={goHome} aria-label="Home">
                 Home
               </button>
-              <button type="button" class="btn btn-nav" onClick={handleBack} aria-label="Back">
+              <button type="button" class="btn btn-nav" onClick={handleBack} aria-label="Back to previous page" title="Previous page (or close app)">
                 Back
               </button>
               {headerTitle && <h1 class="app-header-title">{headerTitle}</h1>}
