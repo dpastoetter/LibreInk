@@ -4,7 +4,6 @@ import type {
   GlobalSettings,
   FontSize,
   Appearance,
-  AppsPerRowPreset,
 } from '../../types/settings';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 
