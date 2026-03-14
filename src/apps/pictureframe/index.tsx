@@ -108,6 +108,7 @@ function PictureFrameApp(_context: AppContext): AppInstance {
   /* Kindle/e-ink: use only local SVGs to avoid crashes and heavy decode. */
   const pictures = allPictures.filter((p) => !p.src.startsWith('http'));
   const usePictures = pictures.length > 0 ? pictures : allPictures;
+  const backRef: { current: { canGoBack: () => boolean; goBack: () => void } | null } = { current: null };
 
   function PictureFrameUI() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -127,6 +128,11 @@ function PictureFrameApp(_context: AppContext): AppInstance {
     const closeFullscreen = useCallback(() => {
       setFullscreen(false);
     }, []);
+
+    backRef.current = {
+      canGoBack: () => fullscreen,
+      goBack: () => setFullscreen(false),
+    };
 
     const prev = () => setCurrentIndex((i) => (i === 0 ? usePictures.length - 1 : i - 1));
     const next = () => setCurrentIndex((i) => (i === usePictures.length - 1 ? 0 : i + 1));
@@ -190,6 +196,8 @@ function PictureFrameApp(_context: AppContext): AppInstance {
   return {
     render: () => <PictureFrameUI />,
     getTitle: () => 'Picture Frame',
+    canGoBack: () => backRef.current?.canGoBack?.() ?? false,
+    goBack: () => backRef.current?.goBack?.(),
   };
 }
 

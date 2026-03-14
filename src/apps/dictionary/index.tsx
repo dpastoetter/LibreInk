@@ -19,12 +19,18 @@ interface DictEntry {
 
 function DictionaryApp(context: AppContext): AppInstance {
   const { network, storage } = context.services;
+  const backRef: { current: { canGoBack: () => boolean; goBack: () => void } | null } = { current: null };
 
   function DictionaryUI() {
     const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<DictEntry[] | null>(null);
+
+    backRef.current = {
+      canGoBack: () => result != null && result.length > 0,
+      goBack: () => setResult(null),
+    };
 
     const search = useCallback(async () => {
       const w = query.trim().toLowerCase();
@@ -94,6 +100,8 @@ function DictionaryApp(context: AppContext): AppInstance {
   return {
     render: () => <DictionaryUI />,
     getTitle: () => 'Dictionary',
+    canGoBack: () => backRef.current?.canGoBack?.() ?? false,
+    goBack: () => backRef.current?.goBack?.(),
   };
 }
 
