@@ -102,9 +102,6 @@ export function MinesweeperGame() {
 
   return (
     <div class="minesweeper-game">
-      <div class="minesweeper-flag-row">
-        <button type="button" class={`btn minesweeper-flag-btn ${flagMode ? 'btn-active' : ''}`} onClick={() => setFlagMode((f) => !f)}>Flag</button>
-      </div>
       <div class="minesweeper-grid" style={{ width: boardSizePx + 'px', height: boardSizePx + 'px', maxHeight: 'none' }}>
         {grid.map((row, r) =>
           row.map((cell, c) => (
@@ -122,6 +119,7 @@ export function MinesweeperGame() {
       </div>
       <div class="minesweeper-footer">
         <span class="minesweeper-status">{lost ? 'Game over' : won ? 'You win!' : flagMode ? 'Flag mode' : 'Tap to reveal'}</span>
+        <button type="button" class={`btn minesweeper-flag-btn ${flagMode ? 'btn-active' : ''}`} onClick={() => setFlagMode((f) => !f)}>Flag</button>
         <button type="button" class="btn" onClick={reset}>New game</button>
       </div>
     </div>

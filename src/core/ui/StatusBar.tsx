@@ -19,13 +19,22 @@ function formatTime(d: Date, timeFormat: '12h' | '24h'): string {
   return timeFormat === '12h' ? formatTimeLegacy12h(d) : formatTimeLegacy(d);
 }
 
+/** Display time: device time + offset (for Kindles that show UTC or miss summer/winter time). */
+function getDisplayDate(offsetHours: number): Date {
+  if (offsetHours === 0) return new Date();
+  return new Date(Date.now() + offsetHours * 3600000);
+}
+
 /** Clock updates every 60s to keep e-ink / low-spec refresh and CPU minimal. */
-function useClock(timeFormat: '12h' | '24h') {
-  const [time, setTime] = useState(() => formatTime(new Date(), timeFormat));
+function useClock(timeFormat: '12h' | '24h', clockOffsetHours: number) {
+  const [time, setTime] = useState(() => formatTime(getDisplayDate(clockOffsetHours), timeFormat));
   useEffect(() => {
-    const id = setInterval(() => setTime(formatTime(new Date(), timeFormat)), 60_000);
+    const id = setInterval(
+      () => setTime(formatTime(getDisplayDate(clockOffsetHours), timeFormat)),
+      60_000
+    );
     return () => clearInterval(id);
-  }, [timeFormat]);
+  }, [timeFormat, clockOffsetHours]);
   return time;
 }
 
@@ -66,44 +75,45 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
   const [themeState, setThemeState] = useState({
     showClock: s.showClock,
     timeFormat: s.timeFormat,
+    clockOffsetHours: s.clockOffsetHours ?? 0,
     appearance: s.appearance as 'light' | 'dark',
     zoom: s.zoom,
   });
-  const { showClock, timeFormat, appearance, zoom } = themeState;
-  const time = useClock(timeFormat);
+  const { showClock, timeFormat, clockOffsetHours, appearance, zoom } = themeState;
+  const time = useClock(timeFormat, clockOffsetHours);
   const ref = useRef(themeState);
   ref.current = themeState;
 
   const unsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
-    const t = setTimeout(() => {
-      unsubRef.current = theme.subscribe((next) => {
-        const nextState = {
-          appearance: next.appearance as 'light' | 'dark',
-          zoom: next.zoom,
-          showClock: next.showClock,
-          timeFormat: next.timeFormat,
-        };
-        if (
-          nextState.appearance !== ref.current.appearance ||
-          nextState.zoom !== ref.current.zoom ||
-          nextState.showClock !== ref.current.showClock ||
-          nextState.timeFormat !== ref.current.timeFormat
-        ) {
-          ref.current = nextState;
-          setThemeState(nextState);
-        }
-      });
-      const sync = theme.getSettings();
-      setThemeState({
-        appearance: sync.appearance as 'light' | 'dark',
-        zoom: sync.zoom,
-        showClock: sync.showClock,
-        timeFormat: sync.timeFormat,
-      });
-    }, 400);
+    unsubRef.current = theme.subscribe((next) => {
+      const nextState = {
+        appearance: next.appearance as 'light' | 'dark',
+        zoom: next.zoom,
+        showClock: next.showClock,
+        timeFormat: next.timeFormat,
+        clockOffsetHours: next.clockOffsetHours ?? 0,
+      };
+      if (
+        nextState.appearance !== ref.current.appearance ||
+        nextState.zoom !== ref.current.zoom ||
+        nextState.showClock !== ref.current.showClock ||
+        nextState.timeFormat !== ref.current.timeFormat ||
+        nextState.clockOffsetHours !== ref.current.clockOffsetHours
+      ) {
+        ref.current = nextState;
+        setThemeState(nextState);
+      }
+    });
+    const sync = theme.getSettings();
+    setThemeState({
+      appearance: sync.appearance as 'light' | 'dark',
+      zoom: sync.zoom,
+      showClock: sync.showClock,
+      timeFormat: sync.timeFormat,
+      clockOffsetHours: sync.clockOffsetHours ?? 0,
+    });
     return () => {
-      clearTimeout(t);
       unsubRef.current?.();
       unsubRef.current = undefined;
     };
@@ -138,6 +148,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           type="button"
           class="btn btn-status btn-status-zoom"
           onClick={zoomOut}
+          onTouchEnd={(e) => { if (zoom > ZOOM_MIN) { e.preventDefault(); zoomOut(); } }}
           disabled={zoom <= ZOOM_MIN}
           aria-label="Zoom out"
         >
@@ -147,6 +158,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           type="button"
           class="btn btn-status btn-status-zoom"
           onClick={zoomIn}
+          onTouchEnd={(e) => { if (zoom < ZOOM_MAX) { e.preventDefault(); zoomIn(); } }}
           disabled={zoom >= ZOOM_MAX}
           aria-label="Zoom in"
         >
@@ -156,6 +168,7 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
           type="button"
           class="btn btn-status btn-status-theme"
           onClick={toggleAppearance}
+          onTouchEnd={(e) => { e.preventDefault(); toggleAppearance(); }}
           aria-label={`Switch to ${appearance === 'light' ? 'dark' : 'light'} mode`}
         >
           {isLegacy ? (appearance === 'light' ? 'D' : 'L') : (appearance === 'light' ? <StatusBarSun /> : <StatusBarMoon />)}

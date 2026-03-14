@@ -272,7 +272,6 @@ function RedditApp(context: AppContext): AppInstance {
               <h2>Comments</h2>
             </>
           )}
-          {!showMainThread && <h2 class="reddit-more-comments">More comments</h2>}
           {comments.length === 0 ? (
             <p class="reddit-meta">No comments yet.</p>
           ) : (
@@ -324,7 +323,7 @@ function RedditApp(context: AppContext): AppInstance {
           <ul class="list reddit-sub-list">
             {subs.map((sub) => (
               <li key={sub} class="reddit-sub-item">
-                <button type="button" onClick={() => setCurrentSub(sub)}>r/{sub}</button>
+                <button type="button" class="btn reddit-sub-btn" onClick={() => setCurrentSub(sub)}>r/{sub}</button>
                 {editMode && (
                   <button
                     type="button"

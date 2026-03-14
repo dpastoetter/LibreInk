@@ -91,6 +91,7 @@ function financeItemsToJson(items: FinanceItem[]): string {
 
 function FinanceApp(context: AppContext): AppInstance {
   const { network, settings } = context.services;
+  const backRef: { current: { canGoBack: () => boolean; goBack: () => void } | null } = { current: null };
 
   function FinanceUI() {
     const [items, setItems] = useState<FinanceItem[]>(() => parseFinanceItems(settings.get().financeItems));
@@ -104,6 +105,11 @@ function FinanceApp(context: AppContext): AppInstance {
     const [addError, setAddError] = useState<string | null>(null);
     const [editMode, setEditMode] = useState(false);
     const setHeaderActions = useContext(AppHeaderActionsContext);
+
+    backRef.current = {
+      canGoBack: () => editMode,
+      goBack: () => setEditMode(false),
+    };
 
     useEffect(() => {
       if (!setHeaderActions) return;
@@ -377,7 +383,12 @@ function FinanceApp(context: AppContext): AppInstance {
     );
   }
 
-  return { render: () => <FinanceUI />, getTitle: () => 'Markets' };
+  return {
+    render: () => <FinanceUI />,
+    getTitle: () => 'Markets',
+    canGoBack: () => backRef.current?.canGoBack?.() ?? false,
+    goBack: () => backRef.current?.goBack?.(),
+  };
 }
 
 export const financeApp = {

@@ -186,7 +186,7 @@ function TimerStopwatchApp(context: AppContext): AppInstance {
 
     return (
       <>
-        <p class="timer-hint">Countdown timer. No sound — good for reading sessions.</p>
+        <p class="widget-hint">Countdown timer. No sound — good for reading sessions.</p>
         {totalSeconds === 0 ? (
           <>
             <p class="timer-label">Choose minutes</p>
@@ -267,7 +267,8 @@ function WorldClockPanel({ settings }: WorldClockPanelProps) {
   };
 
   useEffect(() => {
-    const t = setInterval(() => setTick((n) => n + 1), 1000);
+    /* 2s tick: fewer re-renders on low-spec / Kindle. */
+    const t = setInterval(() => setTick((n) => n + 1), 2000);
     return () => clearInterval(t);
   }, []);
 
@@ -276,7 +277,7 @@ function WorldClockPanel({ settings }: WorldClockPanelProps) {
 
   return (
     <div class="worldclock-app">
-      <p class="widget-hint">Clocks update every second. No network.</p>
+      <p class="widget-hint">Clocks update every 2s. No network.</p>
       <div class="timer-stopwatch-tabs" style="margin-bottom: 0.5rem;">
         <button
           type="button"

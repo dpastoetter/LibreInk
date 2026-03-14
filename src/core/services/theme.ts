@@ -36,7 +36,7 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           root.style.setProperty('--zoom', String(zoom));
           const tapMin = next.tapTargetSize === 'extraLarge' ? 60 : next.tapTargetSize === 'large' ? 52 : 44;
-          root.style.setProperty('--tap-min', `${tapMin}px`);
+          root.style.setProperty('--tap-min', `${Math.round(tapMin * zoom)}px`);
           const contentMaxWidth = next.contentWidth === 'full' ? '100%' : next.contentWidth === 'medium' ? '40rem' : '28rem';
           root.style.setProperty('--content-max-width', contentMaxWidth);
         }
@@ -69,7 +69,7 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           root.style.setProperty('--zoom', String(zoom));
           const tapMin = next.tapTargetSize === 'extraLarge' ? 60 : next.tapTargetSize === 'large' ? 52 : 44;
-          root.style.setProperty('--tap-min', `${tapMin}px`);
+          root.style.setProperty('--tap-min', `${Math.round(tapMin * zoom)}px`);
           const contentMaxWidth = next.contentWidth === 'full' ? '100%' : next.contentWidth === 'medium' ? '40rem' : '28rem';
           root.style.setProperty('--content-max-width', contentMaxWidth);
         }

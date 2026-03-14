@@ -4,6 +4,7 @@ import type { AppDescriptor } from '../../types/plugin';
 import { getAppIcon } from '@core/icons/app-icons';
 import { isSafeLegacySvg } from '../utils/safe-svg';
 import type { ThemeService } from '../services/theme';
+import { debugIngest } from '../utils/debug-ingest';
 
 interface HomeScreenProps {
   apps: AppDescriptor[];
@@ -34,9 +35,7 @@ const AppTile = memo(function AppTile({
   const IconComponent = getAppIcon(app.id);
   const handleActivate = useCallback(
     (e: Event) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'HomeScreen.tsx:handleActivate', message: 'tile activate', data: { appId: app.id, eventType: e.type }, hypothesisId: 'H2', timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
+      debugIngest({ location: 'HomeScreen.tsx:handleActivate', message: 'tile activate', data: { appId: app.id, eventType: e.type }, hypothesisId: 'H2' });
       if (e.type === 'touchend') (e as TouchEvent).preventDefault();
       onLaunch(app);
     },
@@ -99,11 +98,10 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
       themeUnsubRef.current = undefined;
     };
   }, [theme]);
+  /* Defer expanding tile limit so first paint only renders initial batch (faster on Kindle). */
   useEffect(() => {
-    const raf = typeof requestAnimationFrame !== 'undefined' ? requestAnimationFrame : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
-    const cancel = typeof cancelAnimationFrame !== 'undefined' ? cancelAnimationFrame : clearTimeout;
-    const id = raf(() => setTileLimits({ apps: 999, games: 999 }));
-    return () => cancel(id as number);
+    const t = setTimeout(() => setTileLimits({ apps: 999, games: 999 }), 150);
+    return () => clearTimeout(t);
   }, []);
 
   const games = useMemo(
@@ -114,8 +112,8 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
     () => sortAppsWithSettingsLast(apps.filter((a) => a.category !== 'game'), sortOrder),
     [apps, sortOrder]
   );
-  const appsToShow = appsOnly.slice(0, tileLimits.apps);
-  const gamesToShow = games.slice(0, tileLimits.games);
+  const appsToShow = useMemo(() => appsOnly.slice(0, tileLimits.apps), [appsOnly, tileLimits.apps]);
+  const gamesToShow = useMemo(() => games.slice(0, tileLimits.games), [games, tileLimits.games]);
 
   const [page, setPage] = useState<'apps' | 'games'>('apps');
   const showPager = showGamesSection && games.length > 0;
