@@ -12,20 +12,16 @@ const rootDir = path.join(__dirname, '..');
 const distDir = path.join(rootDir, 'dist');
 
 const APP_LIST = [
-  { id: 'blog', name: 'Blog' },
+  { id: 'blog', name: 'Blog & News' },
   { id: 'calculator', name: 'Calculator' },
   { id: 'chess', name: 'Chess' },
   { id: 'comics', name: 'Comics' },
-  { id: 'dictionary', name: 'Dictionary' },
   { id: 'finance', name: 'Finance' },
   { id: 'minesweeper', name: 'Minesweeper' },
-  { id: 'news', name: 'News' },
   { id: 'reddit', name: 'Reddit' },
-  { id: 'stopwatch', name: 'Stopwatch' },
   { id: 'snake', name: 'Snake' },
-  { id: 'timer', name: 'Timer' },
+  { id: 'timer', name: 'Timer & Stopwatch' },
   { id: 'weather', name: 'Weather' },
-  { id: 'worldclock', name: 'World clock' },
   { id: 'todo', name: 'To-do' },
   { id: 'recipes', name: 'Recipes' },
   { id: 'pictureframe', name: 'Picture Frame' },

@@ -86,7 +86,9 @@ export function Shell({ services }: ShellProps) {
       state.touchActive = false;
     };
     const onClick = (e: MouseEvent) => {
-      if (state.moved) {
+      const target = e.target as HTMLElement;
+      const isAppTile = target?.closest?.('.app-tile');
+      if (state.moved && !isAppTile) {
         e.preventDefault();
         e.stopPropagation();
       }
@@ -244,7 +246,8 @@ export function Shell({ services }: ShellProps) {
       themeUnsubRef.current = undefined;
     };
   }, [services.theme]);
-  const headerTitle = showAppTitle ? (instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '') : '';
+  /* Don't show widget name in header when app is open (names can be too long). */
+  const headerTitle = '';
   const [headerActions, setHeaderActions] = useState<VNode | null>(null);
   useEffect(() => {
     setHeaderActions(null);
