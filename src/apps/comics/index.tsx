@@ -165,8 +165,6 @@ function ComicsApp(context: AppContext): AppInstance {
 
     return (
       <div class="comics-app">
-        <p class="widget-hint">comicsrss.com — Prev/Next; no animation.</p>
-        <button type="button" class="btn comics-back-feed" onClick={() => setRssFeedSlug(null)}>Change strip</button>
         {rssItems.length > 0 && (
           <PageNav
             current={rssIndex + 1}

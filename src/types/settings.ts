@@ -32,6 +32,8 @@ export interface GlobalSettings {
 
   showClock: boolean;
   timeFormat: TimeFormatPreset;
+  /** Hours to add to device time for status bar (e.g. 1 if Kindle shows UTC in summer). 0 = use device time. */
+  clockOffsetHours: number;
   showAppTitle: boolean;
 
   showGamesSection: boolean;
@@ -80,6 +82,7 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
 
   showClock: true,
   timeFormat: '24h',
+  clockOffsetHours: 0,
   showAppTitle: true,
 
   showGamesSection: true,

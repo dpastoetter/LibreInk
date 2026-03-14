@@ -4,7 +4,6 @@ import { LEGACY_ICONS } from '../core/icons/legacy-svg';
 
 /** Descriptor + lazy loader for each app. iconFallback = ASCII for Kindle; iconLegacySvg = simple B&W icon. */
 const LAZY_APPS: { descriptor: AppDescriptor; load: () => Promise<WebOSApp> }[] = [
-  { descriptor: { id: 'blog', name: 'Blog & News', icon: '📝', iconFallback: 'B', iconLegacySvg: LEGACY_ICONS.blog, category: 'reader' }, load: () => import('./blog').then((m) => m.blogApp) },
   { descriptor: { id: 'calculator', name: 'Calculator', icon: '🔢', iconFallback: '#', iconLegacySvg: LEGACY_ICONS.calculator, category: 'reader' }, load: () => import('./calculator').then((m) => m.calculatorApp) },
   { descriptor: { id: 'chess', name: 'Chess', icon: '♟️', iconFallback: 'P', iconLegacySvg: LEGACY_ICONS.chess, category: 'game' }, load: () => import('./games/chess-app').then((m) => m.chessApp) },
   { descriptor: { id: 'comics', name: 'Comics', icon: '🗞️', iconFallback: 'C', iconLegacySvg: LEGACY_ICONS.comics, category: 'reader' }, load: () => import('./comics').then((m) => m.comicsApp) },

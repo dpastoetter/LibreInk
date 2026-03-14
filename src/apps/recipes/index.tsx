@@ -58,17 +58,15 @@ interface MealDetail extends MealSummary {
 }
 
 function RecipeApp(context: AppContext): AppInstance {
-  // #region agent log
-  fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'recipes/index.tsx', message: 'RecipeApp entered', data: {}, hypothesisId: 'LAUNCH', timestamp: Date.now() }) }).catch(() => {});
-  // #endregion
   const { network, storage } = context.services;
   const backRef: { current: { view: 'search' | 'detail'; setView: (v: 'search' | 'detail') => void; setDetailId: (id: string | null) => void } | null } = { current: null };
-
-  // #region agent log
-  const log = (message: string, data: Record<string, unknown>, hypothesisId: string) => {
-    fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'recipes/index.tsx', message, data, hypothesisId, timestamp: Date.now() }) }).catch(() => {});
-  };
-  // #endregion
+  const log = typeof import.meta.env.DEV !== 'undefined' && import.meta.env.DEV
+    ? (message: string, data: Record<string, unknown>, hypothesisId: string) => {
+        try {
+          fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'recipes/index.tsx', message, data, hypothesisId, timestamp: Date.now() }) }).catch(() => {});
+        } catch { /* no-op */ }
+      }
+    : () => {};
 
   function RecipeUI() {
     const [view, setView] = useState<'search' | 'detail'>('search');

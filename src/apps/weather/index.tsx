@@ -232,6 +232,7 @@ function WeatherApp(context: AppContext): AppInstance {
 
     return (
       <div class="weather-app">
+        <p class="widget-hint">Search city. Forecast cached for offline.</p>
         <div class="weather-search">
           <input
             type="text"
@@ -246,19 +247,19 @@ function WeatherApp(context: AppContext): AppInstance {
             Search
           </button>
         </div>
-        {loading && !data && <p>Loading…</p>}
+        {loading && !data && <p class="widget-meta">Loading…</p>}
         {error && <p class="browser-error">{error}</p>}
         {data && (
           <>
-            {data.cityName && <p class="weather-city">{data.cityName}</p>}
+            {data.cityName && <h2 class="weather-city">{data.cityName}</h2>}
             <div class="weather-current">
               <span class="weather-icon" aria-hidden="true">{weatherIcon(data.current.code)}</span>
               <span class="weather-temp">{Math.round(data.current.temp)}°</span>
               <span class="weather-desc">{weatherLabel(data.current.code)}</span>
             </div>
-            <ul class="weather-forecast list">
+            <ul class="weather-forecast">
               {data.daily.map((day) => (
-                <li key={day.date}>
+                <li key={day.date} class="weather-forecast-row">
                   <span class="weather-day">{formatWeekdayShortLegacy(new Date(day.date))}</span>
                   <span class="weather-day-icon">{weatherIcon(day.code)}</span>
                   <span class="weather-day-range">{Math.round(day.min)}° – {Math.round(day.max)}°</span>

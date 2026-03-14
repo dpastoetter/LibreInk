@@ -272,7 +272,6 @@ function RedditApp(context: AppContext): AppInstance {
               <h2>Comments</h2>
             </>
           )}
-          {!showMainThread && <h2 class="reddit-more-comments">More comments</h2>}
           {comments.length === 0 ? (
             <p class="reddit-meta">No comments yet.</p>
           ) : (

@@ -93,8 +93,9 @@ function WorldClockApp(context: AppContext): AppInstance {
       setAddOffsetHours('');
     };
 
+    /* 2s tick: fewer re-renders on low-spec / Kindle. */
     useEffect(() => {
-      const t = setInterval(() => setTick((n) => n + 1), 1000);
+      const t = setInterval(() => setTick((n) => n + 1), 2000);
       return () => clearInterval(t);
     }, []);
 
@@ -120,7 +121,7 @@ function WorldClockApp(context: AppContext): AppInstance {
 
     return (
       <div class="worldclock-app">
-        <p class="widget-hint">Clocks update every second. No network.</p>
+        <p class="widget-hint">Clocks update every 2s. No network.</p>
         {editMode && (
           <div class="worldclock-add">
             <input

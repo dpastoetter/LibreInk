@@ -10,6 +10,7 @@ import type { StorageService } from '../services/storage';
 import type { NetworkService } from '../services/network';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
+import { debugIngest } from '../utils/debug-ingest';
 
 export interface ShellServices {
   storage: StorageService;
@@ -91,11 +92,7 @@ export function Shell({ services }: ShellProps) {
       const isAppTile = !!tile;
       const appId = tile instanceof HTMLElement ? tile.getAttribute('data-app-id') : null;
       const prevented = state.moved && !isAppTile;
-      if (state.moved || isAppTile) {
-        // #region agent log
-        fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'shell.tsx:onClick', message: 'click', data: { isAppTile, appId, stateMoved: state.moved, prevented }, hypothesisId: 'H1', timestamp: Date.now() }) }).catch(() => {});
-        // #endregion
-      }
+      if (state.moved || isAppTile) debugIngest({ location: 'shell.tsx:onClick', message: 'click', data: { isAppTile, appId, stateMoved: state.moved, prevented }, hypothesisId: 'H1' });
       if (prevented) {
         e.preventDefault();
         e.stopPropagation();
@@ -174,16 +171,14 @@ export function Shell({ services }: ShellProps) {
           settings: services.settings,
         },
       };
-      // #region agent log
       let inst: AppInstance;
       try {
         inst = app.launch(context);
-        fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'shell.tsx:launchApp', message: 'launchApp ok', data: { appId: app.id, hasRender: !!(inst as AppInstance).render }, hypothesisId: 'H4', timestamp: Date.now() }) }).catch(() => {});
+        debugIngest({ location: 'shell.tsx:launchApp', message: 'launchApp ok', data: { appId: app.id, hasRender: !!(inst as AppInstance).render }, hypothesisId: 'H4' });
       } catch (e) {
-        fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'shell.tsx:launchApp', message: 'launchApp throw', data: { appId: app.id, error: e instanceof Error ? e.message : String(e) }, hypothesisId: 'H4', timestamp: Date.now() }) }).catch(() => {});
+        debugIngest({ location: 'shell.tsx:launchApp', message: 'launchApp throw', data: { appId: app.id, error: e instanceof Error ? e.message : String(e) }, hypothesisId: 'H4' });
         throw e;
       }
-      // #endregion
       setInstance(inst!);
       setCurrentAppId(app.id);
       setAppStack([app.id]);
@@ -197,25 +192,17 @@ export function Shell({ services }: ShellProps) {
 
   const launchAppById = useCallback(
     async (appId: string) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'shell.tsx:launchAppById', message: 'launchAppById start', data: { appId }, hypothesisId: 'LOAD', timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
+      debugIngest({ location: 'shell.tsx:launchAppById', message: 'launchAppById start', data: { appId }, hypothesisId: 'LOAD' });
       setLoadingAppId(appId);
       try {
         const app = await AppRegistry.loadApp(appId);
-        // #region agent log
-        fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'shell.tsx:launchAppById', message: 'loadApp resolved', data: { appId, hasApp: !!app }, hypothesisId: 'H3', timestamp: Date.now() }) }).catch(() => {});
-        // #endregion
+        debugIngest({ location: 'shell.tsx:launchAppById', message: 'loadApp resolved', data: { appId, hasApp: !!app }, hypothesisId: 'H3' });
         if (app) {
-          // #region agent log
-          fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'shell.tsx:launchAppById', message: 'calling launchApp', data: { appId }, hypothesisId: 'H4', timestamp: Date.now() }) }).catch(() => {});
-          // #endregion
+          debugIngest({ location: 'shell.tsx:launchAppById', message: 'calling launchApp', data: { appId }, hypothesisId: 'H4' });
           launchApp(app);
         }
       } catch (e) {
-        // #region agent log
-        fetch('http://127.0.0.1:7647/ingest/0cc433dc-bc56-4722-8dcd-55136a56519b', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'fbf877' }, body: JSON.stringify({ sessionId: 'fbf877', location: 'shell.tsx:launchAppById', message: 'launchAppById catch', data: { appId, error: e instanceof Error ? e.message : String(e) }, hypothesisId: 'H3', timestamp: Date.now() }) }).catch(() => {});
-        // #endregion
+        debugIngest({ location: 'shell.tsx:launchAppById', message: 'launchAppById catch', data: { appId, error: e instanceof Error ? e.message : String(e) }, hypothesisId: 'H3' });
       } finally {
         setLoadingAppId(null);
       }
