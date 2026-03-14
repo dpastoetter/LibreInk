@@ -221,13 +221,26 @@ export function Shell({ services }: ShellProps) {
   const [showAppTitle, setShowAppTitle] = useState(() => services.theme.getSettings().showAppTitle);
   const showAppTitleRef = useRef(showAppTitle);
   showAppTitleRef.current = showAppTitle;
+  const themeUnsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
-    return services.theme.subscribe((s) => {
-      if (s.showAppTitle !== showAppTitleRef.current) {
-        showAppTitleRef.current = s.showAppTitle;
-        setShowAppTitle(s.showAppTitle);
-      }
+    const schedule =
+      typeof requestIdleCallback !== 'undefined'
+        ? requestIdleCallback
+        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
+    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
+    const id = schedule(() => {
+      themeUnsubRef.current = services.theme.subscribe((s) => {
+        if (s.showAppTitle !== showAppTitleRef.current) {
+          showAppTitleRef.current = s.showAppTitle;
+          setShowAppTitle(s.showAppTitle);
+        }
+      });
     });
+    return () => {
+      cancel(id as number);
+      themeUnsubRef.current?.();
+      themeUnsubRef.current = undefined;
+    };
   }, [services.theme]);
   const headerTitle = showAppTitle ? (instance?.getTitle?.() ?? currentApp?.name ?? currentAppId ?? '') : '';
   const [headerActions, setHeaderActions] = useState<VNode | null>(null);

@@ -62,23 +62,49 @@ const AppTile = memo(function AppTile({
   );
 });
 
+const INITIAL_APPS_LIMIT = 6;
+const INITIAL_GAMES_LIMIT = 4;
+
 const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
   const s = theme.getSettings();
   const [showGamesSection, setShowGamesSection] = useState(s.showGamesSection);
   const [sortOrder, setSortOrder] = useState(s.sortOrder);
+  const [tileLimits, setTileLimits] = useState({ apps: INITIAL_APPS_LIMIT, games: INITIAL_GAMES_LIMIT });
   const ref = useRef({ showGamesSection: s.showGamesSection, sortOrder: s.sortOrder });
+  const themeUnsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
-    return theme.subscribe((next) => {
-      if (next.showGamesSection !== ref.current.showGamesSection) {
-        ref.current.showGamesSection = next.showGamesSection;
-        setShowGamesSection(next.showGamesSection);
-      }
-      if (next.sortOrder !== ref.current.sortOrder) {
-        ref.current.sortOrder = next.sortOrder;
-        setSortOrder(next.sortOrder);
-      }
+    const schedule =
+      typeof requestIdleCallback !== 'undefined'
+        ? requestIdleCallback
+        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
+    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
+    const id = schedule(() => {
+      themeUnsubRef.current = theme.subscribe((next) => {
+        if (next.showGamesSection !== ref.current.showGamesSection) {
+          ref.current.showGamesSection = next.showGamesSection;
+          setShowGamesSection(next.showGamesSection);
+        }
+        if (next.sortOrder !== ref.current.sortOrder) {
+          ref.current.sortOrder = next.sortOrder;
+          setSortOrder(next.sortOrder);
+        }
+      });
     });
+    return () => {
+      cancel(id as number);
+      themeUnsubRef.current?.();
+      themeUnsubRef.current = undefined;
+    };
   }, [theme]);
+  useEffect(() => {
+    const schedule =
+      typeof requestIdleCallback !== 'undefined'
+        ? requestIdleCallback
+        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
+    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
+    const id = schedule(() => setTileLimits({ apps: 999, games: 999 }));
+    return () => cancel(id as number);
+  }, []);
 
   const games = useMemo(
     () => sortByName(apps.filter((a) => a.category === 'game'), sortOrder),
@@ -88,13 +114,15 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
     () => sortAppsWithSettingsLast(apps.filter((a) => a.category !== 'game'), sortOrder),
     [apps, sortOrder]
   );
+  const appsToShow = appsOnly.slice(0, tileLimits.apps);
+  const gamesToShow = games.slice(0, tileLimits.games);
 
   return (
     <div class="home-screen">
       <section class="home-category">
         <h2 class="home-category-title">Apps</h2>
         <ul class="app-grid">
-          {appsOnly.map((app) => (
+          {appsToShow.map((app) => (
             <AppTile key={app.id} app={app} onLaunch={onLaunch} />
           ))}
         </ul>
@@ -103,7 +131,7 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
         <section class="home-category">
           <h2 class="home-category-title">Games</h2>
           <ul class="app-grid">
-            {games.map((app) => (
+            {gamesToShow.map((app) => (
               <AppTile key={app.id} app={app} onLaunch={onLaunch} />
             ))}
           </ul>

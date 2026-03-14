@@ -70,25 +70,38 @@ function StatusBarInner({ theme, settings }: StatusBarProps) {
   const [zoom, setZoom] = useState(s.zoom);
   const ref = useRef({ appearance: s.appearance, zoom: s.zoom, showClock: s.showClock, timeFormat: s.timeFormat });
 
+  const unsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
-    return theme.subscribe((next) => {
-      if (next.appearance !== ref.current.appearance) {
-        ref.current.appearance = next.appearance;
-        setAppearance(next.appearance);
-      }
-      if (next.zoom !== ref.current.zoom) {
-        ref.current.zoom = next.zoom;
-        setZoom(next.zoom);
-      }
-      if (next.showClock !== ref.current.showClock) {
-        ref.current.showClock = next.showClock;
-        setShowClock(next.showClock);
-      }
-      if (next.timeFormat !== ref.current.timeFormat) {
-        ref.current.timeFormat = next.timeFormat;
-        setTimeFormat(next.timeFormat);
-      }
+    const schedule =
+      typeof requestIdleCallback !== 'undefined'
+        ? requestIdleCallback
+        : (cb: () => void) => setTimeout(cb, 0) as unknown as number;
+    const cancel = typeof cancelIdleCallback !== 'undefined' ? cancelIdleCallback : clearTimeout;
+    const id = schedule(() => {
+      unsubRef.current = theme.subscribe((next) => {
+        if (next.appearance !== ref.current.appearance) {
+          ref.current.appearance = next.appearance;
+          setAppearance(next.appearance);
+        }
+        if (next.zoom !== ref.current.zoom) {
+          ref.current.zoom = next.zoom;
+          setZoom(next.zoom);
+        }
+        if (next.showClock !== ref.current.showClock) {
+          ref.current.showClock = next.showClock;
+          setShowClock(next.showClock);
+        }
+        if (next.timeFormat !== ref.current.timeFormat) {
+          ref.current.timeFormat = next.timeFormat;
+          setTimeFormat(next.timeFormat);
+        }
+      });
     });
+    return () => {
+      cancel(id as number);
+      unsubRef.current?.();
+      unsubRef.current = undefined;
+    };
   }, [theme]);
 
   const toggleAppearance = () => {
