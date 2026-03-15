@@ -12,11 +12,7 @@ A minimal, plugin-based “webOS-style” launcher for low-spec and e-ink device
 |------------|-----------|
 | ![Home — light mode](docs/screenshots/legacy-home-light.png) | ![Home — dark mode](docs/screenshots/legacy-home-dark.png) |
 
-| Reddit widget | Chess (in-game) |
-|---------------|-----------------|
-| ![Reddit app](docs/screenshots/reddit-widget.png) | ![Chess game](docs/screenshots/chess-widget.png) |
-
-Screenshots show the home screen in light and dark mode (with **3 apps per row**), the Reddit app, and the Chess game. To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
+Screenshots show the home screen in light and dark mode (with **3 apps per row**). To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
 
 ## Tech stack
 
@@ -57,10 +53,8 @@ npm test
 - **Sudoku** – Puzzle game.
 - **Minesweeper** – Classic minesweeper.
 - **Reddit** – Read-only subreddit and post list with paginated comments. Choose a subreddit from the list or open by name. **Sort:** one header button cycles Hot → New → Best for the current subreddit.
-- **News** – RSS reader, multiple sources, CORS proxy, date-sorted mix.
 - **Finance** – Markets: S&P 500, Gold, Bitcoin, Ethereum; 24h change; USD/EUR; refresh.
 - **Comics** – xkcd (by number, Older/Newer) and Comics RSS (curated strips). Cached; no animation.
-- **Blog** – RSS blog reader.
 - **Dictionary** – Offline/cached lookups.
 - **Weather** – Current and forecast (network).
 - **Timer**, **Stopwatch**, **World clock** – Time utilities.
