@@ -108,8 +108,8 @@ No secrets in the bundle; sanitized API content (XSS prevention); Content-Securi
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – StatusBar, PageNav, Button, List, shared UI.
 - `src/core/utils/` – html (stripHtml), url (isSafeUrl, sanitizeUrl), safe-svg (isSafeLegacySvg), date, fallback-ui.
-- `src/apps/` – App plugins: settings, games (chess, snake, minesweeper), news, reddit, comics, blog, dictionary, finance, weather, timer, stopwatch, worldclock, todo, recipes, pictureframe.
-- `src/apps/games/` – GameBoardResize (shared − / size / + header controls for Chess, Snake, Minesweeper).
+- `src/apps/` – App plugins: settings, games (chess, snake, minesweeper), reddit, comics, finance, weather, timer, stopwatch, worldclock, todo, recipes, pictureframe.
+- `src/apps/games/` – GameBoardResize (shared − / size / + header controls for Chess, and potentially also Snake, Minesweeper and other games in the future.
 - `src/types/` – Shared types and plugin API.
 
 ## License
