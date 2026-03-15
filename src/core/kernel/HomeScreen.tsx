@@ -64,14 +64,10 @@ const AppTile = memo(function AppTile({
   );
 });
 
-const INITIAL_APPS_LIMIT = 3;
-const INITIAL_GAMES_LIMIT = 2;
-
 const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScreenProps) {
   const s = theme.getSettings();
   const [showGamesSection, setShowGamesSection] = useState(s.showGamesSection);
   const [sortOrder, setSortOrder] = useState(s.sortOrder);
-  const [tileLimits, setTileLimits] = useState({ apps: INITIAL_APPS_LIMIT, games: INITIAL_GAMES_LIMIT });
   const ref = useRef({ showGamesSection: s.showGamesSection, sortOrder: s.sortOrder });
   const themeUnsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
@@ -98,11 +94,6 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
       themeUnsubRef.current = undefined;
     };
   }, [theme]);
-  /* Defer expanding tile limit so first paint only renders initial batch (faster on Kindle). */
-  useEffect(() => {
-    const t = setTimeout(() => setTileLimits({ apps: 999, games: 999 }), 150);
-    return () => clearTimeout(t);
-  }, []);
 
   const games = useMemo(
     () => sortByName(apps.filter((a) => a.category === 'game'), sortOrder),
@@ -112,8 +103,8 @@ const HomeScreenInner = function HomeScreen({ apps, onLaunch, theme }: HomeScree
     () => sortAppsWithSettingsLast(apps.filter((a) => a.category !== 'game'), sortOrder),
     [apps, sortOrder]
   );
-  const appsToShow = useMemo(() => appsOnly.slice(0, tileLimits.apps), [appsOnly, tileLimits.apps]);
-  const gamesToShow = useMemo(() => games.slice(0, tileLimits.games), [games, tileLimits.games]);
+  const appsToShow = appsOnly;
+  const gamesToShow = games;
 
   const [page, setPage] = useState<'apps' | 'games'>('apps');
   const showPager = showGamesSection && games.length > 0;
