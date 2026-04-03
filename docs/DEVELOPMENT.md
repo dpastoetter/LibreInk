@@ -40,8 +40,8 @@ src/
 │   ├── plugins/
 │   │   └── registry.ts       # App registry (register / getApp / getAllApps)
 │   ├── icons/
-│   │   ├── app-icons.tsx     # Lucide icons (aliased to app-icons-legacy in build)
-│   │   ├── app-icons-legacy.ts  # No Lucide; uses legacy-svg / fallback only
+│   │   ├── app-icons.ts      # Re-exports app-icons-legacy (TS resolve); Vite may alias to legacy
+│   │   ├── app-icons-legacy.ts  # Launcher icons: legacy-svg / fallback only
 │   │   └── legacy-svg.ts     # Inline SVG icons for legacy/Kindle launcher
 │   ├── services/             # Service implementations
 │   │   ├── storage.ts

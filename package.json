@@ -16,7 +16,6 @@
     "push:github": "./scripts/push-to-github.sh"
   },
   "dependencies": {
-    "@heroicons/react": "^2.2.0",
     "preact": "^10.19.2",
     "regenerator-runtime": "^0.14.1",
     "stockfish.js": "^10.0.2"

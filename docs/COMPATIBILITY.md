@@ -28,7 +28,7 @@ LibreInk follows [ReKindle COMPATIBILITY.md](https://github.com/ReKindleOS/ReKin
 - **No `alert` / `confirm` / `prompt`** – We do not use them; use custom modals if needed.
 - **No `position: sticky` / `fixed`** – We avoid them to prevent checkerboarding on e-ink.
 - **Touch targets** – Minimum `--tap-min: 52px` for tap areas.
-- **Simple layout (e-ink)** – In Settings → Appearance, "Simple layout (e-ink)" strips dynamic elements (search/filter inputs in Finance, Reddit, Weather, Recipes, Blog, Dictionary) and uses larger font and spacing. Minimizes CSS/JS-driven UI for e-ink; list views (e.g. Reddit) use pagination (Next/Prev) to limit reflow.
+- **Simple layout (e-ink)** – In Settings → Appearance, "Simple layout (e-ink)" sets `data-simple-layout` on the document, larger app content type, and **hides search/add bars** in Reddit, Finance, Weather, Recipes, Blog, and Dictionary (pick from lists / watchlist / location only). Turn it off to search or add items. List views still use pagination (Next/Prev) to limit reflow.
 - **Chess vs computer** – Stockfish (WASM) is attempted when Workers and WebAssembly are available; the worker is kept alive across games (no re-init). On Kindle/legacy the built-in fallback engine is used so vs computer still works.
 
 ## Quick tips for Kindle users

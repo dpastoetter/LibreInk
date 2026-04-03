@@ -3,6 +3,7 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { getCorsProxyUrl } from '@core/constants';
 import { sanitizeUrl } from '@core/utils/url';
+import { isSimpleLayout } from '@core/utils/simple-layout';
 
 const CACHE_PREFIX = 'recipes:';
 const SEARCH_CACHE_PREFIX = 'recipes:search:';
@@ -58,7 +59,7 @@ interface MealDetail extends MealSummary {
 }
 
 function RecipeApp(context: AppContext): AppInstance {
-  const { network, storage } = context.services;
+  const { network, storage, settings } = context.services;
   const backRef: { current: { view: 'search' | 'detail'; setView: (v: 'search' | 'detail') => void; setDetailId: (id: string | null) => void } | null } = { current: null };
 
   function RecipeUI() {
@@ -185,23 +186,31 @@ function RecipeApp(context: AppContext): AppInstance {
       );
     }
 
+    const simple = isSimpleLayout(() => settings.get());
+
     return (
       <div class="recipes-app">
-        <p class="widget-hint">Search recipes by name. Results from TheMealDB, cached offline.</p>
-        <div class="recipes-search">
-          <input
-            type="text"
-            class="input recipes-input"
-            placeholder="e.g. chicken, pasta"
-            value={query}
-            onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === 'Enter' && search()}
-            aria-label="Search recipes"
-          />
-          <button type="button" class="btn" onClick={search} disabled={loading}>
-            Search
-          </button>
-        </div>
+        {simple ? (
+          <p class="widget-hint simple-layout-hint">Simple layout: turn off in Settings → Appearance to search recipes.</p>
+        ) : (
+          <>
+            <p class="widget-hint">Search recipes by name. Results from TheMealDB, cached offline.</p>
+            <div class="recipes-search">
+              <input
+                type="text"
+                class="input recipes-input"
+                placeholder="e.g. chicken, pasta"
+                value={query}
+                onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
+                onKeyDown={(e) => e.key === 'Enter' && search()}
+                aria-label="Search recipes"
+              />
+              <button type="button" class="btn" onClick={search} disabled={loading}>
+                Search
+              </button>
+            </div>
+          </>
+        )}
         {loading && <p>Loading…</p>}
         {error && <p class="browser-error">{error}</p>}
         {meals.length > 0 && (

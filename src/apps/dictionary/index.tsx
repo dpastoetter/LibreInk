@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
+import { isSimpleLayout } from '@core/utils/simple-layout';
 
 const API_URL = (word: string) =>
   `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.trim().toLowerCase())}`;
@@ -18,7 +19,7 @@ interface DictEntry {
 }
 
 function DictionaryApp(context: AppContext): AppInstance {
-  const { network, storage } = context.services;
+  const { network, storage, settings } = context.services;
   const backRef: { current: { canGoBack: () => boolean; goBack: () => void } | null } = { current: null };
 
   function DictionaryUI() {
@@ -56,23 +57,31 @@ function DictionaryApp(context: AppContext): AppInstance {
       }
     }, [query, network, storage]);
 
+    const simple = isSimpleLayout(() => settings.get());
+
     return (
       <div class="dictionary-app">
-        <p class="widget-hint">Look up a word. Results are cached for offline.</p>
-        <div class="dictionary-search">
-          <input
-            type="text"
-            class="input dictionary-input"
-            placeholder="Word"
-            value={query}
-            onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === 'Enter' && search()}
-            aria-label="Word to look up"
-          />
-          <button type="button" class="btn" onClick={search} disabled={loading}>
-            Look up
-          </button>
-        </div>
+        {simple ? (
+          <p class="widget-hint simple-layout-hint">Simple layout: turn off in Settings → Appearance to look up words. Cached results below if any.</p>
+        ) : (
+          <>
+            <p class="widget-hint">Look up a word. Results are cached for offline.</p>
+            <div class="dictionary-search">
+              <input
+                type="text"
+                class="input dictionary-input"
+                placeholder="Word"
+                value={query}
+                onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
+                onKeyDown={(e) => e.key === 'Enter' && search()}
+                aria-label="Word to look up"
+              />
+              <button type="button" class="btn" onClick={search} disabled={loading}>
+                Look up
+              </button>
+            </div>
+          </>
+        )}
         {loading && <p>Loading…</p>}
         {error && <p class="browser-error">{error}</p>}
         {result && result.length > 0 && (

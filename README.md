@@ -110,7 +110,7 @@ No secrets in the bundle; sanitized API content (XSS prevention); Content-Securi
 
 - `src/core/kernel/` – Shell, home screen, app lifecycle, AppHeaderActionsContext.
 - `src/core/plugins/` – Plugin registry (lazy load on first launch).
-- `src/core/icons/` – App launcher icons: Heroicons (outline) in `app-icons.tsx`; legacy build uses `app-icons-legacy.ts` and `legacy-svg.ts`.
+- `src/core/icons/` – App launcher icons: `app-icons-legacy.ts` + `legacy-svg.ts` (Vite aliases `@core/icons/app-icons` to legacy; no Heroicons in the bundle).
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – StatusBar, PageNav, Button, List, shared UI.
 - `src/core/utils/` – html (stripHtml), url (isSafeUrl, sanitizeUrl), safe-svg (isSafeLegacySvg), date, fallback-ui.

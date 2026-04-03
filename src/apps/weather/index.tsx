@@ -3,6 +3,7 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { getDefaultCacheTtlMs } from '@core/constants';
 import { formatWeekdayShortLegacy } from '@core/utils/date';
+import { isSimpleLayout } from '@core/utils/simple-layout';
 
 const CACHE_KEY = 'weather:cache';
 const DEFAULT_LAT = 52.52;
@@ -229,24 +230,31 @@ function WeatherApp(context: AppContext): AppInstance {
     }, [fetchWeather]);
 
     const onSearch = () => fetchWeatherForCity(searchQuery);
+    const simple = isSimpleLayout(() => settings.get());
 
     return (
       <div class="weather-app">
-        <p class="widget-hint">Search city. Forecast cached for offline.</p>
-        <div class="weather-search">
-          <input
-            type="text"
-            class="input weather-search-input"
-            placeholder="Search city…"
-            value={searchQuery}
-            onInput={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === 'Enter' && onSearch()}
-            aria-label="City search"
-          />
-          <button type="button" class="btn" onClick={onSearch} disabled={loading}>
-            Search
-          </button>
-        </div>
+        <p class="widget-hint">
+          {simple
+            ? 'Simple layout: location or last city. Turn off in Settings → Appearance to search by city.'
+            : 'Search city. Forecast cached for offline.'}
+        </p>
+        {!simple && (
+          <div class="weather-search">
+            <input
+              type="text"
+              class="input weather-search-input"
+              placeholder="Search city…"
+              value={searchQuery}
+              onInput={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
+              onKeyDown={(e) => e.key === 'Enter' && onSearch()}
+              aria-label="City search"
+            />
+            <button type="button" class="btn" onClick={onSearch} disabled={loading}>
+              Search
+            </button>
+          </div>
+        )}
         {loading && !data && <p class="widget-meta">Loading…</p>}
         {error && <p class="browser-error">{error}</p>}
         {data && (
@@ -259,7 +267,7 @@ function WeatherApp(context: AppContext): AppInstance {
                 <span class="weather-desc">{weatherLabel(data.current.code)}</span>
               </div>
             </div>
-            <ul class="weather-forecast" role="list" aria-label="Daily forecast">
+            <ul class="weather-forecast" aria-label="Daily forecast">
               {data.daily.map((day) => (
                 <li key={day.date} class="weather-forecast-row">
                   <span class="weather-day">{formatWeekdayShortLegacy(new Date(day.date))}</span>

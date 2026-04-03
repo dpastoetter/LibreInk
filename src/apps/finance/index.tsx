@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useContext } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { getCorsProxyUrl } from '@core/constants';
+import { isSimpleLayout } from '@core/utils/simple-layout';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 
 const COINGECKO_BASE = 'https://api.coingecko.com/api/v3/simple/price';
@@ -288,6 +289,8 @@ function FinanceApp(context: AppContext): AppInstance {
       persistItems([...items, { id: symbol, name, source: 'yahoo' }]);
     };
 
+    const simple = isSimpleLayout(() => settings.get());
+
     return (
       <div class="finance-app">
         {loading && <p>Loading…</p>}
@@ -325,46 +328,50 @@ function FinanceApp(context: AppContext): AppInstance {
           })}
         </ul>
 
-        <div class="finance-add-section">
-          <div class="finance-add-row finance-search-add-bar">
-            <input
-              type="text"
-              class="input finance-add-input"
-              placeholder="Symbol, id, or search (e.g. AAPL, bitcoin, Apple)"
-              value={searchAddInput}
-              onInput={(e) => setSearchAddInput((e.target as HTMLInputElement).value)}
-              onKeyDown={(e) => {
-                if (e.key !== 'Enter') return;
-                const target = (e.target as HTMLInputElement);
-                if (target.value.trim()) addBySymbol();
-              }}
-            />
-            <button type="button" class="btn" onClick={runSearch} disabled={searching || !searchAddInput.trim()}>
-              {searching ? 'Searching…' : 'Search'}
-            </button>
-            <button type="button" class="btn" onClick={addBySymbol} disabled={!searchAddInput.trim()}>
-              Add
-            </button>
+        {simple ? (
+          <p class="widget-hint simple-layout-hint">Simple layout: watchlist only. Turn off in Settings → Appearance to search and add symbols.</p>
+        ) : (
+          <div class="finance-add-section">
+            <div class="finance-add-row finance-search-add-bar">
+              <input
+                type="text"
+                class="input finance-add-input"
+                placeholder="Symbol, id, or search (e.g. AAPL, bitcoin, Apple)"
+                value={searchAddInput}
+                onInput={(e) => setSearchAddInput((e.target as HTMLInputElement).value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return;
+                  const target = (e.target as HTMLInputElement);
+                  if (target.value.trim()) addBySymbol();
+                }}
+              />
+              <button type="button" class="btn" onClick={runSearch} disabled={searching || !searchAddInput.trim()}>
+                {searching ? 'Searching…' : 'Search'}
+              </button>
+              <button type="button" class="btn" onClick={addBySymbol} disabled={!searchAddInput.trim()}>
+                Add
+              </button>
+            </div>
+            {addError && <p class="finance-add-error">{addError}</p>}
+            {searchResults.length > 0 && (
+              <ul class="finance-search-results">
+                {searchResults.map((s) => (
+                  <li key={s.symbol} class="finance-search-item">
+                    <span>{s.name} ({s.symbol})</span>
+                    <button
+                      type="button"
+                      class="btn btn-small"
+                      onClick={() => addSearchResult(s.symbol, s.name)}
+                      disabled={items.some((i) => i.id === s.symbol && i.source === 'yahoo')}
+                    >
+                      Add
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          {addError && <p class="finance-add-error">{addError}</p>}
-          {searchResults.length > 0 && (
-            <ul class="finance-search-results">
-              {searchResults.map((s) => (
-                <li key={s.symbol} class="finance-search-item">
-                  <span>{s.name} ({s.symbol})</span>
-                  <button
-                    type="button"
-                    class="btn btn-small"
-                    onClick={() => addSearchResult(s.symbol, s.name)}
-                    disabled={items.some((i) => i.id === s.symbol && i.source === 'yahoo')}
-                  >
-                    Add
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        )}
 
         <div class="finance-actions">
           <button

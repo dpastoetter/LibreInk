@@ -5,6 +5,7 @@ import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
 import { sanitizeUrl } from '@core/utils/url';
 import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
+import { isSimpleLayout } from '@core/utils/simple-layout';
 import { parseRssItems, getFeedTitleFromXml } from '@core/utils/rss';
 import { parseJsonArray, isBlogFeed } from '@core/utils/settings-parsers';
 import type { BlogFeedInput } from '@core/utils/settings-parsers';
@@ -344,33 +345,40 @@ function BlogPanel({ context, backRef }: { context: AppContext; backRef: preact.
     }
 
     // Landing: feed picker (same pattern as Reddit sub picker)
+    const simple = isSimpleLayout(() => settings.get());
     return (
       <div class="blog-app">
-        <p class="widget-hint">Add a feed by URL or pick one below.</p>
-        <div class="blog-search">
-          <input
-            type="text"
-            class="input"
-            placeholder="Feed URL or site (e.g. wired.com/feed/rss)"
-            value={searchAddInput}
-            onInput={(e) => setSearchAddInput((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === 'Enter' && addFeed()}
-          />
-          <button type="button" class="btn" onClick={discover} onTouchEnd={(e) => { e.preventDefault(); discover(); }} disabled={discoverLoading || !searchAddInput.trim()}>{discoverLoading ? '…' : 'Discover'}</button>
-          <button type="button" class="btn" onClick={addFeed} onTouchEnd={(e) => { e.preventDefault(); addFeed(); }} disabled={!searchAddInput.trim()}>Add</button>
-        </div>
-        {discoverError && <p class="widget-hint" style="color: var(--finance-down, #c00);">{discoverError}</p>}
-        {discoverResults && discoverResults.length > 0 && (
-          <ul class="list blog-discover-list">
-            {discoverResults.map((r) => (
-              <li key={r.url} class="blog-discover-item">
-                <span>{r.name}</span>
-                <button type="button" class="btn btn-small" onClick={() => addFeedByUrl(r.name, r.url)} onTouchEnd={(e) => { e.preventDefault(); addFeedByUrl(r.name, r.url); }}>Add</button>
-              </li>
-            ))}
-          </ul>
+        {simple ? (
+          <p class="widget-hint simple-layout-hint">Simple layout: open a saved feed below. Turn off in Settings → Appearance to add feeds by URL.</p>
+        ) : (
+          <>
+            <p class="widget-hint">Add a feed by URL or pick one below.</p>
+            <div class="blog-search">
+              <input
+                type="text"
+                class="input"
+                placeholder="Feed URL or site (e.g. wired.com/feed/rss)"
+                value={searchAddInput}
+                onInput={(e) => setSearchAddInput((e.target as HTMLInputElement).value)}
+                onKeyDown={(e) => e.key === 'Enter' && addFeed()}
+              />
+              <button type="button" class="btn" onClick={discover} onTouchEnd={(e) => { e.preventDefault(); discover(); }} disabled={discoverLoading || !searchAddInput.trim()}>{discoverLoading ? '…' : 'Discover'}</button>
+              <button type="button" class="btn" onClick={addFeed} onTouchEnd={(e) => { e.preventDefault(); addFeed(); }} disabled={!searchAddInput.trim()}>Add</button>
+            </div>
+            {discoverError && <p class="widget-hint" style="color: var(--finance-down, #c00);">{discoverError}</p>}
+            {discoverResults && discoverResults.length > 0 && (
+              <ul class="list blog-discover-list">
+                {discoverResults.map((r) => (
+                  <li key={r.url} class="blog-discover-item">
+                    <span>{r.name}</span>
+                    <button type="button" class="btn btn-small" onClick={() => addFeedByUrl(r.name, r.url)} onTouchEnd={(e) => { e.preventDefault(); addFeedByUrl(r.name, r.url); }}>Add</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p class="widget-hint">Or pick one below:</p>
+          </>
         )}
-        <p class="widget-hint">Or pick one below:</p>
         <ul class="list blog-feed-list">
           {feeds.map((feed) => (
             <li key={feed.id} class="blog-feed-item">

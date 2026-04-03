@@ -170,6 +170,7 @@ html[data-appearance="dark"][data-theme="highContrast"] {
 [data-simple-layout="true"] .list li,
 [data-simple-layout="true"] .reddit-comment,
 [data-simple-layout="true"] .finance-row { min-height: 2.5rem; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.simple-layout-hint { color: var(--muted); }
 
 /* Apps per row (home grid) */
 [data-apps-per-row="2"] .app-grid { grid-template-columns: repeat(2, 1fr); }

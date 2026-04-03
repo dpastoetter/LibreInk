@@ -1,3 +1,4 @@
+import { memo } from 'preact/compat';
 import { useState, useEffect, useCallback, useMemo, useContext } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
@@ -6,6 +7,7 @@ import { stripHtml } from '@core/utils/html';
 import { formatDateLegacy } from '@core/utils/date';
 import { getCorsProxyUrl } from '@core/constants';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
+import { isSimpleLayout } from '@core/utils/simple-layout';
 
 const REDDIT_JSON = (path: string) => `https://www.reddit.com${path}.json?raw_json=1&limit=25`;
 
@@ -94,6 +96,24 @@ type RedditPostCommentsResponse = [
   { data: { children: RedditCommentNode[] } }
 ];
 
+const RedditPostRow = memo(function RedditPostRow({
+  post,
+  onOpen,
+}: {
+  post: RedditPost['data'];
+  onOpen: (p: RedditPost['data']) => void;
+}) {
+  return (
+    <li>
+      <button type="button" onClick={() => onOpen(post)}>
+        <strong>{post.title}</strong>
+        <br />
+        <small>u/{post.author} · {post.score} pts · {post.num_comments} comments</small>
+      </button>
+    </li>
+  );
+});
+
 function RedditApp(context: AppContext): AppInstance {
   const { network, settings } = context.services;
   const backRef: {
@@ -160,27 +180,16 @@ function RedditApp(context: AppContext): AppInstance {
       } finally {
         setLoading(false);
       }
-    }, [network]);
+    }, [network, settings]);
 
     useEffect(() => {
       if (currentSub) loadSub(currentSub, listSort);
     }, [currentSub, listSort, loadSub]);
 
     useEffect(() => {
-      if (!selectedPost) return;
       const t = setTimeout(scrollAppContentToTop, 0);
       return () => clearTimeout(t);
-    }, [selectedPost]);
-
-    useEffect(() => {
-      const t = setTimeout(scrollAppContentToTop, 0);
-      return () => clearTimeout(t);
-    }, [listPage]);
-
-    useEffect(() => {
-      const t = setTimeout(scrollAppContentToTop, 0);
-      return () => clearTimeout(t);
-    }, [commentPage]);
+    }, [selectedPost, listPage, commentPage]);
 
     useEffect(() => {
       if (!setHeaderActions) return;
@@ -249,13 +258,15 @@ function RedditApp(context: AppContext): AppInstance {
       } catch {
         setComments([]);
       }
-    }, [network]);
+    }, [network, settings]);
 
     const totalPages = useMemo(() => Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE)), [posts.length]);
     const pagePosts = useMemo(
       () => posts.slice((listPage - 1) * POSTS_PER_PAGE, listPage * POSTS_PER_PAGE),
       [posts, listPage]
     );
+
+    const simple = isSimpleLayout(() => settings.get());
 
     if (selectedPost) {
       const commentPages = Math.max(1, Math.ceil(comments.length / 5));
@@ -301,25 +312,31 @@ function RedditApp(context: AppContext): AppInstance {
     if (!currentSub) {
       return (
         <div class="reddit-app">
-          <div class="reddit-search">
-            <input
-              type="text"
-              class="input"
-              placeholder="Subreddit name (e.g. programming)"
-              value={searchInput}
-              onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') openSubreddit(searchInput);
-              }}
-            />
-            <button type="button" class="btn" onClick={() => openSubreddit(searchInput)}>
-              Open
-            </button>
-            <button type="button" class="btn" onClick={() => addSub(searchInput)}>
-              Add
-            </button>
-          </div>
-          <p class="reddit-search-hint">Or pick one below:</p>
+          {simple ? (
+            <p class="widget-hint simple-layout-hint">Simple layout: pick a subreddit below. Turn off in Settings → Appearance to search or add subs.</p>
+          ) : (
+            <>
+              <div class="reddit-search">
+                <input
+                  type="text"
+                  class="input"
+                  placeholder="Subreddit name (e.g. programming)"
+                  value={searchInput}
+                  onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') openSubreddit(searchInput);
+                  }}
+                />
+                <button type="button" class="btn" onClick={() => openSubreddit(searchInput)}>
+                  Open
+                </button>
+                <button type="button" class="btn" onClick={() => addSub(searchInput)}>
+                  Add
+                </button>
+              </div>
+              <p class="reddit-search-hint">Or pick one below:</p>
+            </>
+          )}
           <ul class="list reddit-sub-list">
             {subs.map((sub) => (
               <li key={sub} class="reddit-sub-item">
@@ -349,13 +366,7 @@ function RedditApp(context: AppContext): AppInstance {
       <div class="reddit-app">
         <ul class="list">
           {pagePosts.map((p) => (
-            <li key={p.id}>
-              <button type="button" onClick={() => openPost(p)}>
-                <strong>{p.title}</strong>
-                <br />
-                <small>u/{p.author} · {p.score} pts · {p.num_comments} comments</small>
-              </button>
-            </li>
+            <RedditPostRow key={p.id} post={p} onOpen={openPost} />
           ))}
         </ul>
         <PageNav current={listPage} total={totalPages} onPrev={() => { setListPage((p) => Math.max(1, p - 1)); scrollAppContentToTop(); }} onNext={() => { setListPage((p) => Math.min(totalPages, p + 1)); scrollAppContentToTop(); }} />

@@ -4,7 +4,6 @@ import type { AppDescriptor } from '../../types/plugin';
 import { getAppIcon } from '@core/icons/app-icons';
 import { isSafeLegacySvg } from '../utils/safe-svg';
 import type { ThemeService } from '../services/theme';
-import { debugIngest } from '../utils/debug-ingest';
 
 interface HomeScreenProps {
   apps: AppDescriptor[];
@@ -35,7 +34,6 @@ const AppTile = memo(function AppTile({
   const IconComponent = getAppIcon(app.id);
   const handleActivate = useCallback(
     (e: Event) => {
-      debugIngest({ location: 'HomeScreen.tsx:handleActivate', message: 'tile activate', data: { appId: app.id, eventType: e.type }, hypothesisId: 'H2' });
       if (e.type === 'touchend') (e as TouchEvent).preventDefault();
       onLaunch(app);
     },
