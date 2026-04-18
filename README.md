@@ -6,9 +6,11 @@ A minimal, plugin-based launcher for low-spec and e-ink devices. It provides a h
 
 ## Features
 
-- **Home screen** – Apps and Games sections; tap any tile to open an app. Touch and click both supported for reliable launch on Kindle. Extra side padding gives a scroll gutter so swiping doesn’t open apps by mistake. Scroll-vs-tap detection ignores taps when the pointer has moved (reduces accidental launches on Kindle).
-- **Status bar** – Zoom (+ / −), theme toggle (light/dark), clock, compact controls.
-- **Single-page legacy build** – One HTML file and one JS bundle (no ES modules), so it runs on Kindle, Silk, and other no-ESM browsers. Black-and-white SVG icons where needed.
+- **Home screen** – **Apps** and **Games** sections; optional **Pinned** row (configure in Settings) for quick access without duplicating tiles in the main grid. Touch and click both supported for reliable launch on Kindle. Extra side padding gives a scroll gutter so swiping doesn’t open apps by mistake. Scroll-vs-tap detection ignores taps when the pointer has moved (reduces accidental launches on Kindle).
+- **Status bar** – Zoom (+ / −), theme toggle (light/dark), clock, compact controls. Clock updates every 60s by default, or every 5 minutes during **quiet hours** when that option is enabled (fewer wakeups on e-ink).
+- **Settings** – Performance profile (**normal** / **low power**), reader image mode (full / lazy / text), offline behavior, quiet hours, home pins, one-tap display presets (e.g. outdoor / night), **export/import** settings JSON, **diagnostics** (version, build id, storage key count, last network error), and cache tools.
+- **Network layer** – Bounded concurrency (stricter in low power), optional in-flight GET dedupe, optional **`AbortSignal`** on `fetchText` / `fetchJson`, and **offline block** when the device reports offline and settings demand it.
+- **Single-page legacy build** – One HTML file and one JS bundle (no ES modules), so it runs on Kindle, Silk, and other no-ESM browsers. Black-and-white SVG icons where needed. **Version** and **build id** are injected at build time (`VITE_APP_VERSION`, `VITE_APP_BUILD`) and shown in Settings → About.
 
 | Home — light mode | Home — dark mode |
 |-------------------|------------------|
@@ -18,7 +20,9 @@ A minimal, plugin-based launcher for low-spec and e-ink devices. It provides a h
 |-------|--------|
 | ![Chess](docs/screenshots/chess-widget.png) | ![Reddit feed](docs/screenshots/reddit-widget.png) |
 
-Screenshots show the home screen in light and dark mode (with **3 apps per row**), and sample app views (Chess, Reddit). To regenerate: `npm run build` then `npm run screenshot`. Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers are installed in user cache).
+Screenshots show the home screen in light and dark mode (with **3 apps per row** via localStorage in the capture script), plus **Reddit** and **Chess** (Chess is opened from the **Games** tab). Outputs: `docs/screenshots/legacy-home-light.png`, `legacy-home-dark.png`, `reddit-widget.png`, `chess-widget.png`.
+
+To regenerate: `npm run build` then `npm run screenshot`. The script starts `vite preview` on a **free port** (or set `SCREENSHOT_PORT` to pin a port if 4173 is free). Requires [Playwright](https://playwright.dev/) — run `npx playwright install chromium` once if needed (`PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if browsers live in user cache).
 
 ## Tech stack
 
@@ -52,7 +56,11 @@ npm test
 
 ## Built-in apps
 
-- **Settings** – font size, theme, appearance, and more.
+- **Settings** – font size, theme, appearance, performance, quiet hours, offline behavior, pinned home tiles, export/import, diagnostics, and more.
+- **Blog** – RSS feeds from settings; cached.
+- **News** – News-style RSS list; cached.
+- **Dictionary** – Word lookup (network).
+- **Read later** – Save titled links locally; open in a new tab when allowed.
 - **Calculator** – Basic arithmetic; offline.
 - **Chess** – Two players or vs computer. Full rules: castling, en passant, pawn promotion to queen, queen and rook captures along ranks and files, checkmate and stalemate. Stockfish (WASM) is used when the browser supports Web Workers and WebAssembly; if Stockfish fails to load or respond, the built-in fallback engine is used so vs computer still works (e.g. on legacy/Kindle).
 - **Snake** – Classic snake: arrow keys or on-screen D-pad, pause, score. Touch-friendly for e-ink.
@@ -62,7 +70,7 @@ npm test
 - **Finance** – Markets: S&P 500, Gold, Bitcoin, Ethereum; 24h change; USD/EUR; refresh.
 - **Comics** – Comics RSS (curated strips). Cached; no animation.
 - **Weather** – Current and forecast (network).
-- **Timer**, **Stopwatch**, **World clock** – Time utilities.
+- **Timer** – Countdown presets plus **Stopwatch** and **World clock** tabs in one app (standalone Stopwatch/World clock apps are not registered to avoid duplicate tiles).
 - **To-do** – Tasks with add/toggle/remove; stored locally.
 - **Recipes** – Search TheMealDB; list and detail view; cached.
 - **Picture Frame** – Slideshow of built-in images (landmarks, scenery, city sights); ‹ / › to change; Full screen with × to close. On legacy/Kindle only four local SVGs (no network). Optional keep-screen-on (modern only).
@@ -71,7 +79,8 @@ npm test
 
 Tuned for **slow hardware, grayscale e-ink, and low refresh rates**:
 
-- **No animation loops** – No `requestAnimationFrame`; discrete updates (e.g. StatusBar 60s, Timer/Stopwatch/World clock 1s).
+- **No animation loops** – No `requestAnimationFrame`; discrete updates (StatusBar clock 60s or 5 min in quiet hours; Timer / Stopwatch / World clock 1s where applicable).
+- **Low power profile** – Fewer parallel fetches, longer effective RSS/API cache TTL, and lighter shadows via `data-performance-profile` (see `index.css`).
 - **Reduced motion** – When `prefers-reduced-motion: reduce`, transitions and decorative shadows are disabled.
 - **Containment** – Shell, app content, and home sections use `contain: layout style` to limit reflow/repaint.
 - **Touch-first** – Large tap targets (`--tap-min`), direct handlers on app tiles and key buttons for reliable tap on Kindle.
@@ -113,9 +122,10 @@ No secrets in the bundle; sanitized API content (XSS prevention); Content-Securi
 - `src/core/icons/` – App launcher icons: `app-icons-legacy.ts` + `legacy-svg.ts` (Vite aliases `@core/icons/app-icons` to legacy; no Heroicons in the bundle).
 - `src/core/services/` – Storage, network, theme, settings.
 - `src/core/ui/` – StatusBar, PageNav, Button, List, shared UI.
-- `src/core/utils/` – html (stripHtml), url (isSafeUrl, sanitizeUrl), safe-svg (isSafeLegacySvg), date, fallback-ui.
-- `src/apps/` – App plugins: settings, games (chess, snake, minesweeper), reddit, comics, finance, weather, timer, stopwatch, worldclock, todo, recipes, pictureframe.
-- `src/apps/games/` – GameBoardResize (shared − / size / + header controls for Chess, and potentially also Snake, Minesweeper and other games in the future.
+- `src/core/utils/` – html (`stripHtml`), url (`isSafeUrl`, `sanitizeUrl`), safe-svg (`isSafeLegacySvg`), date, rss, `quiet-hours`, `settings-import`, `home-favorites`, `simple-layout`, fallback-ui.
+- `src/version.ts` – `getAppVersion()` / `getAppBuild()` (filled from Vite `define` at build time).
+- `src/apps/` – App plugins: settings, blog, news, dictionary, readlater, games (chess, snake, sudoku, minesweeper), reddit, comics, finance, weather, timer (includes stopwatch + world clock tabs), todo, recipes, pictureframe.
+- `src/apps/games/` – **GameBoardResize** (shared − / size / + header controls) for Chess, Snake, Sudoku, Minesweeper; Stockfish worker for Chess where supported.
 - `src/types/` – Shared types and plugin API.
 
 ## License

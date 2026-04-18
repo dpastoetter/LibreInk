@@ -3,7 +3,7 @@ import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
-import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
+import { getCorsProxyUrl, getEffectiveCacheTtlMs } from '@core/constants';
 import { parseRssItems } from '@core/utils/rss';
 import type { RssItem } from '../../types/feed';
 
@@ -73,7 +73,7 @@ function NewsApp(context: AppContext): AppInstance {
       const all: RssItem[] = [];
       let lastError: string | null = null;
       const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
-      const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
+      const cacheTtl = getEffectiveCacheTtlMs(settings.get());
       for (const url of feeds) {
         const sourceName = sourceNameFromUrl(url);
         try {

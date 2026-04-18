@@ -16,7 +16,8 @@ Open http://localhost:5173 (or the **Network** URL Vite prints if you want to te
 1. **Tests** – Run `npm test`. Add or update tests if you change core or app logic.
 2. **Lint** – Run `npm run lint` and fix any reported issues.
 3. **Build** – Run `npm run build` and fix any TypeScript or build errors.
-4. **Style** – Follow existing patterns: TypeScript strict, Preact functional components, semantic CSS classes and design tokens in `src/index.css`. No Tailwind; no `any`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for code style and conventions.
+4. **Docs and screenshots** – If you change the home screen or featured apps in a way that README screenshots should reflect, run `npm run screenshot` after a successful build (see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)) and include updated `docs/screenshots/*.png` in the PR when appropriate.
+5. **Style** – Follow existing patterns: TypeScript strict, Preact functional components, semantic CSS classes and design tokens in `src/index.css`. No Tailwind; no `any`. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for code style and conventions.
 
 ## Version and testing branch
 

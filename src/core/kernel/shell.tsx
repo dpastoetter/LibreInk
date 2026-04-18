@@ -8,7 +8,7 @@ import { StatusBar } from '../ui/StatusBar';
 import { AppHeaderActionsContext } from './AppHeaderActionsContext';
 import { useTapVsScrollThreshold } from '../hooks/useTapVsScrollThreshold';
 import type { StorageService } from '../services/storage';
-import type { NetworkService } from '../services/network';
+import type { NetworkService } from '../../types/services';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
 
@@ -54,6 +54,7 @@ export function Shell({ services }: ShellProps) {
   useTapVsScrollThreshold(TAP_VS_SCROLL_THRESHOLD_PX);
 
   const closeApp = useCallback(() => {
+    if (instanceRef.current?.onSuspend) instanceRef.current.onSuspend();
     if (instanceRef.current?.onDestroy) instanceRef.current.onDestroy();
     setInstance(null);
     setCurrentAppId(null);
@@ -92,6 +93,7 @@ export function Shell({ services }: ShellProps) {
 
   const launchApp = useCallback(
     (app: WebOSApp) => {
+      if (instanceRef.current?.onSuspend) instanceRef.current.onSuspend();
       if (instanceRef.current?.onDestroy) instanceRef.current.onDestroy();
       const context: AppContext = {
         navigate,
@@ -121,7 +123,8 @@ export function Shell({ services }: ShellProps) {
       try {
         const app = await AppRegistry.loadApp(appId);
         if (app) launchApp(app);
-      } catch (e) {
+      } catch {
+        /* loadApp logs to console; stay on home */
       } finally {
         setLoadingAppId(null);
       }

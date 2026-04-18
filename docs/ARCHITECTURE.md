@@ -35,7 +35,7 @@ The shell is the root UI when not on the home screen. It holds:
 
 - **Tap vs scroll**: The shell uses `useTapVsScrollThreshold` (in `src/core/hooks/`) to ignore click when the pointer or touch has moved beyond a small threshold, reducing accidental app launches while scrolling on touch devices (e.g. Kindle).
 - **Home**: When `currentAppId === null`, the shell renders `<HomeScreen />`, which shows the grid of registered apps.
-- **App open**: When the user taps an app, `launchApp(app)` is called. The shell builds an `AppContext` (navigate, closeApp, services), calls `app.launch(context)`, stores the returned `AppInstance`, and pushes a history state. The UI then shows:
+- **App open**: When the user taps an app, `launchApp(app)` is called. If another app was already open, the shell first calls **`onSuspend` then `onDestroy`** on the previous instance (same order as returning home), then builds an `AppContext` (navigate, closeApp, services), calls `app.launch(context)`, stores the returned `AppInstance`, and pushes a history state. The UI then shows:
   - **App header**: Home button, Back button, and a title. The title comes from `instance.getTitle?.()` or the app name. The Back button calls `instance.goBack()` if `instance.canGoBack?.()` is true, otherwise `closeApp()`.
   - **App content**: `instance.render()` is called each time the shell re-renders.
 
@@ -67,7 +67,7 @@ Apps do not import each other; they are only coupled via the shared types and co
 
 **Storage** (`src/core/services/storage.ts`): Key/value persistence (async get/set/remove/keys) over localStorage with a prefix. Used by the settings service and by apps (e.g. news cache, reddit subs).
 
-**Network** (`src/core/services/network.ts`): Thin wrapper around `fetch` with CORS and credentials settings; exposes `fetch`, `fetchText`, `fetchJson`. Used by apps for Reddit, News, Finance, etc.
+**Network** (`src/core/services/network.ts`): Wrapper around `fetch` with CORS and credentials defaults; **limits concurrent requests** (stricter when **Low power** is enabled in settings) and **dedupes identical in-flight GETs** (skipped when `AbortSignal` is passed). When **Offline behavior** is set to **Block** and `navigator.onLine` is false, requests fail fast with a clear error. Failed fetches record a short **last error** string for Settings → Diagnostics (no secrets). `fetchText` / `fetchJson` accept an optional `{ signal }` for cancellation on app teardown. Exposes `fetch`, `fetchText`, `fetchJson`. Used by apps for Reddit, News, Finance, etc.
 
 **Theme** (`src/core/services/theme.ts`): Holds current global settings in memory and applies them to the document via `setAttribute` (e.g. `data-theme`, `data-appearance`, `data-pixel-optics`) and `style.setProperty` for zoom, so legacy/Kindle browsers without full `dataset` support still get high-contrast and appearance. Exposes `getSettings()` and `subscribe(listener)`. Updated only by the settings service when the user changes settings.
 
@@ -77,8 +77,8 @@ Settings and theme are separate so that theme is the single source of “what is
 
 ## UI layers
 
-- **Status bar** (`src/core/ui/StatusBar.tsx`): Top bar with branding, clock, and Light/Dark toggle. Subscribes to theme for appearance.
-- **Home screen** (`src/core/kernel/HomeScreen.tsx`): Grid of app tiles; sorts by category and name; calls `onLaunch(app)` when a tile is tapped.
+- **Status bar** (`src/core/ui/StatusBar.tsx`): Top bar with branding, clock, and Light/Dark toggle. Subscribes to theme for appearance. Clock normally updates every 60s; during **quiet hours** (when enabled in settings with slow clock), updates every 5 minutes to reduce wakeups.
+- **Home screen** (`src/core/kernel/HomeScreen.tsx`): Grid of app tiles; sorts by category and name; calls `onLaunch(app)` when a tile is tapped. **Pinned** tiles (from Settings) render in a row above the pager and are omitted from the main grid to avoid duplicates.
 - **App header**: Rendered by the shell (Home, Back, title, optional header actions). Title is dynamic via `getTitle()`. Apps can inject custom header controls (e.g. board zoom for games) via **AppHeaderActionsContext** (`setHeaderActions`).
 - **App content**: The result of `instance.render()`; each app owns its layout and uses shared CSS classes (e.g. `.list`, `.btn`, `.panel-title`) and optional core components like `PageNav`.
 
@@ -88,7 +88,7 @@ Core UI components live in `src/core/ui/` (e.g. `PageNav`, `Button`, `List`). Ap
 
 - **Launch**: User taps app → Shell `launchApp` → `app.launch(context)` → instance stored → shell re-renders → header + `instance.render()`.
 - **Back (in-app)**: User taps Back and `canGoBack()` is true → Shell calls `instance.goBack()` → app updates its own state (e.g. close thread) → shell re-renders → `getTitle()` and `render()` reflect new state.
-- **Back (exit)**: User taps Back and `canGoBack()` is false, or user uses browser Back → `closeApp` / `goToHome` → instance cleared → home screen shown.
+- **Back (exit)**: User taps Back and `canGoBack()` is false, or user uses browser Back → `closeApp` / `goToHome` → **`onSuspend` then `onDestroy`** on the instance → home screen shown.
 - **Settings change**: User changes a setting in the Settings app → `settings.set(partial)` → storage updated, `theme.applySettings()` → DOM and theme subscribers (e.g. StatusBar) update.
 
 ## Utilities and shared code

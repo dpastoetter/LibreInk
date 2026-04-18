@@ -8,11 +8,14 @@ export interface StorageService {
   keys(prefix?: string): Promise<string[]>;
 }
 
+/** Optional fetch options (signal for AbortController on app teardown). */
+export type NetworkFetchOptions = Pick<RequestInit, 'signal'>;
+
 /** HTTP client wrapper (fetch with CORS/credentials defaults; fetchText/fetchJson helpers). */
 export interface NetworkService {
   fetch(url: string, options?: RequestInit): Promise<Response>;
-  fetchText(url: string): Promise<string>;
-  fetchJson<T>(url: string): Promise<T>;
+  fetchText(url: string, options?: NetworkFetchOptions): Promise<string>;
+  fetchJson<T>(url: string, options?: NetworkFetchOptions): Promise<T>;
 }
 
 /** Current theme/settings applied to the document; read-only for apps. Subscribe for updates. */

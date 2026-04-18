@@ -2,7 +2,7 @@ import { useState, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
-import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
+import { getCorsProxyUrl, getEffectiveCacheTtlMs } from '@core/constants';
 import { sanitizeUrl, isSafeUrl } from '@core/utils/url';
 
 const COMICSRSS_BASE = 'https://www.comicsrss.com/rss/';
@@ -84,7 +84,7 @@ function ComicsApp(context: AppContext): AppInstance {
         const feedUrl = COMICSRSS_BASE + slug + '.rss';
         const cacheKey = CACHE_PREFIX_RSS + slug;
         try {
-          const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
+          const cacheTtl = getEffectiveCacheTtlMs(settings.get());
           const cached = await storage.get<{ items: RssComicItem[]; fetchedAt: number }>(cacheKey);
           if (cached && Date.now() - cached.fetchedAt < cacheTtl) {
             setRssItems(cached.items);
@@ -102,8 +102,16 @@ function ComicsApp(context: AppContext): AppInstance {
           titleRef.current = `Comics · ${name}`;
           await storage.set(cacheKey, { items, fetchedAt: Date.now() });
         } catch (e) {
-          setRssError(e instanceof Error ? e.message : 'Failed to load feed');
-          setRssItems([]);
+          const cachedStale = await storage.get<{ items: RssComicItem[]; fetchedAt: number }>(cacheKey);
+          if (cachedStale && cachedStale.items.length > 0 && settings.get().offlinePreference === 'preferCache') {
+            setRssItems(cachedStale.items);
+            setRssIndex(0);
+            titleRef.current = `Comics · ${name}`;
+            setRssError('Showing cached strips (stale).');
+          } else {
+            setRssError(e instanceof Error ? e.message : 'Failed to load feed');
+            setRssItems([]);
+          }
         } finally {
           setRssLoading(false);
         }
@@ -168,9 +176,13 @@ function ComicsApp(context: AppContext): AppInstance {
     }
 
     titleRef.current = `Comics · ${rssFeedName} · ${currentRss.title}`;
+    const readerImageMode = settings.get().readerImageMode;
 
     return (
       <div class="comics-app">
+        {rssError && rssItems.length > 0 ? (
+          <p class="widget-hint" role="status">{rssError}</p>
+        ) : null}
         {rssItems.length > 0 && (
           <PageNav
             current={rssIndex + 1}
@@ -184,15 +196,19 @@ function ComicsApp(context: AppContext): AppInstance {
           <h2 class="comics-title">{currentRss.title}</h2>
           <p class="comics-meta">{currentRss.pubDate}</p>
           {currentRss.imgUrl && isSafeUrl(currentRss.imgUrl) ? (
-            <div class="comics-image-wrap">
-              <img
-                src={currentRss.imgUrl}
-                alt={currentRss.title}
-                class="comics-image"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+            readerImageMode === 'text' ? (
+              <p class="comics-no-img">Strip image hidden (text-only mode in Settings).</p>
+            ) : (
+              <div class="comics-image-wrap">
+                <img
+                  src={currentRss.imgUrl}
+                  alt={currentRss.title}
+                  class="comics-image"
+                  loading={readerImageMode === 'lazy' ? 'lazy' : undefined}
+                  decoding="async"
+                />
+              </div>
+            )
           ) : currentRss.imgUrl ? (
             <p class="comics-no-img">Image link unavailable.</p>
           ) : (

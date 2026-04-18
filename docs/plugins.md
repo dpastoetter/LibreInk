@@ -23,6 +23,8 @@ This document explains how to add a new app to the shell and how to use shared s
      - `render`: () => JSX (Preact VNode)
      - Optional: `onSuspend`, `onResume`, `onDestroy`, `getTitle`, `canGoBack`, `goBack` (see below)
 
+   **Lifecycle:** When the user leaves an app (Home, Back to close, browser Back, **or opens another app from the home screen**), the shell calls **`onSuspend` then `onDestroy`** on that instance. Put teardown for timers, `AbortController`s, and in-flight work in **`onDestroy`** (or call the same helper from `onSuspend` if you use both). Do not rely on only `onSuspend` without `onDestroy`—both run on every exit path. (Closing via the shell **Back** button when `canGoBack` is false uses the same sequence.)
+
 3. **Register the app** in `src/apps/registry.ts`:
 
    - Add a descriptor and lazy loader to the `LAZY_APPS` array (e.g. `load: () => import('./myapp').then(m => m.myappApp)`). The registry calls `registerAllApps()` at startup to register each app from `LAZY_APPS`.
@@ -47,7 +49,7 @@ Inside `launch(context: AppContext)` you receive:
 - **`context.closeApp()`** – Close the current app and return to home.
 - **`context.services`**:
   - **`storage`** – Key/value persistence (`get`, `set`, `remove`, `keys`). Use a prefix like `myapp:` for your keys.
-  - **`network`** – `fetch`, `fetchText`, `fetchJson` with basic error handling.
+  - **`network`** – `fetch(url, init?)`, `fetchText(url, { signal }?)`, `fetchJson(url, { signal }?)`. Pass `AbortSignal` from an `AbortController` and abort in `onDestroy` to cancel in-flight work when leaving the app. Dedupe is disabled when `signal` is set.
   - **`theme`** – `getSettings()` and `subscribe(listener)` for global theme/settings.
   - **`settings`** – `get()` for current global settings, `set(partial)` to update (persisted).
 
@@ -70,7 +72,7 @@ Global classes like `.panel-title`, `.list`, `.btn`, `.btn-nav` are defined in `
 
 ## Feed / RSS apps
 
-Blog, News, and Comics share a common pattern: CORS proxy and cache TTL from `context.services.settings.get()`, cache keys in storage, and RSS/Atom parsing. Use **`@core/utils/rss`** for `parseRssItems(xml, source)` and `getFeedTitleFromXml(xml)`, and **`src/types/feed.ts`** for the shared `RssItem` type. Proxy and cache helpers are in **`@core/constants`** (`getCorsProxyUrl`, `getDefaultCacheTtlMs`).
+Blog, News, and Comics share a common pattern: CORS proxy and cache TTL from `context.services.settings.get()`, cache keys in storage, and RSS/Atom parsing. Use **`@core/utils/rss`** for `parseRssItems(xml, source)` and `getFeedTitleFromXml(xml)`, and **`src/types/feed.ts`** for the shared `RssItem` type. Proxy and cache helpers are in **`@core/constants`** (`getCorsProxyUrl`, `getEffectiveCacheTtlMs` — respects **Low power** performance profile by extending TTL).
 
 ## Header actions (e.g. board zoom)
 
@@ -78,6 +80,7 @@ Games that need resizable boards (Chess, Snake, Sudoku, Minesweeper) use the sha
 
 ## Example plugins
 
+- **Timer** (`src/apps/timer/index.tsx`) – One app with tabs for **Stopwatch**, **Timer**, and **World clock**; standalone `stopwatch` / `worldclock` apps exist in the tree but are not registered on the home screen to avoid duplicate tiles.
 - **Dictionary** (`src/apps/dictionary/index.tsx`) – Simple search-and-fetch app.
 - **Reddit** / **News** (`src/apps/reddit/index.tsx`, `news/index.tsx`) – Dynamic title and back stack (getTitle, canGoBack, goBack).
 - **Recipes** (`src/apps/recipes/index.tsx`) – Search, list, detail view with back navigation and cached results.

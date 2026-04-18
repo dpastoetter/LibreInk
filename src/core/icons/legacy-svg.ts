@@ -37,6 +37,13 @@ export const LEGACY_ICONS: Record<string, string> = {
     '<path d="M16 7h6v6"/>' +
       '<path d="m22 7-8.5 8.5-5-5L2 17"/>'
   ),
+  sudoku: S(
+    '<rect x="3" y="3" width="18" height="18" rx="1"/>' +
+      '<line x1="9" y1="3" x2="9" y2="21"/>' +
+      '<line x1="15" y1="3" x2="15" y2="21"/>' +
+      '<line x1="3" y1="9" x2="21" y2="9"/>' +
+      '<line x1="3" y1="15" x2="21" y2="15"/>'
+  ),
   minesweeper: S(
     '<circle cx="11" cy="13" r="9"/>' +
       '<path d="M14.35 4.65 16.3 2.7a2.41 2.41 0 0 1 3.4 0l1.6 1.6a2.4 2.4 0 0 1 0 3.4l-1.95 1.95"/>' +
@@ -48,6 +55,11 @@ export const LEGACY_ICONS: Record<string, string> = {
       '<line x1="10" y1="9" x2="8" y2="9"/>' +
       '<line x1="16" y1="13" x2="8" y2="13"/>' +
       '<line x1="16" y1="17" x2="8" y2="17"/>'
+  ),
+  readlater: S(
+    '<path d="M6 2h12v20l-6-4-6 4V2z"/>' +
+      '<line x1="9" y1="8" x2="15" y2="8"/>' +
+      '<line x1="9" y1="12" x2="15" y2="12"/>'
   ),
   news: S(
     '<path d="M15 18h-5"/>' +

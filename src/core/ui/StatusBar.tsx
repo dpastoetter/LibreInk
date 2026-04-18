@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import type { ThemeService } from '../services/theme';
 import type { SettingsService } from '../services/settings';
 import { formatTimeLegacy, formatTimeLegacy12h, formatDateDDMMYY } from '../utils/date';
+import { isQuietHoursActive } from '../utils/quiet-hours';
+import type { GlobalSettings } from '../../types/settings';
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
@@ -26,20 +28,29 @@ function getDisplayDate(offsetHours: number): Date {
   return new Date(Date.now() + offsetHours * 3600000);
 }
 
-/** Clock updates every 60s to keep e-ink / low-spec refresh and CPU minimal. Returns { date: dd.mm.yy, time }. */
-function useClock(timeFormat: '12h' | '24h', clockOffsetHours: number) {
+function clockTickIntervalMs(settings: Pick<GlobalSettings, 'quietHoursEnabled' | 'quietHoursSlowClock' | 'quietHoursStartMinutes' | 'quietHoursEndMinutes'>): number {
+  if (settings.quietHoursEnabled && settings.quietHoursSlowClock && isQuietHoursActive(new Date(), settings)) {
+    return 300_000;
+  }
+  return 60_000;
+}
+
+/** Clock updates on an interval (60s, or 5min during quiet hours when enabled). */
+function useClock(timeFormat: '12h' | '24h', clockOffsetHours: number, tickIntervalMs: number) {
   const getDisplay = () => getDisplayDate(clockOffsetHours);
   const [display, setDisplay] = useState(() => {
     const d = getDisplay();
     return { date: formatDateDDMMYY(d), time: formatTime(d, timeFormat) };
   });
   useEffect(() => {
-    const id = setInterval(() => {
+    const tick = () => {
       const d = getDisplay();
       setDisplay({ date: formatDateDDMMYY(d), time: formatTime(d, timeFormat) });
-    }, 60_000);
+    };
+    tick();
+    const id = setInterval(tick, tickIntervalMs);
     return () => clearInterval(id);
-  }, [timeFormat, clockOffsetHours]);
+  }, [timeFormat, clockOffsetHours, tickIntervalMs]);
   return display;
 }
 
@@ -92,11 +103,23 @@ function StatusBarInner({ theme, settings, onOpenSettings }: StatusBarProps) {
     clockOffsetHours: s.clockOffsetHours ?? 0,
     appearance: s.appearance as 'light' | 'dark',
     zoom: s.zoom,
+    clockTickMs: clockTickIntervalMs(s),
   });
-  const { showClock, clockOffsetHours, appearance, zoom } = themeState;
-  const clock = useClock('24h', clockOffsetHours);
+  const { showClock, clockOffsetHours, appearance, zoom, timeFormat, clockTickMs } = themeState;
+  const clock = useClock(timeFormat, clockOffsetHours, clockTickMs);
   const ref = useRef(themeState);
   ref.current = themeState;
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const tick = clockTickIntervalMs(theme.getSettings());
+      if (tick !== ref.current.clockTickMs) {
+        ref.current = { ...ref.current, clockTickMs: tick };
+        setThemeState((prev) => ({ ...prev, clockTickMs: tick }));
+      }
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [theme]);
 
   const unsubRef = useRef<(() => void) | undefined>(undefined);
   useEffect(() => {
@@ -107,13 +130,15 @@ function StatusBarInner({ theme, settings, onOpenSettings }: StatusBarProps) {
         showClock: next.showClock,
         timeFormat: next.timeFormat,
         clockOffsetHours: next.clockOffsetHours ?? 0,
+        clockTickMs: clockTickIntervalMs(next),
       };
       if (
         nextState.appearance !== ref.current.appearance ||
         nextState.zoom !== ref.current.zoom ||
         nextState.showClock !== ref.current.showClock ||
         nextState.timeFormat !== ref.current.timeFormat ||
-        nextState.clockOffsetHours !== ref.current.clockOffsetHours
+        nextState.clockOffsetHours !== ref.current.clockOffsetHours ||
+        nextState.clockTickMs !== ref.current.clockTickMs
       ) {
         ref.current = nextState;
         setThemeState(nextState);
@@ -126,6 +151,7 @@ function StatusBarInner({ theme, settings, onOpenSettings }: StatusBarProps) {
       showClock: sync.showClock,
       timeFormat: sync.timeFormat,
       clockOffsetHours: sync.clockOffsetHours ?? 0,
+      clockTickMs: clockTickIntervalMs(sync),
     });
     return () => {
       unsubRef.current?.();

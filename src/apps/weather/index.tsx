@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
-import { getDefaultCacheTtlMs } from '@core/constants';
+import { getEffectiveCacheTtlMs } from '@core/constants';
 import { formatWeekdayShortLegacy } from '@core/utils/date';
 import { isSimpleLayout } from '@core/utils/simple-layout';
+import { isQuietHoursActive } from '@core/utils/quiet-hours';
 
 const CACHE_KEY = 'weather:cache';
 const DEFAULT_LAT = 52.52;
@@ -140,7 +141,15 @@ function WeatherApp(context: AppContext): AppInstance {
       setLoading(true);
       setError(null);
       try {
-        const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
+        const gs = settings.get();
+        const cachedQuiet = await storage.get<CachedWeather>(CACHE_KEY);
+        if (isQuietHoursActive(new Date(), gs) && cachedQuiet) {
+          setWeatherData(cachedQuiet);
+          setLoading(false);
+          setError(null);
+          return;
+        }
+        const cacheTtl = getEffectiveCacheTtlMs(gs);
         const cached = await storage.get<CachedWeather>(CACHE_KEY);
         if (cached && Date.now() - cached.fetchedAt < cacheTtl) {
           setData(cached);
@@ -223,7 +232,7 @@ function WeatherApp(context: AppContext): AppInstance {
       } finally {
         setLoading(false);
       }
-    }, [network, storage]);
+    }, [network, storage, settings]);
 
     useEffect(() => {
       fetchWeather();

@@ -4,7 +4,7 @@
  */
 (function (g: unknown) {
   if (typeof g !== 'object' || g === null) return;
-  var win = g as Window & typeof globalThis;
+  const win = g as Window & typeof globalThis;
 
   // Object.assign (ES2015) – used by Preact and others
   if (typeof (win as Window & { Object: { assign?: unknown } }).Object.assign !== 'function') {
@@ -13,11 +13,11 @@
       ...rest: object[]
     ) {
       if (t == null) throw new TypeError('Cannot convert undefined or null to object');
-      var to = Object(t);
-      for (var i = 0; i < rest.length; i++) {
-        var next = rest[i];
+      const to = Object(t);
+      for (let i = 0; i < rest.length; i++) {
+        const next = rest[i];
         if (next != null) {
-          for (var k in next) {
+          for (const k in next) {
             if (Object.prototype.hasOwnProperty.call(next, k)) (to as Record<string, unknown>)[k] = (next as Record<string, unknown>)[k];
           }
         }

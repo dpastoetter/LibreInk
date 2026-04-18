@@ -18,13 +18,14 @@ This document covers how to run, build, test, and work with the codebase day to 
 | `npm run lint` | Run ESLint on `src/` (TypeScript + jsx-a11y) |
 | `npm test` | Run Vitest once |
 | `npm run test:watch` | Run Vitest in watch mode |
-| `npm run screenshot` | After `npm run build`, runs `scripts/screenshot-legacy.mjs`: starts preview and captures home screen (light/dark), Reddit widget, and Chess in-game to `docs/screenshots/`. Use for the legacy single-page build. Requires Playwright (`npx playwright install chromium`; use `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if needed). |
+| `npm run screenshot` | After `npm run build`, runs `scripts/screenshot-legacy.mjs`: starts `vite preview` on an **ephemeral free port** (override with `SCREENSHOT_PORT`), captures legacy home (light/dark), Reddit, and Chess to `docs/screenshots/`. Chess is opened from the **Games** tab. Outputs: `legacy-home-light.png`, `legacy-home-dark.png`, `reddit-widget.png`, `chess-widget.png`. Requires Playwright (`npx playwright install chromium`; `PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/ms-playwright` if needed). |
 
 ## Project structure
 
 ```
 src/
 ├── main.tsx                 # Entry: create services, register apps, render Shell
+├── version.ts               # getAppVersion() / getAppBuild() (Vite define: VITE_APP_VERSION, VITE_APP_BUILD)
 ├── index.css                 # Global styles and design tokens
 ├── types/                    # Shared TypeScript types
 │   ├── plugin.ts             # App plugin interface, AppContext, AppInstance
@@ -46,6 +47,7 @@ src/
 │   ├── services/             # Service implementations
 │   │   ├── storage.ts
 │   │   ├── network.ts
+│   │   ├── network-last-error.ts  # Last failed fetch message for Settings diagnostics
 │   │   ├── theme.ts
 │   │   └── settings.ts
 │   ├── ui/                   # Shared UI components
@@ -58,17 +60,23 @@ src/
 │       ├── url.ts            # isSafeUrl, sanitizeUrl
 │       ├── safe-svg.ts       # isSafeLegacySvg (app tile icons)
 │       ├── date.ts           # formatTimeLegacy, etc.
+│       ├── quiet-hours.ts    # isQuietHoursActive (StatusBar, Weather, Finance)
+│       ├── settings-import.ts  # pick/merge shapes for Settings JSON import
+│       ├── home-favorites.ts # parse homeFavoriteAppIds, pinned descriptors
+│       ├── simple-layout.ts  # optional layout helpers for dense UIs
 │       ├── fallback-ui.ts    # setRootFallback (no innerHTML)
 │       ├── rss.ts            # parseRssItems, getFeedTitleFromXml (Blog, News, Comics)
 │       └── settings-parsers.ts  # parseJsonArray, guards for settings JSON (blog feeds, etc.)
 └── apps/                     # App plugins
     ├── registry.ts           # registerAllApps(), LAZY_APPS
     ├── settings/
-    ├── finance/
-    ├── games/                # Chess (Stockfish + fallback), Snake, Sudoku, Minesweeper; GameBoardResize for board zoom
+    ├── blog/
     ├── news/
-    ├── reddit/
     ├── dictionary/
+    ├── readlater/
+    ├── finance/
+    ├── games/                # Chess (Stockfish + fallback), Snake, Sudoku, Minesweeper; GameBoardResize
+    ├── reddit/
     ├── todo/
     ├── recipes/
     ├── pictureframe/

@@ -51,9 +51,9 @@ let theme: ReturnType<typeof createThemeService>;
 let settings: ReturnType<typeof createSettingsService>;
 try {
   storage = createStorageService();
-  network = createNetworkService();
   theme = createThemeService(DEFAULT_SETTINGS);
   settings = createSettingsService(storage, theme);
+  network = createNetworkService(() => theme.getSettings());
   registerAllApps();
   const win = typeof window !== 'undefined' ? (window as unknown as LegacyWindow) : null;
   if (win?.__openinkSnake) {

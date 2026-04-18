@@ -4,6 +4,7 @@
  * Requires: npm run build, then npm run screenshot (starts preview, captures, exits).
  */
 import { spawn } from 'node:child_process';
+import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
@@ -11,10 +12,21 @@ import fs from 'node:fs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
 const screenshotsDir = path.join(rootDir, 'docs', 'screenshots');
-const port = 4173;
-const baseUrl = `http://127.0.0.1:${port}`;
 
-async function waitForServer(timeoutMs = 15000) {
+/** Avoid collisions when default preview port (4173) is already in use. */
+function getFreePort() {
+  return new Promise((resolve, reject) => {
+    const s = net.createServer();
+    s.listen(0, '127.0.0.1', () => {
+      const addr = s.address();
+      const p = typeof addr === 'object' && addr ? addr.port : 4173;
+      s.close(() => resolve(p));
+    });
+    s.on('error', reject);
+  });
+}
+
+async function waitForServer(baseUrl, timeoutMs = 15000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     try {
@@ -34,6 +46,13 @@ async function main() {
     console.error('Run npm run build first (dist/index.html not found).');
     process.exit(1);
   }
+
+  const port =
+    process.env.SCREENSHOT_PORT && /^\d+$/.test(process.env.SCREENSHOT_PORT.trim())
+      ? parseInt(process.env.SCREENSHOT_PORT.trim(), 10)
+      : await getFreePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  console.log(`Preview + screenshots on ${baseUrl}`);
 
   let playwright;
   try {
@@ -59,7 +78,7 @@ async function main() {
   process.on('exit', killPreview);
   process.on('SIGINT', () => { killPreview(); process.exit(130); });
 
-  if (!(await waitForServer())) {
+  if (!(await waitForServer(baseUrl))) {
     console.error('Preview server did not become ready in time.');
     killPreview();
     process.exit(1);
@@ -130,23 +149,32 @@ async function main() {
       }
     }
 
+    // Chess lives under Home → Games (not Apps)
+    const gamesNavBtn = await page.$('button[aria-label="Games"]');
+    if (gamesNavBtn) {
+      await gamesNavBtn.click();
+      await page.waitForTimeout(500);
+    }
+
     // Chess widget (inside a game: open Chess, start vs Computer, wait for board)
     const chessTile = await page.$('button[data-app-id="chess"]');
     if (chessTile) {
       await chessTile.click();
-      await page.waitForSelector('.chess-game', { timeout: 15000 }).catch(() => null);
-      await page.waitForTimeout(600);
+      await page.waitForSelector('.app-content .chess-game, .chess-game', { timeout: 20000 }).catch(() => null);
+      await page.waitForTimeout(1500);
       const vsComputerBtn = page.locator('button').filter({ hasText: /vs Computer/i }).first();
       if (await vsComputerBtn.count() > 0) {
         await vsComputerBtn.click();
-        await page.waitForSelector('.chess-board', { timeout: 10000 }).catch(() => null);
-        await page.waitForTimeout(800);
+        await page.waitForSelector('.chess-board', { timeout: 15000 }).catch(() => null);
+        await page.waitForTimeout(1200);
       }
       await page.screenshot({
         path: path.join(screenshotsDir, 'chess-widget.png'),
         type: 'png',
       });
       console.log('Saved docs/screenshots/chess-widget.png');
+    } else {
+      console.warn('Chess tile not found; skipped chess-widget.png');
     }
   } finally {
     await browser.close();

@@ -6,8 +6,11 @@ import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
 import { formatDateLegacy } from '@core/utils/date';
 import { getCorsProxyUrl } from '@core/constants';
+import { sanitizeUrl } from '@core/utils/url';
+import type { ReaderImageModePreset } from '../../types/settings';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
 import { isSimpleLayout } from '@core/utils/simple-layout';
+import { READLATER_STORAGE_KEY, normalizeReadLaterStorage } from '../readlater';
 
 const REDDIT_JSON = (path: string) => `https://www.reddit.com${path}.json?raw_json=1&limit=25`;
 
@@ -27,7 +30,16 @@ interface RedditPost {
     permalink: string;
     is_self: boolean;
     num_comments: number;
+    /** Listing thumbnail URL when present (not "self" / "default"). */
+    thumbnail?: string;
   };
+}
+
+function isRedditThumbnailToken(s: string | undefined): boolean {
+  if (!s || typeof s !== 'string') return false;
+  const t = s.trim().toLowerCase();
+  if (t === 'self' || t === 'default' || t === 'nsfw' || t === 'spoiler' || t === 'image') return false;
+  return /^https?:\/\//.test(s);
 }
 
 interface RedditComment {
@@ -99,23 +111,42 @@ type RedditPostCommentsResponse = [
 const RedditPostRow = memo(function RedditPostRow({
   post,
   onOpen,
+  readerImageMode,
 }: {
   post: RedditPost['data'];
   onOpen: (p: RedditPost['data']) => void;
+  readerImageMode: ReaderImageModePreset;
 }) {
+  const rawThumb = isRedditThumbnailToken(post.thumbnail) ? post.thumbnail : undefined;
+  const thumbUrl = rawThumb ? sanitizeUrl(rawThumb) : null;
+  const showThumb = readerImageMode !== 'text' && (thumbUrl?.length ?? 0) > 0;
   return (
     <li>
-      <button type="button" onClick={() => onOpen(post)}>
-        <strong>{post.title}</strong>
-        <br />
-        <small>u/{post.author} · {post.score} pts · {post.num_comments} comments</small>
+      <button type="button" class="reddit-post-row" onClick={() => onOpen(post)}>
+        {showThumb ? (
+          <img
+            src={thumbUrl!}
+            alt=""
+            class="reddit-list-thumb"
+            width={72}
+            height={72}
+            loading={readerImageMode === 'lazy' ? 'lazy' : 'eager'}
+            decoding="async"
+          />
+        ) : null}
+        <span class="reddit-post-row-text">
+          <strong>{post.title}</strong>
+          <br />
+          <small>u/{post.author} · {post.score} pts · {post.num_comments} comments</small>
+        </span>
       </button>
     </li>
   );
 });
 
 function RedditApp(context: AppContext): AppInstance {
-  const { network, settings } = context.services;
+  const { network, settings, storage } = context.services;
+  const abortHolder: { ac: AbortController | null } = { ac: null };
   const backRef: {
     current: {
       setSelectedPost: (p: RedditPost['data'] | null) => void;
@@ -126,6 +157,13 @@ function RedditApp(context: AppContext): AppInstance {
   } = { current: null };
 
   function RedditUI() {
+    useEffect(() => {
+      return () => {
+        abortHolder.ac?.abort();
+        abortHolder.ac = null;
+      };
+    }, []);
+
     const [subs, setSubs] = useState<string[]>(() => parseRedditSubreddits(settings.get().redditSubreddits));
     const [searchInput, setSearchInput] = useState('');
     const [currentSub, setCurrentSub] = useState<string | null>(null);
@@ -161,16 +199,20 @@ function RedditApp(context: AppContext): AppInstance {
     const [commentPage, setCommentPage] = useState(1);
 
     const loadSub = useCallback(async (sub: string, sort: ListSort) => {
+      abortHolder.ac?.abort();
+      const ac = new AbortController();
+      abortHolder.ac = ac;
       setLoading(true);
       setError(null);
       try {
         const url = REDDIT_JSON(`/r/${sub}/${sort}`);
         const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
         const proxyUrl = proxy + encodeURIComponent(url);
-        const data = await network.fetchJson<{ data: { children: RedditPost[] } }>(proxyUrl);
+        const data = await network.fetchJson<{ data: { children: RedditPost[] } }>(proxyUrl, { signal: ac.signal });
         setPosts(data.data.children.map((c) => c.data));
         setListPage(1);
       } catch (e) {
+        if (e instanceof Error && e.name === 'AbortError') return;
         const msg = e instanceof Error ? e.message : 'Failed to load';
         if (msg.includes('500')) {
           setError("This subreddit couldn't be loaded (server error). Try again or pick another.");
@@ -233,13 +275,16 @@ function RedditApp(context: AppContext): AppInstance {
     }, [setHeaderActions, currentSub, selectedPost, listSort, editMode]);
 
     const openPost = useCallback(async (post: RedditPost['data']) => {
+      abortHolder.ac?.abort();
+      const ac = new AbortController();
+      abortHolder.ac = ac;
       setSelectedPost(post);
       setComments([]);
       try {
         const commentsUrl = REDDIT_JSON(post.permalink);
         const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
         const proxyCommentsUrl = proxy + encodeURIComponent(commentsUrl);
-        const data = await network.fetchJson<RedditPostCommentsResponse>(proxyCommentsUrl);
+        const data = await network.fetchJson<RedditPostCommentsResponse>(proxyCommentsUrl, { signal: ac.signal });
         const list = data[1]?.data?.children ?? [];
         const flatten = (nodes: RedditCommentNode[], depth: number): RedditComment[] => {
           const out: RedditComment[] = [];
@@ -255,7 +300,8 @@ function RedditApp(context: AppContext): AppInstance {
           return out;
         };
         setComments(flatten(list, 0));
-      } catch {
+      } catch (e) {
+        if (e instanceof Error && e.name === 'AbortError') return;
         setComments([]);
       }
     }, [network, settings]);
@@ -267,6 +313,7 @@ function RedditApp(context: AppContext): AppInstance {
     );
 
     const simple = isSimpleLayout(() => settings.get());
+    const readerImageMode = settings.get().readerImageMode;
 
     if (selectedPost) {
       const commentPages = Math.max(1, Math.ceil(comments.length / 5));
@@ -280,6 +327,27 @@ function RedditApp(context: AppContext): AppInstance {
               <div class="reddit-selftext">
                 {stripHtml(selectedPost.selftext_html || selectedPost.selftext || '') || (selectedPost.is_self ? '' : `Link: ${selectedPost.url}`)}
               </div>
+              {!selectedPost.is_self && sanitizeUrl(selectedPost.url) ? (
+                <p>
+                  <button
+                    type="button"
+                    class="btn"
+                    onClick={async () => {
+                      const url = sanitizeUrl(selectedPost.url);
+                      if (!url) return;
+                      const raw = await storage.get<unknown>(READLATER_STORAGE_KEY);
+                      const items = normalizeReadLaterStorage(raw);
+                      const id = `rl_${Date.now()}`;
+                      await storage.set(READLATER_STORAGE_KEY, [
+                        { id, title: selectedPost.title.slice(0, 500), url, createdAt: Date.now() },
+                        ...items,
+                      ]);
+                    }}
+                  >
+                    Save link to Read later
+                  </button>
+                </p>
+              ) : null}
               <h2>Comments</h2>
             </>
           )}
@@ -366,7 +434,7 @@ function RedditApp(context: AppContext): AppInstance {
       <div class="reddit-app">
         <ul class="list">
           {pagePosts.map((p) => (
-            <RedditPostRow key={p.id} post={p} onOpen={openPost} />
+            <RedditPostRow key={p.id} post={p} onOpen={openPost} readerImageMode={readerImageMode} />
           ))}
         </ul>
         <PageNav current={listPage} total={totalPages} onPrev={() => { setListPage((p) => Math.max(1, p - 1)); scrollAppContentToTop(); }} onNext={() => { setListPage((p) => Math.min(totalPages, p + 1)); scrollAppContentToTop(); }} />
@@ -376,6 +444,10 @@ function RedditApp(context: AppContext): AppInstance {
 
   return {
     render: () => <RedditUI />,
+    onDestroy: () => {
+      abortHolder.ac?.abort();
+      abortHolder.ac = null;
+    },
     getTitle: () => '', // Keep header uncluttered; subreddit and post title not shown in app bar
     canGoBack: () => backRef.current != null && (backRef.current.selectedPost != null || backRef.current.currentSub != null),
     goBack: () => {

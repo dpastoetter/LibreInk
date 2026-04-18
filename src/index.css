@@ -162,6 +162,12 @@ html[data-appearance="dark"][data-theme="highContrast"] {
 [data-reduce-flashes="true"] .btn,
 [data-reduce-flashes="true"] .panel { transition: none; box-shadow: none; }
 
+/* Low power (Kindle): drop soft shadows to reduce repaint cost */
+[data-performance-profile="lowPower"] {
+  --shadow-soft: 0 0 transparent;
+  --shadow-card: 0 0 transparent;
+}
+
 /* Simple layout (e-ink): larger font, minimal layout; search/filter UIs remain enabled */
 [data-simple-layout="true"] {
   font-size: 1.2rem;
@@ -1213,6 +1219,21 @@ textarea {
 .app-content .reddit-sub-list .reddit-sub-btn:hover { background: var(--bg); border-color: #000; }
 .app-content .reddit-sub-list .reddit-sub-btn:active { background: var(--muted); color: var(--bg); border-color: #000; }
 .reddit-sub-delete { min-width: 2rem; padding: 0.2em 0.4em; font-size: var(--widget-font); line-height: 1; flex-shrink: 0; }
+.reddit-post-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  text-align: left;
+  width: 100%;
+}
+.reddit-post-row-text { min-width: 0; flex: 1; }
+.reddit-list-thumb {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
 .reddit-meta { color: var(--muted); font-size: var(--widget-meta); }
 .reddit-selftext { margin: var(--space) 0; font-size: var(--widget-font); line-height: 1.4; }
 .reddit-selftext p { margin: 0 0 0.75em; }
@@ -1587,6 +1608,12 @@ textarea {
 .settings-app .panel .btn { margin-right: calc(var(--space) * 0.65); margin-bottom: calc(var(--space) * 0.55); font-size: var(--widget-font); }
 .settings-app .panel-description { color: var(--muted); font-size: var(--widget-meta); margin: 0 0 calc(var(--space) * 0.5); }
 .settings-app .settings-import-message { margin: 0.5rem 0 0; font-size: var(--widget-meta); color: var(--muted); }
+.settings-app .settings-import-textarea { width: 100%; max-width: 100%; box-sizing: border-box; font-family: inherit; margin: 0.5rem 0; }
+.settings-app .settings-checkbox-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 0; font-size: var(--widget-font); }
+.settings-app .settings-diag-list li { margin-bottom: 0.35rem; word-break: break-word; }
+.settings-app .settings-fav-list { max-height: 14rem; overflow-y: auto; }
+.home-pinned { margin-bottom: var(--space); }
+.home-pinned .home-category-title { font-size: 1rem; }
 .settings-app .settings-row { margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
 .settings-app .settings-row .settings-label { min-width: 6rem; color: var(--muted); font-size: var(--widget-meta); }
 .settings-app .settings-toggle { display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem; font-size: var(--widget-font); cursor: pointer; }

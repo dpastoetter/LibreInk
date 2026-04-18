@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useContext } from 'preact/hooks';
+import { useState, useEffect, useCallback, useContext, useRef } from 'preact/hooks';
 import type { AppContext, AppInstance } from '../../types/plugin';
 import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { getCorsProxyUrl } from '@core/constants';
 import { isSimpleLayout } from '@core/utils/simple-layout';
 import { AppHeaderActionsContext } from '@core/kernel/AppHeaderActionsContext';
+import { isQuietHoursActive } from '@core/utils/quiet-hours';
 
 const COINGECKO_BASE = 'https://api.coingecko.com/api/v3/simple/price';
 const YAHOO_CHART = (symbol: string) =>
@@ -97,6 +98,10 @@ function FinanceApp(context: AppContext): AppInstance {
   function FinanceUI() {
     const [items, setItems] = useState<FinanceItem[]>(() => parseFinanceItems(settings.get().financeItems));
     const [rows, setRows] = useState<FinanceRow[]>([]);
+    const rowsRef = useRef<FinanceRow[]>([]);
+    useEffect(() => {
+      rowsRef.current = rows;
+    }, [rows]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currency, setCurrency] = useState<Currency>('USD');
@@ -139,6 +144,13 @@ function FinanceApp(context: AppContext): AppInstance {
     );
 
     const fetchData = useCallback(async () => {
+      if (
+        isQuietHoursActive(new Date(), settings.get()) &&
+        rowsRef.current.some((r) => r.priceUsd != null || r.priceEur != null)
+      ) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       setError(null);
       const list = items.length ? items : parseFinanceItems(settings.get().financeItems);

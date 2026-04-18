@@ -46,6 +46,7 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           root.setAttribute('data-theme', next.theme);
           root.setAttribute('data-apps-per-row', next.appsPerRow);
           root.setAttribute('data-simple-layout', next.simpleLayout ? 'true' : 'false');
+          root.setAttribute('data-performance-profile', next.performanceProfile);
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           applyZoomAndFont(root, zoom, next.fontSize, next.tapTargetSize, next.contentWidth);
           if (document.body) {
@@ -80,6 +81,7 @@ export function createThemeService(initial: GlobalSettings): ThemeService {
           root.setAttribute('data-invert-colors', next.invertColors ? 'true' : 'false');
           root.setAttribute('data-reduce-flashes', next.reduceFlashes ? 'true' : 'false');
           root.setAttribute('data-simple-layout', next.simpleLayout ? 'true' : 'false');
+          root.setAttribute('data-performance-profile', next.performanceProfile);
           root.setAttribute('data-apps-per-row', next.appsPerRow);
           const zoom = Math.max(0.5, Math.min(2, Number(next.zoom) || 1));
           applyZoomAndFont(root, zoom, next.fontSize, next.tapTargetSize, next.contentWidth);

@@ -137,6 +137,8 @@ function RecipeApp(context: AppContext): AppInstance {
       setDetail(null);
     }, []);
 
+    const readerImageMode = settings.get().readerImageMode;
+
     const ingredients = detail
       ? Array.from({ length: 20 }, (_, i) => {
           const d = detail as unknown as Record<string, string>;
@@ -159,8 +161,18 @@ function RecipeApp(context: AppContext): AppInstance {
             <div class="recipes-detail">
               <h2 class="recipes-detail-title">{detail.strMeal}</h2>
               {(() => {
+                if (readerImageMode === 'text') return null;
                 const thumb = sanitizeUrl(detail.strMealThumb);
-                return thumb ? <img src={thumb} alt="" class="recipes-detail-img" loading="lazy" /> : null;
+                if (!thumb) return null;
+                return (
+                  <img
+                    src={thumb}
+                    alt=""
+                    class="recipes-detail-img"
+                    loading={readerImageMode === 'lazy' ? 'lazy' : undefined}
+                    decoding="async"
+                  />
+                );
               })()}
               {ingredients.length > 0 && (
                 <div class="recipes-ingredients">
@@ -223,8 +235,18 @@ function RecipeApp(context: AppContext): AppInstance {
                   onClick={() => loadDetail(m.idMeal)}
                 >
                   {(() => {
+                    if (readerImageMode === 'text') return null;
                     const thumb = sanitizeUrl(m.strMealThumb);
-                    return thumb ? <img src={thumb} alt="" class="recipes-list-thumb" loading="lazy" /> : null;
+                    if (!thumb) return null;
+                    return (
+                      <img
+                        src={thumb}
+                        alt=""
+                        class="recipes-list-thumb"
+                        loading={readerImageMode === 'lazy' ? 'lazy' : undefined}
+                        decoding="async"
+                      />
+                    );
                   })()}
                   <span>{m.strMeal}</span>
                 </button>

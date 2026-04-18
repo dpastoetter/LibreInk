@@ -3,6 +3,8 @@
  * Single source for CORS and cache TTLs to keep policy consistent and bundle small.
  */
 
+import type { GlobalSettings } from '../types/settings';
+
 /** CORS proxy used for cross-origin requests (Reddit, News, Comics, Finance). */
 export const CORS_PROXY = 'https://corsproxy.io/?';
 
@@ -27,4 +29,13 @@ export function getDefaultCacheTtlMs(preset: '30m' | '6h' | '24h' | '7d'): numbe
     case '7d': return 7 * 24 * 60 * 60 * 1000;
     default: return CACHE_TTL_SHORT_MS;
   }
+}
+
+/** Effective RSS/API cache TTL; doubles (capped at 7d) when `performanceProfile` is low power. */
+export function getEffectiveCacheTtlMs(settings: Pick<GlobalSettings, 'defaultCacheTtl' | 'performanceProfile'>): number {
+  const base = getDefaultCacheTtlMs(settings.defaultCacheTtl);
+  if (settings.performanceProfile !== 'lowPower') return base;
+  const doubled = base * 2;
+  const cap = getDefaultCacheTtlMs('7d');
+  return Math.min(doubled, cap);
 }

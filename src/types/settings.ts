@@ -16,6 +16,12 @@ export type OfflinePreferencePreset = 'preferCache' | 'ask' | 'block';
 export type TapTargetSizePreset = 'normal' | 'large' | 'extraLarge';
 export type FocusRingPreset = 'always' | 'keyboard' | 'never';
 
+/** Fewer concurrent requests, longer effective cache TTL, lighter chrome (see `data-performance-profile` on root). */
+export type PerformanceProfilePreset = 'normal' | 'lowPower';
+
+/** Strip thumbnails in reader apps; `lazy` keeps images but defers decode. */
+export type ReaderImageModePreset = 'full' | 'lazy' | 'text';
+
 export interface GlobalSettings {
   pixelOptics: PixelOpticsPreset;
   colorMode: ColorMode;
@@ -53,6 +59,21 @@ export interface GlobalSettings {
   reduceFlashes: boolean;
   /** Simple layout for e-ink: hide search/filter UIs, larger font. */
   simpleLayout: boolean;
+
+  performanceProfile: PerformanceProfilePreset;
+  readerImageMode: ReaderImageModePreset;
+
+  /** JSON array of app ids to pin on the home screen (max 8). */
+  homeFavoriteAppIds: string;
+
+  /** Local-time quiet window: fewer clock updates and optional refresh gating. */
+  quietHoursEnabled: boolean;
+  /** Minutes from midnight (0–1439), start of quiet window. */
+  quietHoursStartMinutes: number;
+  /** Minutes from midnight (0–1439), end of quiet window (exclusive if range wraps). */
+  quietHoursEndMinutes: number;
+  /** When true and quiet hours active, status bar clock updates every 5 minutes instead of 1. */
+  quietHoursSlowClock: boolean;
 
   /** JSON array of { id, name, source } for Finance widget. source: 'yahoo' | 'coingecko'. */
   financeItems: string;
@@ -100,6 +121,16 @@ export const DEFAULT_SETTINGS: GlobalSettings = {
   invertColors: false,
   reduceFlashes: false,
   simpleLayout: true,
+
+  performanceProfile: 'normal',
+  readerImageMode: 'full',
+
+  homeFavoriteAppIds: '[]',
+
+  quietHoursEnabled: false,
+  quietHoursStartMinutes: 22 * 60,
+  quietHoursEndMinutes: 7 * 60,
+  quietHoursSlowClock: true,
 
   financeItems: '[{"id":"^GSPC","name":"S&P 500","source":"yahoo"},{"id":"GC=F","name":"Gold","source":"yahoo"},{"id":"bitcoin","name":"Bitcoin","source":"coingecko"},{"id":"ethereum","name":"Ethereum","source":"coingecko"}]',
 

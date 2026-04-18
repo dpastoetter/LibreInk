@@ -4,7 +4,7 @@ import { PLUGIN_API_VERSION } from '../../types/plugin';
 import { PageNav } from '@core/ui/PageNav';
 import { stripHtml } from '@core/utils/html';
 import { sanitizeUrl } from '@core/utils/url';
-import { getCorsProxyUrl, getDefaultCacheTtlMs } from '@core/constants';
+import { getCorsProxyUrl, getEffectiveCacheTtlMs } from '@core/constants';
 import { isSimpleLayout } from '@core/utils/simple-layout';
 import { parseRssItems, getFeedTitleFromXml } from '@core/utils/rss';
 import { parseJsonArray, isBlogFeed } from '@core/utils/settings-parsers';
@@ -266,7 +266,7 @@ function BlogPanel({ context, backRef }: { context: AppContext; backRef: preact.
     const loadFeed = useCallback(async (feed: BlogFeed) => {
       setLoading(true);
       setError(null);
-      const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
+      const cacheTtl = getEffectiveCacheTtlMs(settings.get());
       const cacheKey = CACHE_KEY + ':' + encodeURIComponent(feed.url).slice(0, 500);
       const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
       try {
@@ -443,7 +443,7 @@ function NewsPanel({ context, backRef }: { context: AppContext; backRef: preact.
       const all: NewsItem[] = [];
       let lastError: string | null = null;
       const proxy = getCorsProxyUrl(settings.get().corsProxyUrl);
-      const cacheTtl = getDefaultCacheTtlMs(settings.get().defaultCacheTtl);
+      const cacheTtl = getEffectiveCacheTtlMs(settings.get());
       for (const url of feeds) {
         const sourceName = sourceNameFromUrl(url);
         try {
